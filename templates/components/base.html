@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-nav-layout="vertical" data-theme-mode="light" data-header-styles="light" data-menu-styles="dark" data-toggled="close">
+
+    <head>
+
+        <!-- Meta Data -->
+        <meta charset="UTF-8">
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="Description" content="Django Bootstrap Responsive Admin Web Dashboard Template">
+        <meta name="Author" content="Spruko Technologies Private Limited">
+        <meta name="keywords" content="django template, django dashboard template, template in django, admin template, django admin dashboards, django bootstrap 5, bootstrap template, django and bootstrap, django web template, django admin template, bootstrap 5 framework, responsive dashboard, django admin panel, bootstrap framework template, django bootstrap.">
+    
+        <!-- Title -->
+        <title> Xintra - Django Bootstrap 5 Premium Admin & Dashboard Template </title>
+        
+        <!-- Favicon -->
+        <link rel="icon" href="{% static 'assets/images/brand-logos/favicon.ico'%}" type="image/x-icon">
+    
+        <!-- Start::styles -->
+        {% include 'components/layouts/styles.html' %}
+        {% block styles %}{% endblock %}
+        <!-- End::styles -->  
+
+	</head>
+
+	<body class="">
+
+        <!-- Start::main-switcher -->
+        {% include 'components/layouts/switcher.html' %}
+        <!-- End::main-switcher -->
+
+        <!-- Loader -->
+        <div id="loader" >
+            <img src="{% static 'assets/images/media/loader.svg'%}" alt="">
+        </div>
+        <!-- Loader -->
+
+        <div class="page">
+
+            <!-- Start::main-header -->
+            {% include 'components/layouts/main-header.html' %}
+            
+            <!-- Include Toast Messages -->
+            {% include 'components/layouts/toast-messages.html' %}
+
+            <!-- Start::main-sidebar -->
+            {% include 'components/layouts/main-sidebar.html' %}
+            <!-- End::main-sidebar -->
+            
+            <!-- Start::Main-content -->
+            <div class="main-content app-content">
+                <div class="container-fluid">
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+            <!-- End Main Content-->
+            
+            <!-- Start::main-modal -->
+            {% include 'components/layouts/modal.html' %}
+            <!-- End::main-modal --> 
+            
+            <!-- Start::main-footer -->
+            {% include 'components/layouts/footer.html' %}
+            <!-- End::main-footer -->  
+            
+		</div>
+        <!-- END PAGE-->
+
+        <!-- Start::scripts -->
+        {% include 'components/layouts/scripts.html' %}
+        
+        <!-- Sticky JS -->
+        <script src="{% static 'assets/js/sticky.js'%}"></script>
+        
+        <!-- Defaultmenu JS -->
+        <script src="{% static 'assets/js/defaultmenu.min.js'%}"></script>
+
+        {% block scripts %}{% endblock %}
+
+        <!-- Custom-Switcher JS -->
+        <script src="{% static 'assets/js/custom-switcher.min.js'%}"></script>
+
+        <!-- Custom JS -->
+        <script src="{% static 'assets/js/custom.js'%}"></script>
+          
+	</body>
+</html>

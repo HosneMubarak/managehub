@@ -1,0 +1,61 @@
+{% load static %}
+
+         <!-- Scroll To Top -->
+         <div class="scrollToTop">
+            <span class="arrow"><i class="ti ti-arrow-narrow-up fs-20"></i></span>
+         </div>
+         <div id="responsive-overlay"></div>
+         <!-- Scroll To Top -->
+
+         <!-- Popper JS -->
+         <script src="{% static 'assets/libs/@popperjs/core/umd/popper.min.js'%}"></script>
+
+         <!-- Bootstrap JS -->
+         <script src="{% static 'assets/libs/bootstrap/js/bootstrap.bundle.min.js'%}"></script>
+
+         <!-- Node Waves JS-->
+         <script src="{% static 'assets/libs/node-waves/waves.min.js'%}"></script>
+
+         <!-- Simplebar JS -->
+         <script src="{% static 'assets/libs/simplebar/simplebar.min.js'%}"></script>
+         <script src="{% static 'assets/js/simplebar.js'%}"></script>
+
+         <!-- Auto Complete JS -->
+         <script src="{% static 'assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js'%}"></script>
+
+         <!-- Color Picker JS -->
+         <script src="{% static 'assets/libs/@simonwep/pickr/pickr.es5.min.js'%}"></script>
+
+         <!-- Date & Time Picker JS -->
+         <script src="{% static 'assets/libs/flatpickr/flatpickr.min.js'%}"></script>
+
+        <!-- Custom JS -->
+        <script>
+            function toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    // Enter fullscreen
+                    document.documentElement.requestFullscreen().then(() => {
+                        document.querySelector('.full-screen-open').classList.add('d-none');
+                        document.querySelector('.full-screen-close').classList.remove('d-none');
+                    }).catch(err => {
+                        console.log(`Error attempting to enable fullscreen: ${err.message}`);
+                    });
+                } else {
+                    // Exit fullscreen
+                    document.exitFullscreen().then(() => {
+                        document.querySelector('.full-screen-open').classList.remove('d-none');
+                        document.querySelector('.full-screen-close').classList.add('d-none');
+                    }).catch(err => {
+                        console.log(`Error attempting to exit fullscreen: ${err.message}`);
+                    });
+                }
+            }
+
+            // Listen for fullscreen changes (e.g., when user presses ESC)
+            document.addEventListener('fullscreenchange', function() {
+                if (!document.fullscreenElement) {
+                    document.querySelector('.full-screen-open').classList.remove('d-none');
+                    document.querySelector('.full-screen-close').classList.add('d-none');
+                }
+            });
+        </script>

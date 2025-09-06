@@ -1,0 +1,327 @@
+{% extends 'components/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block styles %}
+    <!-- dragula css-->
+    <link rel="stylesheet" href="{% static 'assets/libs/dragula/dragula.min.css'%}">
+{% endblock %}
+
+{% block content %}
+    <!-- Page Header -->
+    <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2">
+        <div>
+            <nav>
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'projects:list' %}">Projects</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ project.name }}</li>
+                </ol>
+            </nav>
+            <h1 class="page-title fw-medium fs-18 mb-0">Project Overview</h1>
+        </div>
+        <div class="btn-list">
+            <a href="{% url 'projects:update' project.id %}" class="btn btn-primary btn-wave">
+                <i class="ri-edit-line align-middle me-1 lh-1"></i> Edit Project
+            </a>
+            <a href="{% url 'projects:list' %}" class="btn btn-white btn-wave me-0">
+                <i class="ri-arrow-left-line me-1"></i> Back to Projects
+            </a>
+        </div>
+    </div>
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xxl-8">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
+                        Project Details
+                    </div> 
+                    <div>
+                        <a href="{% url 'projects:create' %}" class="btn btn-sm btn-primary btn-wave"><i class="ri-add-line align-middle me-1 fw-medium"></i>Create Project</a>
+                        <div class="dropdown d-inline-block">
+                            <a aria-label="anchor" href="javascript:void(0);" class="btn btn-sm btn-primary1 btn-wave" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="ri-more-2-line align-middle fw-medium me-1"></i>Actions
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'projects:update' project.id %}"><i class="ri-edit-line align-middle me-1"></i>Edit</a></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'projects:delete' project.id %}"><i class="ri-delete-bin-line align-middle me-1"></i>Delete</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-4 gap-2 flex-wrap">
+                        <span class="avatar avatar-lg me-1 bg-primary-gradient"><i class="ri-stack-line fs-24 lh-1"></i></span>
+                        <div>
+                            <h6 class="fw-medium mb-2 task-title">
+                                {{ project.name }}
+                            </h6>
+                            {% if project.status == 'NEW' %}
+                                <span class="badge bg-secondary-transparent">{{ project.get_status_display }}</span>
+                            {% elif project.status == 'IN_PROGRESS' %}
+                                <span class="badge bg-primary-transparent">{{ project.get_status_display }}</span>
+                            {% elif project.status == 'COMPLETE' %}
+                                <span class="badge bg-success-transparent">{{ project.get_status_display }}</span>
+                            {% elif project.status == 'ON_HOLD' %}
+                                <span class="badge bg-warning-transparent">{{ project.get_status_display }}</span>
+                            {% else %}
+                                <span class="badge bg-danger-transparent">{{ project.get_status_display }}</span>
+                            {% endif %}
+                            <span class="text-muted fs-12"><i class="ri-circle-fill text-success mx-2 fs-9"></i>Last Updated {{ project.updated_at|naturaltime }}</span>
+                        </div>
+                        <div class="ms-auto align-self-start">
+                            <span class="badge bg-info-transparent">ID: {{ project.project_id }}</span>
+                        </div>
+                    </div>
+                    <div class="fs-15 fw-medium mb-2">Project Description :</div>
+                    <p class="text-muted mb-4">{{ project.description }}</p>
+                    <div class="d-flex gap-5 mb-4 flex-wrap">
+                        <div class="d-flex align-items-center gap-2 me-3">
+                            <span class="avatar avatar-md avatar-rounded me-1 bg-primary1-transparent"><i class="ri-calendar-event-line fs-18 lh-1 align-middle"></i></span>
+                            <div>
+                                <div class="fw-medium mb-0 task-title">
+                                    Start Date
+                                </div>
+                                <span class="fs-12 text-muted">{{ project.start_date|date:"d F, Y"|default:"Not set" }}</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 me-3">
+                            <span class="avatar avatar-md avatar-rounded me-1 bg-primary2-transparent"><i class="ri-time-line fs-18 lh-1 align-middle"></i></span>
+                            <div>
+                                <div class="fw-medium mb-0 task-title">
+                                    End Date
+                                </div>
+                                <span class="fs-12 text-muted">{{ project.estimated_end_date|date:"d F, Y"|default:"Not set" }}</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="avatar avatar-md p-1 avatar-rounded me-1 bg-primary-transparent">
+                                {% if project.project_manager.avatar %}
+                                    <img src="{{ project.project_manager.avatar.url }}" alt="manager">
+                                {% else %}
+                                    <i class="ri-user-line"></i>
+                                {% endif %}
+                            </span>
+                            <div>
+                                <div class="fw-medium mb-0 task-title">
+                                    Project Manager
+                                </div>
+                                <span class="fs-12 text-muted">{{ project.project_manager.get_full_name|default:project.project_manager.username }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-5 mb-4 flex-wrap">
+                        <div class="d-flex align-items-center gap-2 me-3">
+                            <span class="avatar avatar-md avatar-rounded me-1 bg-warning-transparent"><i class="ri-flag-line fs-18 lh-1 align-middle"></i></span>
+                            <div>
+                                <div class="fw-medium mb-0 task-title">
+                                    Priority
+                                </div>
+                                <span class="fs-12 text-muted">{{ project.get_priority_display }}</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 me-3">
+                            <span class="avatar avatar-md avatar-rounded me-1 bg-success-transparent"><i class="ri-building-line fs-18 lh-1 align-middle"></i></span>
+                            <div>
+                                <div class="fw-medium mb-0 task-title">
+                                    Business Area
+                                </div>
+                                <span class="fs-12 text-muted">{{ project.business_area.name }}</span>
+                            </div>
+                        </div>
+                        {% if project.effort_size %}
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="avatar avatar-md avatar-rounded me-1 bg-info-transparent"><i class="ri-bar-chart-line fs-18 lh-1 align-middle"></i></span>
+                            <div>
+                                <div class="fw-medium mb-0 task-title">
+                                    Effort Size
+                                </div>
+                                <span class="fs-12 text-muted">{{ project.get_effort_size_display }} ({{ project.estimated_hours }}h)</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="row">
+                        <div class="col-xl-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="avatar avatar-md avatar-rounded bg-primary-transparent me-2">
+                                    <i class="ri-calendar-line fs-16"></i>
+                                </span>
+                                <div>
+                                    <p class="mb-0 fw-medium text-muted fs-12">Created</p>
+                                    <p class="fs-14 mb-0 fw-medium">{{ project.created_at|naturaltime }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="avatar avatar-md avatar-rounded bg-secondary-transparent me-2">
+                                    <i class="ri-refresh-line fs-16"></i>
+                                </span>
+                                <div>
+                                    <p class="mb-0 fw-medium text-muted fs-12">Last Updated</p>
+                                    <p class="fs-14 mb-0 fw-medium">{{ project.updated_at|naturaltime }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-4">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Project Team
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if assigned_users %}
+                        <div class="d-flex flex-column gap-3">
+                            {% for user in assigned_users %}
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="avatar avatar-sm avatar-rounded">
+                                        {% if user.avatar %}
+                                            <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name }}">
+                                        {% else %}
+                                            <i class="ri-user-line"></i>
+                                        {% endif %}
+                                    </span>
+                                    <div>
+                                        <div class="fw-medium fs-14">{{ user.get_full_name|default:user.username }}</div>
+                                        <div class="text-muted fs-12">Team Member</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <form method="post" action="{% url 'projects:remove_assignment' project.id user.id %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-icon btn-light" onclick="return confirm('Remove this user from the project?')">
+                                            <i class="ri-close-line"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="ri-user-add-line fs-48 text-muted"></i>
+                            <p class="text-muted mt-2">No team members assigned</p>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Add Team Member Button -->
+                    <div class="mt-3">
+                        <button class="btn btn-primary btn-sm w-100" data-bs-toggle="modal" data-bs-target="#assignUserModal">
+                            <i class="ri-user-add-line me-1"></i> Assign User
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End::row-1 -->
+
+    <!-- Start::row-2 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        Project Comments
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Add Comment Form -->
+                    <form method="post" action="{% url 'projects:add_comment' project.id %}" class="mb-4">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-xl-10">
+                                {{ comment_form.comment }}
+                            </div>
+                            <div class="col-xl-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="ri-send-plane-line me-1"></i>Add Comment
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Comments List -->
+                    {% if comments %}
+                        <div class="d-flex flex-column gap-3">
+                            {% for comment in comments %}
+                            <div class="d-flex gap-3">
+                                <span class="avatar avatar-sm avatar-rounded">
+                                    {% if comment.author.avatar %}
+                                        <img src="{{ comment.author.avatar.url }}" alt="{{ comment.author.get_full_name }}">
+                                    {% else %}
+                                        <i class="ri-user-line"></i>
+                                    {% endif %}
+                                </span>
+                                <div class="flex-fill">
+                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                        <div class="fw-medium">{{ comment.author.get_full_name|default:comment.author.username }}</div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="text-muted fs-12">{{ comment.created_at|naturaltime }}</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-muted mb-0">{{ comment.comment }}</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="ri-chat-3-line fs-48 text-muted"></i>
+                            <p class="text-muted mt-2">No comments yet</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End::row-2 -->
+
+    <!-- Assign User Modal -->
+    <div class="modal fade" id="assignUserModal" tabindex="-1" aria-labelledby="assignUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="assignUserModalLabel">Assign User to Project</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post" action="{% url 'projects:manage_assignment' project.id %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">User</label>
+                            <select name="user" class="form-select" required>
+                                <option value="">Select User</option>
+                                {% for user in available_users %}
+                                    <option value="{{ user.pk }}">{{ user.get_full_name|default:user.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Assign User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+    <!-- dragula js-->
+    <script src="{% static 'assets/libs/dragula/dragula.min.js'%}"></script>
+    <!-- project overview -->
+    <script src="{% static 'assets/js/project-overview.js'%}"></script>
+{% endblock %}

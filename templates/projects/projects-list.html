@@ -1,0 +1,319 @@
+{% extends 'components/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block styles %}
+{% endblock %}
+
+{% block content %}
+    <!-- Page Header -->
+    <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2">
+        <div>
+            <nav>
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Apps</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'projects:list' %}">Projects</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Projects List</li>
+                </ol>
+            </nav>
+            <h1 class="page-title fw-medium fs-18 mb-0">Projects List</h1>
+        </div>
+        <div class="btn-list">
+            <button class="btn btn-white btn-wave" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+                <i class="ri-filter-3-line align-middle me-1 lh-1"></i> Filter
+            </button>
+        </div>
+    </div>
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div class="d-flex flex-wrap gap-1 project-list-main">
+                            <a href="{% url 'projects:create' %}" class="btn btn-primary me-2">
+                                <i class="ri-add-line me-1 fw-medium align-middle"></i>New Project
+                            </a>
+                        </div>
+                        <div class="avatar-list-stacked">
+                            {% for project in projects|slice:":8" %}
+                                {% if project.project_manager.avatar %}
+                                    <span class="avatar avatar-sm avatar-rounded">
+                                        <img src="{{ project.project_manager.avatar.url }}" alt="{{ project.project_manager.get_full_name }}">
+                                    </span>
+                                {% else %}
+                                    <span class="avatar avatar-sm avatar-rounded bg-primary text-fixed-white">
+                                        {{ project.project_manager.first_name|first }}{{ project.project_manager.last_name|first }}
+                                    </span>
+                                {% endif %}
+                            {% endfor %}
+                            {% if projects.count > 8 %}
+                                <a class="avatar avatar-sm bg-primary avatar-rounded text-fixed-white" href="javascript:void(0);">
+                                    +{{ projects.count|add:"-8" }}
+                                </a>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex" role="search">
+                            <form method="get" class="d-flex">
+                                <input class="form-control me-2" type="search" name="search" placeholder="Search Project" 
+                                       value="{{ request.GET.search }}" aria-label="Search">
+                                <button class="btn btn-light" type="submit">Search</button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Collapsible Filter Section -->
+                    <div class="collapse mt-3" id="filterCollapse">
+                        <form method="get">
+                            <input type="hidden" name="search" value="{{ request.GET.search }}">
+                            <div class="row g-3 align-items-end">
+                                <div class="col-lg-3 col-md-6">
+                                    <label class="form-label text-muted fs-12 mb-1">Business Area</label>
+                                    {{ search_form.business_area }}
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <label class="form-label text-muted fs-12 mb-1">Status</label>
+                                    {{ search_form.status }}
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <label class="form-label text-muted fs-12 mb-1">Priority</label>
+                                    {{ search_form.priority }}
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <label class="form-label text-muted fs-12 mb-1">Project Manager</label>
+                                    {{ search_form.project_manager }}
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 mt-3 justify-content-end">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="ri-search-line me-1"></i>Apply Filters
+                                </button>
+                                <a href="{% url 'projects:list' %}" class="btn btn-outline-secondary">
+                                    <i class="ri-refresh-line me-1"></i>Clear All
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End::row-1 -->
+
+    <!-- Start::row-2 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card custom-card overflow-hidden">
+                <div class="card-body p-0">
+                    {% if projects %}
+                        <div class="table-responsive">
+                            <table class="table text-nowrap">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Project Name</th>
+                                        <th scope="col">Description</th>
+                                        <th scope="col">Start Date</th>
+                                        <th scope="col">Due Date</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Priority</th>
+                                        <th scope="col">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for project in projects %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2">
+                                                    <span class="avatar avatar-rounded p-1 bg-{% cycle 'info' 'warning' 'danger' 'success' 'primary' %}-transparent">
+                                                        {% if project.project_type.icon %}
+                                                            <i class="{{ project.project_type.icon }}"></i>
+                                                        {% else %}
+                                                            <i class="ri-folder-line"></i>
+                                                        {% endif %}
+                                                    </span>
+                                                </div>
+                                                <div class="flex-fill">
+                                                    <a href="{% url 'projects:detail' project.id %}" class="fw-medium fs-14 d-block text-truncate project-list-title">
+                                                        {{ project.name }}
+                                                    </a>
+                                                    <span class="text-muted d-block fs-12">
+                                                        Created {{ project.created_at|naturaltime }} • Updated {{ project.updated_at|naturaltime }}
+                                                    </span>
+                                                    <span class="text-muted d-block fs-12">
+                                                        {% if project.assigned_users.count > 0 %}
+                                                            Total <span class="fw-medium text-default">{{ project.assigned_users.count }}</span> team members
+                                                        {% else %}
+                                                            No team members assigned
+                                                        {% endif %}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <p class="text-muted mb-0 project-list-description">
+                                                {{ project.description|truncatechars:80 }}
+                                            </p>
+                                        </td>
+                                        <td>
+                                            {% if project.start_date %}
+                                                {{ project.start_date|date:"d,M Y" }}
+                                            {% else %}
+                                                <span class="text-muted">Not set</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if project.estimated_end_date %}
+                                                {{ project.estimated_end_date|date:"d,M Y" }}
+                                            {% else %}
+                                                <span class="text-muted">Not set</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div>
+                                                {% if project.status %}
+                                                    {% if project.status == 'COMPLETE' %}
+                                                        <span class="badge bg-success-transparent">{{ project.get_status_display }}</span>
+                                                    {% elif project.status == 'IN_PROGRESS' %}
+                                                        <span class="badge bg-primary-transparent">{{ project.get_status_display }}</span>
+                                                    {% elif project.status == 'ON_HOLD' %}
+                                                        <span class="badge bg-warning-transparent">{{ project.get_status_display }}</span>
+                                                    {% elif project.status == 'NEW' %}
+                                                        <span class="badge bg-secondary-transparent">{{ project.get_status_display }}</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger-transparent">{{ project.get_status_display }}</span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="badge bg-secondary-transparent">No Status</span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if project.priority %}
+                                                {% if project.priority == 'HIGH' or project.priority == 'CRITICAL' %}
+                                                    <span class="badge bg-danger-transparent">{{ project.get_priority_display }}</span>
+                                                {% elif project.priority == 'MEDIUM' %}
+                                                    <span class="badge bg-warning-transparent">{{ project.get_priority_display }}</span>
+                                                {% else %}
+                                                    <span class="badge bg-success-transparent">{{ project.get_priority_display }}</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="badge bg-secondary-transparent">No Priority</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <a aria-label="anchor" href="javascript:void(0);" 
+                                                   class="btn btn-icon btn-sm btn-light" 
+                                                   data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="fe fe-more-vertical"></i>
+                                                </a>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <a class="dropdown-item" href="{% url 'projects:detail' project.id %}">
+                                                            <i class="ri-eye-line align-middle me-1 d-inline-block"></i>View
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item" href="{% url 'projects:update' project.id %}">
+                                                            <i class="ri-edit-line align-middle me-1 d-inline-block"></i>Edit
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item text-danger" href="{% url 'projects:delete' project.id %}">
+                                                            <i class="ri-delete-bin-line me-1 align-middle d-inline-block"></i>Delete
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <div class="mb-3">
+                                <i class="ri-folder-open-line fs-48 text-muted"></i>
+                            </div>
+                            <h5 class="text-muted">No Projects Found</h5>
+                            <p class="text-muted mb-3">Get started by creating your first project.</p>
+                            <a href="{% url 'projects:create' %}" class="btn btn-primary">
+                                <i class="ri-add-line me-1"></i> Create Project
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End::row-2 -->
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+        <ul class="pagination justify-content-end">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.business_area %}business_area={{ request.GET.business_area }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.priority %}priority={{ request.GET.priority }}&{% endif %}{% if request.GET.project_manager %}project_manager={{ request.GET.project_manager }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link">Previous</a>
+                </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <a class="page-link" href="javascript:void(0);">{{ num }}</a>
+                    </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.business_area %}business_area={{ request.GET.business_area }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.priority %}priority={{ request.GET.priority }}&{% endif %}{% if request.GET.project_manager %}project_manager={{ request.GET.project_manager }}&{% endif %}page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.business_area %}business_area={{ request.GET.business_area }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.priority %}priority={{ request.GET.priority }}&{% endif %}{% if request.GET.project_manager %}project_manager={{ request.GET.project_manager }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link">Next</a>
+                </li>
+            {% endif %}
+        </ul>
+    {% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle sort functionality
+    const sortSelect = document.getElementById('sort-select');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            const url = new URL(window.location);
+            if (this.value) {
+                url.searchParams.set('sort', this.value);
+            } else {
+                url.searchParams.delete('sort');
+            }
+            window.location.href = url.toString();
+        });
+        
+        // Set current sort value
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentSort = urlParams.get('sort');
+        if (currentSort) {
+            sortSelect.value = currentSort;
+        }
+    }
+});
+</script>
+{% endblock %}

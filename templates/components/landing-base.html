@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-nav-layout="horizontal" data-nav-style="menu-click" data-menu-position="fixed" data-theme-mode="light" data-toggled="close">
+
+    <head>
+
+        <!-- Meta Data -->
+        <meta charset="UTF-8">
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="Description" content="Django Bootstrap Responsive Admin Web Dashboard Template">
+        <meta name="Author" content="Spruko Technologies Private Limited">
+        <meta name="keywords" content="django template, django dashboard template, template in django, admin template, django admin dashboards, django bootstrap 5, bootstrap template, django and bootstrap, django web template, django admin template, bootstrap 5 framework, responsive dashboard, django admin panel, bootstrap framework template, django bootstrap.">
+    
+        <!-- Title -->
+        <title> Xintra - Django Bootstrap 5 Premium Admin & Dashboard Template </title>
+
+        <!-- Favicon -->
+        <link rel="icon" href="{% static 'assets/images/brand-logos/favicon.ico'%}" type="image/x-icon">
+        
+        <!-- Start::styles -->
+        {% include 'components/layouts/landingpage/styles.html' %}
+        {% block styles %}{% endblock %}
+        <!-- End::styles -->  
+
+    </head>
+
+	<body class="landing-body">
+
+        <!-- Start::main-switcher -->
+        {% include 'components/layouts/landingpage/switcher.html' %}
+        <!-- End::main-switcher -->
+
+        <div class="landing-page-wrapper relative">
+
+            <!-- Start::main-header -->
+            {% include 'components/layouts/landingpage/main-header.html' %}
+            <!-- End::main-header -->
+
+            <!-- Start::main-sidebar -->
+            {% include 'components/layouts/landingpage/main-sidebar.html' %}
+            <!-- End::main-sidebar -->
+
+            <!-- Start::main-content -->
+            <div class="main-content landing-main px-0">
+
+                {% block content %}{% endblock %}
+
+            </div>
+            <!-- End::main-content -->
+
+        </div>
+
+        <!-- Start::scripts -->
+        {% include 'components/layouts/landingpage/scripts.html' %}
+        {% block scripts %}{% endblock %}
+        <!-- End::scripts -->  
+          
+	</body>
+</html>

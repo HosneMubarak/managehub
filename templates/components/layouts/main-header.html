@@ -1,0 +1,113 @@
+{% load static %}
+
+				<header class="app-header sticky" id="header">
+
+					<!-- Start::main-header-container -->
+					<div class="main-header-container container-fluid">
+
+						<!-- Start::header-content-left -->
+						<div class="header-content-left">
+
+							<!-- Start::header-element -->
+							<div class="header-element">
+								<div class="horizontal-logo">
+									<a href="{% url 'dashboard:index' %}" class="header-logo">
+										<img src="{% static 'assets/images/brand-logos/desktop-logo.png'%}" alt="logo" class="desktop-logo">
+										<img src="{% static 'assets/images/brand-logos/toggle-dark.png'%}" alt="logo" class="toggle-dark">
+										<img src="{% static 'assets/images/brand-logos/desktop-dark.png'%}" alt="logo" class="desktop-dark">
+										<img src="{% static 'assets/images/brand-logos/toggle-logo.png'%}" alt="logo" class="toggle-logo">
+										<img src="{% static 'assets/images/brand-logos/toggle-white.png'%}" alt="logo" class="toggle-white">
+										<img src="{% static 'assets/images/brand-logos/desktop-white.png'%}" alt="logo" class="desktop-white">
+									</a>
+								</div>
+							</div>
+							<!-- End::header-element -->
+
+							<!-- Start::header-element -->
+							<div class="header-element mx-lg-0 mx-2">
+								<a aria-label="Hide Sidebar" class="sidemenu-toggle header-link animated-arrow hor-toggle horizontal-navtoggle" data-bs-toggle="sidebar" href="javascript:void(0);"><span></span></a>
+							</div>
+							<!-- End::header-element -->
+
+							<!-- Start::header-element -->
+							<div class="header-element header-search d-md-block d-none my-auto auto-complete-search">
+								<!-- Start::header-link -->
+								<input type="text" class="header-search-bar form-control" id="header-search" placeholder="Search anything here ..." spellcheck=false autocomplete="off" autocapitalize="off">
+								<a href="javascript:void(0);" class="header-search-icon border-0">
+									<i class="ri-search-line"></i>
+								</a>
+								<!-- End::header-link -->
+							</div>
+							<!-- End::header-element -->
+
+						</div>
+						<!-- End::header-content-left -->
+
+						<!-- Start::header-content-right -->
+						<ul class="header-content-right">
+
+							<!-- Start::header-element -->
+							<li class="header-element header-theme-mode">
+								<!-- Start::header-link|layout-setting -->
+								<a href="javascript:void(0);" class="header-link layout-setting">
+									<span class="light-layout">
+										<!-- Start::header-link-icon -->
+										<i class="bi bi-moon header-link-icon"></i>
+										<!-- End::header-link-icon -->
+									</span>
+									<span class="dark-layout">
+										<!-- Start::header-link-icon -->
+										<i class="bi bi-brightness-high header-link-icon"></i>
+										<!-- End::header-link-icon -->
+									</span>
+								</a>
+								<!-- End::header-link|layout-setting -->
+							</li>
+							<!-- End::header-element -->
+
+							<!-- Start::header-element -->
+							<li class="header-element header-fullscreen">
+								<!-- Start::header-link -->
+								<a href="javascript:void(0);" class="header-link" onclick="toggleFullscreen();">
+									<i class="bi bi-fullscreen full-screen-open header-link-icon"></i>
+									<i class="bi bi-fullscreen-exit full-screen-close header-link-icon d-none"></i>
+								</a>
+								<!-- End::header-link -->
+							</li>
+							<!-- End::header-element -->
+
+							<!-- Start::header-element -->
+							<li class="header-element">
+								<!-- Start::header-link|dropdown-toggle -->
+								<a href="javascript:void(0);" class="header-link dropdown-toggle" id="mainHeaderProfile" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+									<div class="d-flex align-items-center">
+										<div class="me-sm-2 me-0">
+											{% if user.avatar %}
+												<img src="{{ user.avatar.url }}" alt="img" width="32" height="32" class="rounded-circle">
+											{% else %}
+												<img src="{% static 'assets/images/faces/9.jpg'%}" alt="img" width="32" height="32" class="rounded-circle">
+											{% endif %}
+										</div>
+										<div class="d-sm-block d-none">
+											<p class="fw-medium mb-0 lh-1">{{ user.get_full_name|default:user.username }}</p>
+											<span class="op-7 fw-normal d-block fs-11">{{ user.occupation|default:"User" }}</span>
+										</div>
+									</div>
+								</a>
+								<!-- End::header-link|dropdown-toggle -->
+								<ul class="main-header-dropdown dropdown-menu pt-0 overflow-hidden header-profile-dropdown dropdown-menu-end" aria-labelledby="mainHeaderProfile">
+									<li><a class="dropdown-item d-flex align-items-center" href="{% url 'users:profile' %}"><i class="fe fe-user p-1 rounded-circle bg-primary-transparent me-2 fs-16"></i>Profile</a></li>
+									<li><a class="dropdown-item d-flex align-items-center" href="{% url 'users:profile_edit' %}"><i class="fe fe-edit p-1 rounded-circle bg-primary-transparent me-2 fs-16"></i>Edit Profile</a></li>
+									<li><a class="dropdown-item d-flex align-items-center" href="{% url 'account_change_password' %}"><i class="fe fe-settings p-1 rounded-circle bg-primary-transparent me-2 fs-16"></i>Change Password</a></li>
+									<li><a class="dropdown-item d-flex align-items-center" href="{% url 'account_logout' %}"><i class="fe fe-lock p-1 rounded-circle bg-primary-transparent me-2 fs-16"></i>Log Out</a></li>
+								</ul>
+							</li>  
+							<!-- End::header-element -->
+
+						</ul>
+						<!-- End::header-content-right -->
+
+					</div>
+					<!-- End::main-header-container -->
+
+				</header>

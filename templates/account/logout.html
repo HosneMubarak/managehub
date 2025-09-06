@@ -1,0 +1,57 @@
+{% extends 'components/custom-base.html' %}
+{% load static %}
+{% load account %}
+
+{% block styles %}
+{% endblock %}
+
+{% block body %}
+    <body class="bg-white">
+{% endblock %}
+
+{% block content %}
+        <div class="row authentication authentication-cover-main mx-0">
+            <div class="col-xxl-6 col-xl-7">
+                <div class="row justify-content-center align-items-center h-100">
+                    <div class="col-xxl-7 col-xl-9 col-lg-6 col-md-6 col-sm-8 col-12">
+                        <div class="card custom-card my-auto border">
+                            <div class="card-body p-5 text-center">
+                                <div class="mb-4">
+                                    <i class="ri-logout-circle-line fs-1 text-primary"></i>
+                                </div>
+                                <p class="h5 mb-2">Sign Out</p>
+                                <p class="mb-4 text-muted op-7 fw-normal">Are you sure you want to sign out?</p>
+                                
+                                <form method="post" action="{% url 'account_logout' %}">
+                                    {% csrf_token %}
+                                    <div class="d-grid gap-2">
+                                        <button type="submit" class="btn btn-primary">Yes, Sign Out</button>
+                                        <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">Cancel</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-6 col-xl-5 col-lg-12 d-xl-block d-none px-0">
+                <div class="authentication-cover overflow-hidden">
+                    <div class="authentication-cover-logo"> 
+                        <a href="{% url 'dashboard:index' %}"> 
+                            <img src="{% static 'assets/images/brand-logos/desktop-white.png'%}" alt="" class="authentication-brand desktop-white"> 
+                        </a> 
+                    </div>
+                    <div class="aunthentication-cover-content d-flex align-items-center justify-content-center">
+                        <div>
+                            <h3 class="text-fixed-white mb-1 fw-medium">See You Soon!</h3>
+                            <h6 class="text-fixed-white mb-3 fw-medium">Thanks for using ManageHub</h6>
+                            <p class="text-fixed-white mb-1 op-6">Your session will be securely ended. You can always sign back in to continue managing your projects.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

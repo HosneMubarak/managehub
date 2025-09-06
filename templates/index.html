@@ -1,0 +1,263 @@
+
+{% extends 'components/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ManageHub{% endblock %}
+
+{% block styles %}
+<!-- Additional styles for dashboard -->
+
+
+{% endblock %}
+
+{% block content %}
+        
+                    <!-- Start::page-header -->
+                    <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2">
+                        <div>
+                            <ol class="breadcrumb mb-1">
+                                <li class="breadcrumb-item">
+                                    <a href="javascript:void(0);">
+                                        Dashboards
+                                    </a>
+                                </li>
+                                <li class="breadcrumb-item active" aria-current="page">Overview</li>
+                            </ol>
+                            <h1 class="page-title fw-medium fs-18 mb-0">Dashboard Overview</h1>
+                        </div>
+                    </div>
+                    <!-- End::page-header -->
+                    <!-- Start::app-content -->
+                    <div class="row row-sm mt-lg-4">
+                        <!-- Stats Cards -->
+                        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                            <div class="card custom-card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <span class="avatar avatar-md bg-primary-transparent">
+                                                <i class="ri-folder-line fs-18"></i>
+                                            </span>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <span class="d-block fw-medium">Total Projects</span>
+                                            <h4 class="fw-semibold mb-0">{{ total_projects }}</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                            <div class="card custom-card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <span class="avatar avatar-md bg-success-transparent">
+                                                <i class="ri-user-line fs-18"></i>
+                                            </span>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <span class="d-block fw-medium">Total Users</span>
+                                            <h4 class="fw-semibold mb-0">{{ total_users }}</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>    
+                        <!-- Project Status Cards -->
+                        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                            <div class="card custom-card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <span class="avatar avatar-md bg-success-transparent">
+                                                <i class="ri-check-double-line fs-18"></i>
+                                            </span>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <span class="d-block fw-medium">Completed Projects</span>
+                                            <h4 class="fw-semibold mb-0">{{ completed_projects }}</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                            <div class="card custom-card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <span class="avatar avatar-md bg-warning-transparent">
+                                                <i class="ri-time-line fs-18"></i>
+                                            </span>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <span class="d-block fw-medium">Ongoing Projects</span>
+                                            <h4 class="fw-semibold mb-0">{{ ongoing_projects }}</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                            <div class="card custom-card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <span class="avatar avatar-md bg-info-transparent">
+                                                <i class="ri-add-circle-line fs-18"></i>
+                                            </span>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <span class="d-block fw-medium">New Projects</span>
+                                            <h4 class="fw-semibold mb-0">{{ new_projects }}</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                            <div class="card custom-card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <span class="avatar avatar-md bg-danger-transparent">
+                                                <i class="ri-pause-circle-line fs-18"></i>
+                                            </span>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <span class="d-block fw-medium">Pending Projects</span>
+                                            <h4 class="fw-semibold mb-0">{{ pending_projects }}</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Recent Projects -->
+                        <div class="col-xl-8 col-lg-12">
+                            <div class="card custom-card">
+                                <div class="card-header justify-content-between">
+                                    <div class="card-title">Recent Projects</div>
+                                    <a href="{% url 'projects:list' %}" class="btn btn-sm btn-light">View All</a>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover text-nowrap">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">Project</th>
+                                                    <th scope="col">Status</th>
+                                                    <th scope="col">Team</th>
+                                                    <th scope="col">Created</th>
+                                                    <th scope="col">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for project in recent_projects %}
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="flex-fill">
+                                                                <span class="d-block fw-semibold">{{ project.name }}</span>
+                                                                <span class="text-muted fs-12">{{ project.business_area.name }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        {% if project.status == 'NEW' %}
+                                                            <span class="badge bg-info-transparent">{{ project.get_status_display }}</span>
+                                                        {% elif project.status == 'IN_PROGRESS' %}
+                                                            <span class="badge bg-warning-transparent">{{ project.get_status_display }}</span>
+                                                        {% elif project.status == 'COMPLETE' %}
+                                                            <span class="badge bg-success-transparent">{{ project.get_status_display }}</span>
+                                                        {% else %}
+                                                            <span class="badge bg-secondary-transparent">{{ project.get_status_display }}</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        <div class="avatar-list-stacked">
+                                                            {% for user in project.assigned_users.all|slice:":3" %}
+                                                            <span class="avatar avatar-xs avatar-rounded">
+                                                                {% if user.avatar %}
+                                                                    <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name }}">
+                                                                {% else %}
+                                                                    <div class="bg-primary text-white d-flex align-items-center justify-content-center h-100">
+                                                                        {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                                                                    </div>
+                                                                {% endif %}
+                                                            </span>
+                                                            {% endfor %}
+                                                            {% if project.assigned_users.count > 3 %}
+                                                            <span class="avatar avatar-xs bg-light text-default border border-2 avatar-rounded">
+                                                                +{{ project.assigned_users.count|add:"-3" }}
+                                                            </span>
+                                                            {% endif %}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-muted">{{ project.created_at|date:"M d, Y" }}</span>
+                                                    </td>
+                                                    <td>
+                                                        <a href="{% url 'projects:detail' project.id %}" class="btn btn-icon btn-sm btn-primary-light" data-bs-toggle="tooltip" data-bs-title="View Project">
+                                                            <i class="ri-eye-line"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                {% empty %}
+                                                <tr>
+                                                    <td colspan="5" class="text-center text-muted">No recent projects found.</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Team Activity -->
+                        <div class="col-xl-4 col-lg-12">
+                            <div class="card custom-card">
+                                <div class="card-header justify-content-between">
+                                    <div class="card-title">Team Activity</div>
+                                </div>
+                                <div class="card-body">
+                                    {% for member in team_members %}
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="me-3">
+                                            <span class="avatar avatar-sm avatar-rounded">
+                                                {% if member.avatar %}
+                                                    <img src="{{ member.avatar.url }}" alt="{{ member.get_full_name }}">
+                                                {% else %}
+                                                    <div class="bg-primary text-white d-flex align-items-center justify-content-center h-100">
+                                                        {{ member.first_name|first|upper }}{{ member.last_name|first|upper }}
+                                                    </div>
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <span class="d-block fw-semibold">{{ member.get_full_name }}</span>
+                                            <span class="text-muted fs-12">{{ member.project_count }} project{{ member.project_count|pluralize }}</span>
+                                        </div>
+                                        <div>
+                                            <span class="badge bg-primary-transparent">{{ member.department|default:"Team" }}</span>
+                                        </div>
+                                    </div>
+                                    {% empty %}
+                                    <p class="text-muted text-center">No team members found.</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End::app-content -->
+
+{% endblock %}
+
+{% block scripts %}
+	
+        <!-- Dashboard specific scripts -->
+
+
+{% endblock %}

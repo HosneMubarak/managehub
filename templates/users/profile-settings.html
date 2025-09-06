@@ -1,0 +1,244 @@
+
+{% extends 'components/base.html' %}
+{% load static %}
+
+{% block styles %}
+{% endblock %}
+
+{% block content %}
+                    <!-- Page Header -->
+                    <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2">
+                        <div>
+                            <nav>
+                                <ol class="breadcrumb mb-1">
+                                    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+                                    <li class="breadcrumb-item"><a href="{% url 'users:profile' %}">Profile</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">Profile Settings</li>
+                                </ol>
+                            </nav>
+                            <h1 class="page-title fw-medium fs-18 mb-0">Profile Settings</h1>
+                        </div>
+                        <div class="btn-list">
+                            <a href="{% url 'users:profile' %}" class="btn btn-white btn-wave">
+                                <i class="ri-arrow-left-line align-middle me-1 lh-1"></i> Back to Profile
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Page Header Close -->
+
+                    <!-- Start::row-1 -->
+                    <div class="row gap-3 justify-content-center">
+                        <div class="col-xl-9">
+                            <div class="card custom-card">
+                                <ul class="nav nav-tabs tab-style-8 scaleX rounded m-3 profile-settings-tab gap-2" id="myTab4" role="tablist">
+                                    <li class="nav-item me-1" role="presentation">
+                                        <button class="nav-link  px-4 bg-primary-transparent active" id="account" data-bs-toggle="tab" data-bs-target="#account-pane" type="button" role="tab" aria-controls="account-pane" aria-selected="true">Account</button>
+                                    </li>
+                                    <li class="nav-item me-1" role="presentation">
+                                        <button class="nav-link  px-4 bg-primary-transparent" id="security-tab" data-bs-toggle="tab" data-bs-target="#security-tab-pane" type="button" role="tab" aria-controls="security-tab-pane" aria-selected="false" tabindex="-1">Security</button>
+                                    </li>
+                                </ul>
+                                <div class="p-3 border-bottom border-top border-block-end-dashed tab-content">
+                                    <div class="tab-pane show active" id="account-pane" role="tabpanel" aria-labelledby="account" tabindex="0">
+                                        
+                                        <form method="post" enctype="multipart/form-data">
+                                            {% csrf_token %}
+                                            <div class="row gy-4">
+                                                <div class="col-xl-12">
+                                                    <div class="card custom-card shadow-none mb-0 border">
+                                                        <div class="card-body">
+                                                            <div class="row gy-3">
+                                                                <div class="col-xl-12">
+                                                                    <div class="d-flex align-items-center mb-3">
+                                                                        <div class="me-3">
+                                                                            <span class="avatar avatar-xl avatar-rounded">
+                                                                                {% if user.avatar %}
+                                                                                    <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name }}" id="profile-img">
+                                                                                {% else %}
+                                                                                    <img src="{% static 'assets/images/faces/11.jpg'%}" alt="{{ user.get_full_name }}" id="profile-img">
+                                                                                {% endif %}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div class="flex-fill">
+                                                                            <h6 class="fw-medium mb-1">Profile Picture</h6>
+                                                                            <p class="mb-2 text-muted">Upload a new profile picture</p>
+                                                                            {{ form.avatar }}
+                                                                            {% if form.avatar.help_text %}
+                                                                                <div class="form-text">{{ form.avatar.help_text }}</div>
+                                                                            {% endif %}
+                                                                            {% if form.avatar.errors %}
+                                                                                <div class="text-danger">
+                                                                                    {% for error in form.avatar.errors %}
+                                                                                        <small>{{ error }}</small>
+                                                                                    {% endfor %}
+                                                                                </div>
+                                                                            {% endif %}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-xl-6">
+                                                                    <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name <span class="text-danger">*</span></label>
+                                                                    {{ form.first_name }}
+                                                                    {% if form.first_name.errors %}
+                                                                        <div class="text-danger">
+                                                                            {% for error in form.first_name.errors %}
+                                                                                <small>{{ error }}</small>
+                                                                            {% endfor %}
+                                                                        </div>
+                                                                    {% endif %}
+                                                                </div>
+                                                                <div class="col-xl-6">
+                                                                    <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name <span class="text-danger">*</span></label>
+                                                                    {{ form.last_name }}
+                                                                    {% if form.last_name.errors %}
+                                                                        <div class="text-danger">
+                                                                            {% for error in form.last_name.errors %}
+                                                                                <small>{{ error }}</small>
+                                                                            {% endfor %}
+                                                                        </div>
+                                                                    {% endif %}
+                                                                </div>
+                                                                <div class="col-xl-12">
+                                                                    <label for="{{ form.email.id_for_label }}" class="form-label">Email Address <span class="text-danger">*</span></label>
+                                                                    {{ form.email }}
+                                                                    {% if form.email.errors %}
+                                                                        <div class="text-danger">
+                                                                            {% for error in form.email.errors %}
+                                                                                <small>{{ error }}</small>
+                                                                            {% endfor %}
+                                                                        </div>
+                                                                    {% endif %}
+                                                                </div>
+                                                                <div class="col-xl-6">
+                                                                    <label for="{{ form.gender.id_for_label }}" class="form-label">Gender</label>
+                                                                    {{ form.gender }}
+                                                                    {% if form.gender.errors %}
+                                                                        <div class="text-danger">
+                                                                            {% for error in form.gender.errors %}
+                                                                                <small>{{ error }}</small>
+                                                                            {% endfor %}
+                                                                        </div>
+                                                                    {% endif %}
+                                                                </div>
+                                                                <div class="col-xl-6">
+                                                                    <label for="{{ form.occupation.id_for_label }}" class="form-label">Occupation</label>
+                                                                    {{ form.occupation }}
+                                                                    {% if form.occupation.errors %}
+                                                                        <div class="text-danger">
+                                                                            {% for error in form.occupation.errors %}
+                                                                                <small>{{ error }}</small>
+                                                                            {% endfor %}
+                                                                        </div>
+                                                                    {% endif %}
+                                                                </div>
+                                                                <div class="col-xl-12">
+                                                                    <label for="{{ form.bio.id_for_label }}" class="form-label">Bio</label>
+                                                                    {{ form.bio }}
+                                                                    {% if form.bio.errors %}
+                                                                        <div class="text-danger">
+                                                                            {% for error in form.bio.errors %}
+                                                                                <small>{{ error }}</small>
+                                                                            {% endfor %}
+                                                                        </div>
+                                                                    {% endif %}
+                                                                </div>
+                                                                <div class="col-xl-6">
+                                                                    <label for="{{ form.phone_number.id_for_label }}" class="form-label">Phone Number</label>
+                                                                    {{ form.phone_number }}
+                                                                    {% if form.phone_number.errors %}
+                                                                        <div class="text-danger">
+                                                                            {% for error in form.phone_number.errors %}
+                                                                                <small>{{ error }}</small>
+                                                                            {% endfor %}
+                                                                        </div>
+                                                                    {% endif %}
+                                                                </div>
+                                                                <div class="col-xl-6">
+                                                                    <label for="{{ form.country.id_for_label }}" class="form-label">Country</label>
+                                                                    {{ form.country }}
+                                                                    {% if form.country.errors %}
+                                                                        <div class="text-danger">
+                                                                            {% for error in form.country.errors %}
+                                                                                <small>{{ error }}</small>
+                                                                            {% endfor %}
+                                                                        </div>
+                                                                    {% endif %}
+                                                                </div>
+                                                                <div class="col-xl-12">
+                                                                    <label for="{{ form.city_of_origin.id_for_label }}" class="form-label">City</label>
+                                                                    {{ form.city_of_origin }}
+                                                                    {% if form.city_of_origin.errors %}
+                                                                        <div class="text-danger">
+                                                                            {% for error in form.city_of_origin.errors %}
+                                                                                <small>{{ error }}</small>
+                                                                            {% endfor %}
+                                                                        </div>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex justify-content-end gap-2 mt-4">
+                                                <a href="{% url 'users:profile' %}" class="btn btn-light">Cancel</a>
+                                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="tab-pane" id="security-tab-pane" role="tabpanel" aria-labelledby="security-tab" tabindex="0">
+                                        <div class="row gy-4">
+                                            <div class="col-xl-12">
+                                                <div class="card custom-card shadow-none mb-0 border">
+                                                    <div class="card-body">
+                                                        <h6 class="fw-medium mb-3">Password & Security</h6>
+                                                        <div class="row gy-3">
+                                                            <div class="col-xl-12">
+                                                                <div class="d-flex align-items-center justify-content-between">
+                                                                    <div>
+                                                                        <h6 class="mb-1">Change Password</h6>
+                                                                        <p class="text-muted mb-0">Update your account password</p>
+                                                                    </div>
+                                                                    <div>
+                                                                        <a href="{% url 'account_change_password' %}" class="btn btn-primary btn-sm">Change Password</a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-xl-12">
+                                                                <hr class="my-3">
+                                                                <div class="d-flex align-items-center justify-content-between">
+                                                                    <div>
+                                                                        <h6 class="mb-1">Account Information</h6>
+                                                                        <p class="text-muted mb-0">Last login: {{ user.last_login|date:"F d, Y H:i"|default:"Never" }}</p>
+                                                                        <p class="text-muted mb-0">Member since: {{ user.date_joined|date:"F d, Y" }}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End::row-1 -->
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Preview uploaded image
+    document.getElementById('{{ form.avatar.id_for_label }}').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('profile-img').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% load static %}
+
+<!-- Toast Container for Messages -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="toast django-message-toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
+                <div class="toast-header 
+                    {% if message.tags == 'success' %}bg-success text-fixed-white{% endif %}
+                    {% if message.tags == 'error' %}bg-danger text-fixed-white{% endif %}
+                    {% if message.tags == 'warning' %}bg-warning text-fixed-white{% endif %}
+                    {% if message.tags == 'info' %}bg-info text-fixed-white{% endif %}
+                    {% if message.tags == 'debug' %}bg-secondary text-fixed-white{% endif %}
+                ">
+                    <img class="bd-placeholder-img rounded me-1" src="{% static 'assets/images/brand-logos/toggle-dark.png'%}" alt="ManageHub" width="20" height="20">
+                    <strong class="me-auto">ManageHub</strong>
+                    <small>now</small>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    {{ message }}
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-show all Django message toasts
+    var toastElements = document.querySelectorAll('.django-message-toast');
+    toastElements.forEach(function(toastElement) {
+        var toast = new bootstrap.Toast(toastElement);
+        toast.show();
+    });
+});
+</script>

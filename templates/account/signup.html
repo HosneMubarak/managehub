@@ -1,0 +1,115 @@
+
+{% extends 'components/custom-base.html' %}
+{% load static %}
+{% load account %}
+
+{% block styles %}
+{% endblock %}
+
+{% block body %}
+    <body class="bg-white">
+{% endblock %}
+
+{% block content %}
+        <div class="row authentication authentication-cover-main mx-0">
+            <div class="col-xxl-6 col-xl-7">
+                <div class="row justify-content-center align-items-center h-100">
+                    <div class="col-xxl-7 col-xl-9 col-lg-6 col-md-6 col-sm-8 col-12">
+                        <div class="card custom-card my-5 border">
+                        <div class="card-body p-5">
+                                <p class="h5 mb-2 text-center">Sign Up</p>
+                                <p class="mb-4 text-muted op-7 fw-normal text-center">Welcome! Begin by creating your account.</p>
+                                
+                                {% if form.errors %}
+                                    <div class="alert alert-danger">
+                                        {% for field, errors in form.errors.items %}
+                                            {% for error in errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                <form method="post" action="{% url 'account_signup' %}">
+                                    {% csrf_token %}
+                                    <div class="row gy-3">
+                                        <div class="col-xl-6">
+                                            <label for="id_first_name" class="form-label text-default">First Name<sup class="fs-12 text-danger">*</sup></label>
+                                            <input type="text" class="form-control" id="id_first_name" name="first_name" placeholder="Enter your first name" required>
+                                        </div>
+                                        <div class="col-xl-6">
+                                            <label for="id_last_name" class="form-label text-default">Last Name<sup class="fs-12 text-danger">*</sup></label>
+                                            <input type="text" class="form-control" id="id_last_name" name="last_name" placeholder="Enter your last name" required>
+                                        </div>
+                                        <div class="col-xl-12">
+                                            <label for="{{ form.email.id_for_label }}" class="form-label text-default">Email<sup class="fs-12 text-danger">*</sup></label>
+                                            <input type="email" class="form-control" id="{{ form.email.id_for_label }}" name="{{ form.email.name }}" placeholder="Enter your email" value="{{ form.email.value|default:'' }}" required>
+                                        </div>
+                                        <div class="col-xl-12">
+                                            <label for="{{ form.username.id_for_label }}" class="form-label text-default">Username</label>
+                                            <input type="text" class="form-control" id="{{ form.username.id_for_label }}" name="{{ form.username.name }}" placeholder="Enter your username" value="{{ form.username.value|default:'' }}">
+                                            {% if form.username.help_text %}
+                                                <div class="form-text text-muted fs-12">{{ form.username.help_text }}</div>
+                                            {% endif %}
+                                            {% if form.username.errors %}
+                                                <div class="text-danger fs-12">{{ form.username.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-xl-12">
+                                            <label for="{{ form.password1.id_for_label }}" class="form-label text-default">Password<sup class="fs-12 text-danger">*</sup></label>
+                                            <div class="position-relative">
+                                                <input type="password" class="form-control create-password-input" id="{{ form.password1.id_for_label }}" name="{{ form.password1.name }}" placeholder="Enter password" required>
+                                                <a href="javascript:void(0);" class="show-password-button text-muted" onclick="createpassword('{{ form.password1.id_for_label }}',this)"  id="button-addon2"><i class="ri-eye-off-line align-middle"></i></a>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-12">
+                                            <label for="{{ form.password2.id_for_label }}" class="form-label text-default">Confirm Password<sup class="fs-12 text-danger">*</sup></label>
+                                            <div class="position-relative">
+                                                <input type="password" class="form-control create-password-input" id="{{ form.password2.id_for_label }}" name="{{ form.password2.name }}" placeholder="Confirm password" required>
+                                                <a href="javascript:void(0);" class="show-password-button text-muted" onclick="createpassword('{{ form.password2.id_for_label }}',this)"  id="button-addon21"><i class="ri-eye-off-line align-middle"></i></a>
+                                            </div>
+                                            <div class="form-check mt-3">
+                                                <input class="form-check-input" type="checkbox" value="" id="defaultCheck1" required>
+                                                <label class="form-check-label text-muted fw-normal fs-14" for="defaultCheck1">
+                                                    By creating an account you agree to our 
+                                                    <a href="#" class="text-success"><u>Terms & Conditions</u></a> and <a href="#" class="text-success"><u>Privacy Policy</u></a>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-grid mt-4">
+                                        <button type="submit" class="btn btn-primary">Create Account</button>
+                                    </div>
+                                </form>
+
+                                <div class="text-center">
+                                    <p class="text-muted mt-3 mb-0">Already have an account? <a href="{% url 'account_login' %}" class="text-primary">Sign In</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-6 col-xl-5 col-lg-12 d-xl-block d-none px-0">
+                <div class="authentication-cover overflow-hidden">
+                    <div class="authentication-cover-logo"> 
+                        <a href="{% url 'dashboard:index' %}"> 
+                            <img src="{% static 'assets/images/brand-logos/desktop-white.png'%}" alt="" class="authentication-brand desktop-white"> 
+                        </a> 
+                    </div>
+                    <div class="aunthentication-cover-content d-flex align-items-center justify-content-center">
+                        <div>
+                            <h3 class="text-fixed-white mb-1 fw-medium">Join ManageHub!</h3>
+                            <h6 class="text-fixed-white mb-3 fw-medium">Create Your Account</h6>
+                            <p class="text-fixed-white mb-1 op-6">Welcome to ManageHub. Create your account to start managing projects and collaborating with your team effectively.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
+{% block scripts %}
+        <!-- Show Password JS -->
+        <script src="{% static 'assets/js/show-password.js'%}"></script>
+{% endblock %}

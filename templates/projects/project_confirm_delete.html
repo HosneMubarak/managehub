@@ -1,0 +1,90 @@
+{% extends 'components/base.html' %}
+{% load static %}
+
+{% block title %}Delete Project - ManageHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
+        <h1 class="page-title fw-semibold fs-18 mb-0">Delete Project</h1>
+        <div class="ms-md-1 ms-0">
+            <nav>
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'projects:list' %}">Projects</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'projects:detail' project.id %}">{{ project.name }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Delete</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <!-- Page Header Close -->
+
+    <!-- Start::row-1 -->
+    <div class="row justify-content-center">
+        <div class="col-xl-6">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title text-danger">
+                        <i class="ri-delete-bin-line me-2"></i>Confirm Project Deletion
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger" role="alert">
+                        <h6 class="alert-heading">Warning!</h6>
+                        <p class="mb-0">You are about to permanently delete this project. This action cannot be undone.</p>
+                    </div>
+                    
+                    <div class="project-details mb-4">
+                        <h6 class="fw-semibold mb-3">Project Details:</h6>
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Project ID:</strong></div>
+                            <div class="col-sm-8">{{ project.project_id }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Name:</strong></div>
+                            <div class="col-sm-8">{{ project.name }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Status:</strong></div>
+                            <div class="col-sm-8">
+                                <span class="badge bg-{{ project.status|lower }}-transparent">{{ project.get_status_display }}</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Manager:</strong></div>
+                            <div class="col-sm-8">{{ project.project_manager.get_full_name|default:project.project_manager.username }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Team Members:</strong></div>
+                            <div class="col-sm-8">{{ project.assigned_users.count }} assigned</div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-warning" role="alert">
+                        <h6 class="alert-heading">What will be deleted:</h6>
+                        <ul class="mb-0">
+                            <li>The project and all its data</li>
+                            <li>All team member assignments</li>
+                            <li>All project comments and history</li>
+                            <li>All related project records</li>
+                        </ul>
+                    </div>
+                    
+                    <form method="post" class="d-flex gap-2 justify-content-end">
+                        {% csrf_token %}
+                        <a href="{% url 'projects:detail' project.id %}" class="btn btn-secondary">
+                            <i class="ri-arrow-left-line me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="ri-delete-bin-line me-1"></i>Delete Project
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End::row-1 -->
+</div>
+{% endblock %}
