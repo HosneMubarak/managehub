@@ -196,8 +196,8 @@ def remove_project_assignment(request, pk, user_id):
     if request.method == 'POST':
         project = get_object_or_404(Project, id=pk)
         try:
-            user = User.objects.get(pk=user_id)
-            if project.assigned_users.filter(pk=user.pk).exists():
+            user = User.objects.get(id=user_id)  # Use id field (UUID) instead of pk
+            if project.assigned_users.filter(id=user.id).exists():  # Use id field for consistency
                 project.assigned_users.remove(user)
                 user_name = user.get_full_name() or user.username
                 messages.success(request, f'{user_name} removed from project successfully!')
