@@ -36,3 +36,7 @@ clean:
 	docker system prune -f
 clean-all:
 	docker system prune -af --volumes
+dummy-user:
+	docker compose run --rm web python manage.py create_dummy_users
+dummy-project:
+	docker compose run --rm web python manage.py create_dummy_projects

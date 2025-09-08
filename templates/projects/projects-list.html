@@ -144,8 +144,9 @@
                                     <tr>
                                         <th scope="col">Project Name</th>
                                         <th scope="col">Description</th>
-                                        <th scope="col">Start Date</th>
-                                        <th scope="col">Due Date</th>
+                                        <th scope="col">Effort</th>
+                                        <th scope="col">Timeline</th>
+                                        <th scope="col">T/Code</th>
                                         <th scope="col">Status</th>
                                         <th scope="col">Priority</th>
                                         <th scope="col">Manager</th>
@@ -185,21 +186,46 @@
                                         </td>
                                         <td>
                                             <p class="text-muted mb-0 project-list-description">
-                                                {{ project.description|truncatechars:80 }}
+                                                {{ project.description|truncatechars:60 }}
                                             </p>
+                                            {% if project.clarity %}
+                                                <small class="text-info d-block">
+                                                    <i class="ri-lightbulb-line me-1"></i>{{ project.clarity|truncatechars:40 }}
+                                                </small>
+                                            {% endif %}
                                         </td>
                                         <td>
-                                            {% if project.start_date %}
-                                                {{ project.start_date|date:"d,M Y" }}
+                                            {% if project.effort_size %}
+                                                <span class="badge bg-info-transparent">{{ project.get_effort_size_display }}</span>
+                                                <small class="d-block text-muted">{{ project.estimated_hours }}h</small>
                                             {% else %}
                                                 <span class="text-muted">Not set</span>
                                             {% endif %}
                                         </td>
                                         <td>
-                                            {% if project.estimated_end_date %}
-                                                {{ project.estimated_end_date|date:"d,M Y" }}
+                                            {% if project.timeline %}
+                                                <span class="text-muted">{{ project.timeline|truncatechars:30 }}</span>
+                                            {% elif project.start_date and project.estimated_end_date %}
+                                                <small class="text-muted">
+                                                    {{ project.start_date|date:"M d" }} - {{ project.estimated_end_date|date:"M d, Y" }}
+                                                </small>
+                                            {% elif project.start_date %}
+                                                <small class="text-muted">
+                                                    Started {{ project.start_date|date:"M d, Y" }}
+                                                </small>
+                                            {% elif project.estimated_end_date %}
+                                                <small class="text-muted">
+                                                    Due {{ project.estimated_end_date|date:"M d, Y" }}
+                                                </small>
                                             {% else %}
                                                 <span class="text-muted">Not set</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if project.t_code %}
+                                                <code class="text-primary">{{ project.t_code }}</code>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
                                             {% endif %}
                                         </td>
                                         <td>
@@ -514,28 +540,57 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function showSuccessMessage(message) {
-        // Simple toast notification - you can enhance this with your preferred notification system
-        const toast = document.createElement('div');
-        toast.className = 'alert alert-success position-fixed top-0 end-0 m-3';
-        toast.style.zIndex = '9999';
-        toast.textContent = message;
-        document.body.appendChild(toast);
-        
-        setTimeout(() => {
-            toast.remove();
-        }, 3000);
+        showToast(message, 'success');
     }
     
     function showErrorMessage(message) {
-        const toast = document.createElement('div');
-        toast.className = 'alert alert-danger position-fixed top-0 end-0 m-3';
-        toast.style.zIndex = '9999';
-        toast.textContent = message;
-        document.body.appendChild(toast);
+        showToast(message, 'error');
+    }
+    
+    function showToast(message, type) {
+        // Create toast element using the same structure as the default toast system
+        const toastContainer = document.querySelector('.toast-container') || createToastContainer();
         
-        setTimeout(() => {
-            toast.remove();
-        }, 5000);
+        const toastElement = document.createElement('div');
+        toastElement.className = 'toast';
+        toastElement.setAttribute('role', 'alert');
+        toastElement.setAttribute('aria-live', 'assertive');
+        toastElement.setAttribute('aria-atomic', 'true');
+        toastElement.setAttribute('data-bs-autohide', 'true');
+        toastElement.setAttribute('data-bs-delay', type === 'error' ? '5000' : '3000');
+        
+        const headerClass = type === 'success' ? 'bg-success text-fixed-white' : 'bg-danger text-fixed-white';
+        
+        toastElement.innerHTML = `
+            <div class="toast-header ${headerClass}">
+                <img class="bd-placeholder-img rounded me-1" src="/static/assets/images/brand-logos/toggle-dark.png" alt="ManageHub" width="20" height="20">
+                <strong class="me-auto">ManageHub</strong>
+                <small>now</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                ${message}
+            </div>
+        `;
+        
+        toastContainer.appendChild(toastElement);
+        
+        // Initialize and show the toast
+        const toast = new bootstrap.Toast(toastElement);
+        toast.show();
+        
+        // Remove the toast element after it's hidden
+        toastElement.addEventListener('hidden.bs.toast', function() {
+            toastElement.remove();
+        });
+    }
+    
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.style.zIndex = '1055';
+        document.body.appendChild(container);
+        return container;
     }
 });
 </script>
