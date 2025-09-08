@@ -15,4 +15,5 @@ urlpatterns = [
     path('<uuid:pk>/comment/', views.add_project_comment, name='add_comment'),
     path('<uuid:pk>/assign/', views.manage_project_assignment, name='manage_assignment'),
     path('<uuid:pk>/assignment/<uuid:user_id>/remove/', views.remove_project_assignment, name='remove_assignment'),
+    path('<uuid:pk>/update-field/', views.update_project_field, name='update_field'),
 ]

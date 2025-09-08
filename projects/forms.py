@@ -37,7 +37,8 @@ class ProjectForm(forms.ModelForm):
         fields = [
             'project_id', 'name', 'description', 'business_area', 'project_type',
             'project_manager', 'effort_size', 'priority', 'status',
-            'start_date', 'estimated_end_date', 'actual_end_date', 'week_commencing'
+            'start_date', 'estimated_end_date', 'actual_end_date', 'week_commencing',
+            'clarity', 'timeline', 't_code'
         ]
         widgets = {
             'name': forms.TextInput(attrs={
@@ -71,6 +72,18 @@ class ProjectForm(forms.ModelForm):
             'week_commencing': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'w/c 9/6/25'
+            }),
+            'clarity': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter project clarity description'
+            }),
+            'timeline': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter timeline information'
+            }),
+            't_code': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter t/code'
             }),
         }
     

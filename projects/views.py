@@ -61,6 +61,8 @@ class ProjectListView(LoginRequiredMixin, ListView):
         context['active_projects'] = Project.objects.filter(
             status__in=['NEW', 'IN_PROGRESS']
         ).count()
+        # Add active users for inline editing
+        context['active_users'] = User.objects.filter(is_active=True).order_by('first_name', 'last_name')
         return context
 
 class ProjectDetailView(LoginRequiredMixin, DetailView):
@@ -207,3 +209,56 @@ def remove_project_assignment(request, pk, user_id):
             messages.error(request, 'User not found.')
     
     return redirect('projects:detail', pk=pk)
+
+def update_project_field(request, pk):
+    """Update project field via AJAX for inline editing"""
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        project = get_object_or_404(Project, id=pk)
+        field = request.POST.get('field')
+        value = request.POST.get('value')
+        
+        # Define allowed fields for inline editing
+        allowed_fields = {
+            'status': Project.STATUS_CHOICES,
+            'priority': Project.PRIORITY_CHOICES,
+            'project_manager': None  # Special handling for ForeignKey
+        }
+        
+        if field not in allowed_fields:
+            return JsonResponse({'success': False, 'error': 'Invalid field'})
+        
+        try:
+            if field == 'project_manager':
+                # Handle project manager update
+                if value:
+                    manager = User.objects.get(id=value, is_active=True)
+                    project.project_manager = manager
+                else:
+                    return JsonResponse({'success': False, 'error': 'Invalid manager selected'})
+            else:
+                # Handle choice fields (status, priority)
+                valid_choices = [choice[0] for choice in allowed_fields[field]]
+                if value not in valid_choices:
+                    return JsonResponse({'success': False, 'error': 'Invalid choice'})
+                setattr(project, field, value)
+            
+            project.save()
+            
+            # Return updated display value
+            if field == 'project_manager':
+                display_value = project.project_manager.get_full_name() or project.project_manager.username
+            else:
+                display_value = getattr(project, f'get_{field}_display')()
+            
+            return JsonResponse({
+                'success': True,
+                'display_value': display_value,
+                'field': field
+            })
+            
+        except User.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Manager not found'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request'})

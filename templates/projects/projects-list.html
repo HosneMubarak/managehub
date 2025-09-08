@@ -3,9 +3,39 @@
 {% load humanize %}
 
 {% block styles %}
+<style>
+.inline-edit-container {
+    cursor: pointer;
+    position: relative;
+}
+
+.inline-edit-container:hover .display-value {
+    background-color: rgba(0, 123, 255, 0.1);
+    border-radius: 4px;
+    padding: 2px 4px;
+}
+
+.inline-edit-container .edit-select {
+    min-width: 120px;
+}
+
+.inline-edit-container[data-field="project_manager"] .edit-select {
+    min-width: 150px;
+}
+
+.display-value {
+    transition: background-color 0.2s ease;
+}
+
+.table td {
+    vertical-align: middle;
+}
+</style>
 {% endblock %}
 
 {% block content %}
+    <!-- CSRF Token for AJAX requests -->
+    {% csrf_token %}
     <!-- Page Header -->
     <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2">
         <div>
@@ -118,6 +148,7 @@
                                         <th scope="col">Due Date</th>
                                         <th scope="col">Status</th>
                                         <th scope="col">Priority</th>
+                                        <th scope="col">Manager</th>
                                         <th scope="col">Actions</th>
                                     </tr>
                                 </thead>
@@ -172,36 +203,76 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            <div>
-                                                {% if project.status %}
-                                                    {% if project.status == 'COMPLETE' %}
-                                                        <span class="badge bg-success-transparent">{{ project.get_status_display }}</span>
-                                                    {% elif project.status == 'IN_PROGRESS' %}
-                                                        <span class="badge bg-primary-transparent">{{ project.get_status_display }}</span>
-                                                    {% elif project.status == 'ON_HOLD' %}
-                                                        <span class="badge bg-warning-transparent">{{ project.get_status_display }}</span>
-                                                    {% elif project.status == 'NEW' %}
-                                                        <span class="badge bg-secondary-transparent">{{ project.get_status_display }}</span>
+                                            <div class="inline-edit-container" data-field="status" data-project-id="{{ project.id }}">
+                                                <span class="display-value">
+                                                    {% if project.status %}
+                                                        {% if project.status == 'COMPLETE' %}
+                                                            <span class="badge bg-success-transparent">{{ project.get_status_display }}</span>
+                                                        {% elif project.status == 'IN_PROGRESS' %}
+                                                            <span class="badge bg-primary-transparent">{{ project.get_status_display }}</span>
+                                                        {% elif project.status == 'ON_HOLD' %}
+                                                            <span class="badge bg-warning-transparent">{{ project.get_status_display }}</span>
+                                                        {% elif project.status == 'NEW' %}
+                                                            <span class="badge bg-secondary-transparent">{{ project.get_status_display }}</span>
+                                                        {% else %}
+                                                            <span class="badge bg-danger-transparent">{{ project.get_status_display }}</span>
+                                                        {% endif %}
                                                     {% else %}
-                                                        <span class="badge bg-danger-transparent">{{ project.get_status_display }}</span>
+                                                        <span class="badge bg-secondary-transparent">No Status</span>
                                                     {% endif %}
-                                                {% else %}
-                                                    <span class="badge bg-secondary-transparent">No Status</span>
-                                                {% endif %}
+                                                </span>
+                                                <select class="form-select form-select-sm edit-select d-none" data-field="status">
+                                                    <option value="NEW" {% if project.status == 'NEW' %}selected{% endif %}>New</option>
+                                                    <option value="IN_PROGRESS" {% if project.status == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
+                                                    <option value="COMPLETE" {% if project.status == 'COMPLETE' %}selected{% endif %}>Complete</option>
+                                                    <option value="ON_HOLD" {% if project.status == 'ON_HOLD' %}selected{% endif %}>On Hold</option>
+                                                    <option value="CANCELLED" {% if project.status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+                                                </select>
                                             </div>
                                         </td>
                                         <td>
-                                            {% if project.priority %}
-                                                {% if project.priority == 'HIGH' or project.priority == 'CRITICAL' %}
-                                                    <span class="badge bg-danger-transparent">{{ project.get_priority_display }}</span>
-                                                {% elif project.priority == 'MEDIUM' %}
-                                                    <span class="badge bg-warning-transparent">{{ project.get_priority_display }}</span>
-                                                {% else %}
-                                                    <span class="badge bg-success-transparent">{{ project.get_priority_display }}</span>
-                                                {% endif %}
-                                            {% else %}
-                                                <span class="badge bg-secondary-transparent">No Priority</span>
-                                            {% endif %}
+                                            <div class="inline-edit-container" data-field="priority" data-project-id="{{ project.id }}">
+                                                <span class="display-value">
+                                                    {% if project.priority %}
+                                                        {% if project.priority == 'HIGH' or project.priority == 'CRITICAL' %}
+                                                            <span class="badge bg-danger-transparent">{{ project.get_priority_display }}</span>
+                                                        {% elif project.priority == 'MEDIUM' %}
+                                                            <span class="badge bg-warning-transparent">{{ project.get_priority_display }}</span>
+                                                        {% else %}
+                                                            <span class="badge bg-success-transparent">{{ project.get_priority_display }}</span>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <span class="badge bg-secondary-transparent">No Priority</span>
+                                                    {% endif %}
+                                                </span>
+                                                <select class="form-select form-select-sm edit-select d-none" data-field="priority">
+                                                    <option value="LOW" {% if project.priority == 'LOW' %}selected{% endif %}>Low</option>
+                                                    <option value="MEDIUM" {% if project.priority == 'MEDIUM' %}selected{% endif %}>Medium</option>
+                                                    <option value="HIGH" {% if project.priority == 'HIGH' %}selected{% endif %}>High</option>
+                                                    <option value="CRITICAL" {% if project.priority == 'CRITICAL' %}selected{% endif %}>Critical</option>
+                                                </select>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="inline-edit-container" data-field="project_manager" data-project-id="{{ project.id }}">
+                                                <span class="display-value">
+                                                    {% if project.project_manager.avatar %}
+                                                        <img src="{{ project.project_manager.avatar.url }}" alt="{{ project.project_manager.get_full_name }}" class="avatar avatar-xs rounded-circle me-1">
+                                                    {% else %}
+                                                        <span class="avatar avatar-xs rounded-circle bg-primary text-white me-1">
+                                                            {{ project.project_manager.first_name|first }}{{ project.project_manager.last_name|first }}
+                                                        </span>
+                                                    {% endif %}
+                                                    <span class="text-truncate">{{ project.project_manager.get_full_name|default:project.project_manager.username }}</span>
+                                                </span>
+                                                <select class="form-select form-select-sm edit-select d-none" data-field="project_manager">
+                                                    {% for user in active_users %}
+                                                        <option value="{{ user.id }}" {% if user.id == project.project_manager.id %}selected{% endif %}>
+                                                            {{ user.get_full_name|default:user.username }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
                                         </td>
                                         <td>
                                             <div class="dropdown">
@@ -313,6 +384,158 @@ document.addEventListener('DOMContentLoaded', function() {
         if (currentSort) {
             sortSelect.value = currentSort;
         }
+    }
+
+    // Inline editing functionality
+    const inlineEditContainers = document.querySelectorAll('.inline-edit-container');
+    
+    inlineEditContainers.forEach(container => {
+        const displayValue = container.querySelector('.display-value');
+        const editSelect = container.querySelector('.edit-select');
+        const projectId = container.dataset.projectId;
+        const field = container.dataset.field;
+        
+        // Show edit mode on click
+        displayValue.addEventListener('click', function() {
+            displayValue.classList.add('d-none');
+            editSelect.classList.remove('d-none');
+            editSelect.focus();
+        });
+        
+        // Handle value change
+        editSelect.addEventListener('change', function() {
+            const newValue = this.value;
+            updateProjectField(projectId, field, newValue, container);
+        });
+        
+        // Handle escape key to cancel editing
+        editSelect.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                cancelEdit(container);
+            }
+        });
+        
+        // Handle blur to cancel editing if no change
+        editSelect.addEventListener('blur', function() {
+            setTimeout(() => {
+                if (!editSelect.classList.contains('d-none')) {
+                    cancelEdit(container);
+                }
+            }, 100);
+        });
+    });
+    
+    function updateProjectField(projectId, field, value, container) {
+        // Get CSRF token from the hidden input field
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+        
+        if (!csrfToken) {
+            showErrorMessage('CSRF token not found. Please refresh the page.');
+            cancelEdit(container);
+            return;
+        }
+        
+        // Create form data
+        const formData = new FormData();
+        formData.append('field', field);
+        formData.append('value', value);
+        formData.append('csrfmiddlewaretoken', csrfToken);
+        
+        fetch(`/projects/${projectId}/update-field/`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateDisplayValue(container, field, data.display_value);
+                showSuccessMessage(`${field.replace('_', ' ')} updated successfully`);
+            } else {
+                showErrorMessage(data.error || 'Update failed');
+                cancelEdit(container);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorMessage('Network error occurred');
+            cancelEdit(container);
+        });
+    }
+    
+    function updateDisplayValue(container, field, displayValue) {
+        const displayElement = container.querySelector('.display-value');
+        const editSelect = container.querySelector('.edit-select');
+        
+        if (field === 'status') {
+            const statusBadgeClass = getStatusBadgeClass(editSelect.value);
+            displayElement.innerHTML = `<span class="badge ${statusBadgeClass}">${displayValue}</span>`;
+        } else if (field === 'priority') {
+            const priorityBadgeClass = getPriorityBadgeClass(editSelect.value);
+            displayElement.innerHTML = `<span class="badge ${priorityBadgeClass}">${displayValue}</span>`;
+        } else if (field === 'project_manager') {
+            // For manager, we'll keep the simple text display for now
+            displayElement.innerHTML = `<span class="text-truncate">${displayValue}</span>`;
+        }
+        
+        displayElement.classList.remove('d-none');
+        editSelect.classList.add('d-none');
+    }
+    
+    function cancelEdit(container) {
+        const displayValue = container.querySelector('.display-value');
+        const editSelect = container.querySelector('.edit-select');
+        
+        displayValue.classList.remove('d-none');
+        editSelect.classList.add('d-none');
+    }
+    
+    function getStatusBadgeClass(status) {
+        const statusClasses = {
+            'COMPLETE': 'bg-success-transparent',
+            'IN_PROGRESS': 'bg-primary-transparent',
+            'ON_HOLD': 'bg-warning-transparent',
+            'NEW': 'bg-secondary-transparent',
+            'CANCELLED': 'bg-danger-transparent'
+        };
+        return statusClasses[status] || 'bg-secondary-transparent';
+    }
+    
+    function getPriorityBadgeClass(priority) {
+        const priorityClasses = {
+            'CRITICAL': 'bg-danger-transparent',
+            'HIGH': 'bg-danger-transparent',
+            'MEDIUM': 'bg-warning-transparent',
+            'LOW': 'bg-success-transparent'
+        };
+        return priorityClasses[priority] || 'bg-secondary-transparent';
+    }
+    
+    function showSuccessMessage(message) {
+        // Simple toast notification - you can enhance this with your preferred notification system
+        const toast = document.createElement('div');
+        toast.className = 'alert alert-success position-fixed top-0 end-0 m-3';
+        toast.style.zIndex = '9999';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+    
+    function showErrorMessage(message) {
+        const toast = document.createElement('div');
+        toast.className = 'alert alert-danger position-fixed top-0 end-0 m-3';
+        toast.style.zIndex = '9999';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 5000);
     }
 });
 </script>

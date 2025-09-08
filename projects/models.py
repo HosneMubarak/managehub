@@ -105,6 +105,23 @@ class Project(TimeStampedModel):
         help_text="Week commencing date like 'w/c 9/6/25'"
     )
     
+    # New fields as requested
+    clarity = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Project clarity description"
+    )
+    timeline = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Project timeline information"
+    )
+    t_code = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="T/code identifier"
+    )
+    
     # Additional tracking
     created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='created_projects')
     

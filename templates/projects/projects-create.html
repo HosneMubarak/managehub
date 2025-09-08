@@ -217,6 +217,37 @@
                                     {% endif %}
                                 </div>
                             </div>
+                            <div class="col-xl-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.t_code.id_for_label }}" class="form-label">T/Code</label>
+                                    {{ form.t_code }}
+                                    {% if form.t_code.help_text %}
+                                        <div class="form-text">{{ form.t_code.help_text }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Project Details -->
+                        <div class="row">
+                            <div class="col-xl-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.clarity.id_for_label }}" class="form-label">Clarity</label>
+                                    {{ form.clarity }}
+                                    {% if form.clarity.help_text %}
+                                        <div class="form-text">{{ form.clarity.help_text }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-xl-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.timeline.id_for_label }}" class="form-label">Timeline</label>
+                                    {{ form.timeline }}
+                                    {% if form.timeline.help_text %}
+                                        <div class="form-text">{{ form.timeline.help_text }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Team Assignment -->
