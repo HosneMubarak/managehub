@@ -30,6 +30,175 @@
 .table td {
     vertical-align: middle;
 }
+
+/* Styles for hover-editable fields (Name and Timeline only) */
+.hover-editable {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.hover-editable:hover .edit-btn {
+    opacity: 1;
+    visibility: visible;
+}
+
+.edit-btn {
+    position: absolute;
+    top: 50%;
+    right: 4px;
+    transform: translateY(-50%);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    z-index: 10;
+    background: #0d6efd;
+    border: none;
+    color: white;
+    border-radius: 3px;
+    padding: 3px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.edit-btn:hover {
+    background: #0b5ed7;
+    transform: translateY(-50%) scale(1.05);
+}
+
+/* Direct editable fields (Effort and T/Code) */
+.direct-editable {
+    position: relative;
+    cursor: pointer;
+}
+
+.direct-editable:hover .display-content {
+    background-color: rgba(13, 110, 253, 0.08);
+    border-radius: 4px;
+}
+
+.edit-form {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 2px;
+}
+
+.edit-form.active {
+    display: flex;
+}
+
+.edit-input {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 13px;
+    background: white;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.edit-input:focus {
+    outline: none;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+}
+
+.submit-btn {
+    background: #198754;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-weight: 500;
+    transition: all 0.15s ease-in-out;
+}
+
+.submit-btn:hover {
+    background: #157347;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.submit-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.cancel-btn {
+    background: #6c757d;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-weight: 500;
+    transition: all 0.15s ease-in-out;
+}
+
+.cancel-btn:hover {
+    background: #5c636a;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.display-content {
+    transition: background-color 0.2s ease;
+    padding: 4px;
+    border-radius: 4px;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+}
+
+.hover-editable .display-content {
+    padding-right: 32px; /* Space for edit button */
+}
+
+.hover-editable:hover .display-content {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+.project-name-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    width: 100%;
+    transition: color 0.15s ease;
+}
+
+.project-name-link:hover {
+    text-decoration: none;
+    color: #0d6efd;
+}
+
+/* Direct editable styling */
+.direct-editable .display-content {
+    transition: all 0.2s ease;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+}
+
+.direct-editable:hover .display-content {
+    border-color: #0d6efd;
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* Effort size select styling */
+.edit-form select.edit-input {
+    min-width: 120px;
+    cursor: pointer;
+}
 </style>
 {% endblock %}
 
@@ -146,7 +315,7 @@
                                         <th scope="col">Description</th>
                                         <th scope="col">Effort</th>
                                         <th scope="col">Timeline</th>
-                                        <th scope="col">T/Code</th>
+                                        <th scope="col" class="text-start">T/Code</th>
                                         <th scope="col">Status</th>
                                         <th scope="col">Priority</th>
                                         <th scope="col">Manager</th>
@@ -168,9 +337,19 @@
                                                     </span>
                                                 </div>
                                                 <div class="flex-fill">
-                                                    <a href="{% url 'projects:detail' project.id %}" class="fw-medium fs-14 d-block text-truncate project-list-title">
-                                                        {{ project.name }}
-                                                    </a>
+                                                    <div class="hover-editable" data-field="name" data-project-id="{{ project.id }}">
+                                                        <div class="display-content">
+                                                            <a href="{% url 'projects:detail' project.id %}" class="fw-medium fs-14 d-block text-truncate project-list-title project-name-link">
+                                                                {{ project.name }}
+                                                            </a>
+                                                        </div>
+                                                        <button class="edit-btn" type="button">Edit</button>
+                                                        <div class="edit-form">
+                                                            <input type="text" class="edit-input" value="{{ project.name }}">
+                                                            <button class="submit-btn" type="button">Save</button>
+                                                            <button class="cancel-btn" type="button">Cancel</button>
+                                                        </div>
+                                                    </div>
                                                     <span class="text-muted d-block fs-12">
                                                         Created {{ project.created_at|naturaltime }} • Updated {{ project.updated_at|naturaltime }}
                                                     </span>
@@ -195,38 +374,67 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            {% if project.effort_size %}
-                                                <span class="badge bg-info-transparent">{{ project.get_effort_size_display }}</span>
-                                                <small class="d-block text-muted">{{ project.estimated_hours }}h</small>
-                                            {% else %}
-                                                <span class="text-muted">Not set</span>
-                                            {% endif %}
+                                            <div class="inline-edit-container" data-field="effort_size" data-project-id="{{ project.id }}">
+                                                <span class="display-value">
+                                                    {% if project.effort_size %}
+                                                        <span class="badge bg-info-transparent">{{ project.get_effort_size_display }}</span>
+                                                        <small class="d-block text-muted">{{ project.estimated_hours }}h</small>
+                                                    {% else %}
+                                                        <span class="text-muted">Not set</span>
+                                                    {% endif %}
+                                                </span>
+                                                <select class="form-select form-select-sm edit-select d-none" data-field="effort_size">
+                                                    <option value="">Select Size</option>
+                                                    <option value="S" {% if project.effort_size == 'S' %}selected{% endif %}>Small (40h)</option>
+                                                    <option value="M" {% if project.effort_size == 'M' %}selected{% endif %}>Medium (80h)</option>
+                                                    <option value="L" {% if project.effort_size == 'L' %}selected{% endif %}>Large (160h)</option>
+                                                </select>
+                                            </div>
                                         </td>
                                         <td>
-                                            {% if project.timeline %}
-                                                <span class="text-muted">{{ project.timeline|truncatechars:30 }}</span>
-                                            {% elif project.start_date and project.estimated_end_date %}
-                                                <small class="text-muted">
-                                                    {{ project.start_date|date:"M d" }} - {{ project.estimated_end_date|date:"M d, Y" }}
-                                                </small>
-                                            {% elif project.start_date %}
-                                                <small class="text-muted">
-                                                    Started {{ project.start_date|date:"M d, Y" }}
-                                                </small>
-                                            {% elif project.estimated_end_date %}
-                                                <small class="text-muted">
-                                                    Due {{ project.estimated_end_date|date:"M d, Y" }}
-                                                </small>
-                                            {% else %}
-                                                <span class="text-muted">Not set</span>
-                                            {% endif %}
+                                            <div class="hover-editable" data-field="timeline" data-project-id="{{ project.id }}">
+                                                <div class="display-content">
+                                                    {% if project.timeline %}
+                                                        <span class="text-muted">{{ project.timeline|truncatechars:30 }}</span>
+                                                    {% elif project.start_date and project.estimated_end_date %}
+                                                        <small class="text-muted">
+                                                            {{ project.start_date|date:"M d" }} - {{ project.estimated_end_date|date:"M d, Y" }}
+                                                        </small>
+                                                    {% elif project.start_date %}
+                                                        <small class="text-muted">
+                                                            Started {{ project.start_date|date:"M d, Y" }}
+                                                        </small>
+                                                    {% elif project.estimated_end_date %}
+                                                        <small class="text-muted">
+                                                            Due {{ project.estimated_end_date|date:"M d, Y" }}
+                                                        </small>
+                                                    {% else %}
+                                                        <span class="text-muted">Not set</span>
+                                                    {% endif %}
+                                                </div>
+                                                <button class="edit-btn" type="button">Edit</button>
+                                                <div class="edit-form">
+                                                    <input type="text" class="edit-input" value="{{ project.timeline }}" placeholder="Enter timeline details">
+                                                    <button class="submit-btn" type="button">Save</button>
+                                                    <button class="cancel-btn" type="button">Cancel</button>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>
-                                            {% if project.t_code %}
-                                                <code class="text-primary">{{ project.t_code }}</code>
-                                            {% else %}
-                                                <span class="text-muted">-</span>
-                                            {% endif %}
+                                            <div class="hover-editable" data-field="t_code" data-project-id="{{ project.id }}">
+                                                <div class="display-content">
+                                                    {% if project.t_code %}
+                                                        <code class="text-primary">{{ project.t_code }}</code>
+                                                    {% else %}
+                                                        <span class="text-muted">-</span>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="edit-form">
+                                                    <input type="text" class="edit-input" value="{{ project.t_code }}" placeholder="Enter T/Code">
+                                                    <button class="submit-btn" type="button">Save</button>
+                                                    <button class="cancel-btn" type="button">Cancel</button>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>
                                             <div class="inline-edit-container" data-field="status" data-project-id="{{ project.id }}">
@@ -412,7 +620,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Inline editing functionality
+    // Inline editing functionality for existing fields (status, priority, project_manager)
     const inlineEditContainers = document.querySelectorAll('.inline-edit-container');
     
     inlineEditContainers.forEach(container => {
@@ -448,6 +656,122 @@ document.addEventListener('DOMContentLoaded', function() {
                     cancelEdit(container);
                 }
             }, 100);
+        });
+    });
+    
+    // Hover-editable fields functionality (Name and Timeline)
+    const hoverEditableFields = document.querySelectorAll('.hover-editable');
+    
+    hoverEditableFields.forEach(field => {
+        const editBtn = field.querySelector('.edit-btn');
+        const editForm = field.querySelector('.edit-form');
+        const displayContent = field.querySelector('.display-content');
+        const editInput = field.querySelector('.edit-input');
+        const submitBtn = field.querySelector('.submit-btn');
+        const cancelBtn = field.querySelector('.cancel-btn');
+        const projectId = field.dataset.projectId;
+        const fieldName = field.dataset.field;
+        
+        // Store original value
+        let originalValue = editInput.value;
+        
+        // Show edit form on edit button click
+        editBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Prevent navigation for project name links
+            if (fieldName === 'name') {
+                const link = displayContent.querySelector('a');
+                if (link) {
+                    link.style.pointerEvents = 'none';
+                }
+            }
+            
+            displayContent.style.display = 'none';
+            editBtn.style.display = 'none';
+            editForm.classList.add('active');
+            editInput.focus();
+            
+            // Select text for easier editing
+            if (editInput.type === 'text') {
+                editInput.select();
+            }
+        });
+        
+        // Handle submit
+        submitBtn.addEventListener('click', function() {
+            const newValue = editInput.value;
+            submitFieldUpdate(projectId, fieldName, newValue, field);
+        });
+        
+        // Handle cancel
+        cancelBtn.addEventListener('click', function() {
+            cancelFieldEdit(field, originalValue);
+        });
+        
+        // Handle Enter key to submit
+        editInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submitBtn.click();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                cancelBtn.click();
+            }
+        });
+    });
+    
+    // Direct-editable fields functionality (T/Code only)
+    const directEditableFields = document.querySelectorAll('.direct-editable');
+    
+    directEditableFields.forEach(field => {
+        const editForm = field.querySelector('.edit-form');
+        const displayContent = field.querySelector('.display-content');
+        const editInput = field.querySelector('.edit-input');
+        const submitBtn = field.querySelector('.submit-btn');
+        const cancelBtn = field.querySelector('.cancel-btn');
+        const projectId = field.dataset.projectId;
+        const fieldName = field.dataset.field;
+        
+        // Store original value
+        let originalValue = editInput.value;
+        
+        // Show edit form on display content click
+        displayContent.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            displayContent.style.display = 'none';
+            editForm.classList.add('active');
+            editInput.focus();
+            
+            // Select text for easier editing
+            if (editInput.type === 'text') {
+                editInput.select();
+            }
+        });
+        
+        // Handle submit
+        submitBtn.addEventListener('click', function() {
+            const newValue = editInput.value;
+            submitFieldUpdate(projectId, fieldName, newValue, field);
+        });
+        
+        // Handle cancel
+        cancelBtn.addEventListener('click', function() {
+            cancelDirectFieldEdit(field, originalValue);
+        });
+        
+        // Handle Enter key to submit
+        editInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submitBtn.click();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                cancelBtn.click();
+            }
         });
     });
     
@@ -491,6 +815,131 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    function submitFieldUpdate(projectId, fieldName, value, fieldContainer) {
+        // Get CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+        
+        if (!csrfToken) {
+            showErrorMessage('CSRF token not found. Please refresh the page.');
+            return;
+        }
+        
+        // Show loading state
+        const submitBtn = fieldContainer.querySelector('.submit-btn');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Saving...';
+        submitBtn.disabled = true;
+        
+        // Create form data
+        const formData = new FormData();
+        formData.append('field', fieldName);
+        formData.append('value', value);
+        formData.append('csrfmiddlewaretoken', csrfToken);
+        
+        fetch(`/projects/${projectId}/update-field/`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateFieldDisplay(fieldContainer, fieldName, data.display_value, value);
+                showSuccessMessage(`${fieldName.replace('_', ' ')} updated successfully`);
+            } else {
+                showErrorMessage(data.error || 'Update failed');
+                // Reset to original value on error
+                const editInput = fieldContainer.querySelector('.edit-input');
+                const originalValue = editInput.dataset.originalValue || '';
+                editInput.value = originalValue;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorMessage('Network error occurred');
+        })
+        .finally(() => {
+            // Reset button state
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        });
+    }
+    
+    function updateFieldDisplay(fieldContainer, fieldName, displayValue, newValue) {
+        const displayContent = fieldContainer.querySelector('.display-content');
+        const editInput = fieldContainer.querySelector('.edit-input');
+        
+        // Update the display based on field type
+        if (fieldName === 'name') {
+            const link = displayContent.querySelector('a');
+            if (link) {
+                link.textContent = displayValue;
+                link.style.pointerEvents = 'auto';
+            }
+        } else if (fieldName === 'timeline') {
+            if (displayValue) {
+                displayContent.innerHTML = `<span class="text-muted">${displayValue.length > 30 ? displayValue.substring(0, 30) + '...' : displayValue}</span>`;
+            } else {
+                displayContent.innerHTML = '<span class="text-muted">Not set</span>';
+            }
+        } else if (fieldName === 't_code') {
+            if (displayValue) {
+                displayContent.innerHTML = `<code class="text-primary">${displayValue}</code>`;
+            } else {
+                displayContent.innerHTML = '<span class="text-muted">-</span>';
+            }
+        }
+        
+        // Update original value for future edits
+        editInput.dataset.originalValue = newValue;
+        
+        // Exit edit mode
+        exitFieldEditMode(fieldContainer);
+    }
+    
+    function cancelFieldEdit(fieldContainer, originalValue) {
+        const editInput = fieldContainer.querySelector('.edit-input');
+        editInput.value = originalValue;
+        exitFieldEditMode(fieldContainer);
+    }
+    
+    function exitFieldEditMode(fieldContainer) {
+        const displayContent = fieldContainer.querySelector('.display-content');
+        const editBtn = fieldContainer.querySelector('.edit-btn');
+        const editForm = fieldContainer.querySelector('.edit-form');
+        const fieldName = fieldContainer.dataset.field;
+        
+        // Re-enable project name link if applicable
+        if (fieldName === 'name') {
+            const link = displayContent.querySelector('a');
+            if (link) {
+                link.style.pointerEvents = 'auto';
+            }
+        }
+        
+        displayContent.style.display = 'flex';
+        if (editBtn) {
+            editBtn.style.display = 'block';
+        }
+        editForm.classList.remove('active');
+    }
+    
+    function cancelDirectFieldEdit(fieldContainer, originalValue) {
+        const editInput = fieldContainer.querySelector('.edit-input');
+        editInput.value = originalValue;
+        exitDirectFieldEditMode(fieldContainer);
+    }
+    
+    function exitDirectFieldEditMode(fieldContainer) {
+        const displayContent = fieldContainer.querySelector('.display-content');
+        const editForm = fieldContainer.querySelector('.edit-form');
+        
+        displayContent.style.display = 'flex';
+        editForm.classList.remove('active');
+    }
+    
     function updateDisplayValue(container, field, displayValue) {
         const displayElement = container.querySelector('.display-value');
         const editSelect = container.querySelector('.edit-select');
@@ -501,6 +950,15 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (field === 'priority') {
             const priorityBadgeClass = getPriorityBadgeClass(editSelect.value);
             displayElement.innerHTML = `<span class="badge ${priorityBadgeClass}">${displayValue}</span>`;
+        } else if (field === 'effort_size') {
+            if (displayValue) {
+                displayElement.innerHTML = `
+                    <span class="badge bg-info-transparent">${displayValue.size}</span>
+                    <small class="d-block text-muted">${displayValue.hours}h</small>
+                `;
+            } else {
+                displayElement.innerHTML = '<span class="text-muted">Not set</span>';
+            }
         } else if (field === 'project_manager') {
             // For manager, we'll keep the simple text display for now
             displayElement.innerHTML = `<span class="text-truncate">${displayValue}</span>`;

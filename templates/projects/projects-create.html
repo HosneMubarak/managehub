@@ -208,7 +208,7 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-xl-6">
+                            <div class="col-xl-4">
                                 <div class="mb-3">
                                     <label for="{{ form.week_commencing.id_for_label }}" class="form-label">Week Commencing</label>
                                     {{ form.week_commencing }}
@@ -217,12 +217,21 @@
                                     {% endif %}
                                 </div>
                             </div>
-                            <div class="col-xl-6">
+                            <div class="col-xl-4">
                                 <div class="mb-3">
                                     <label for="{{ form.t_code.id_for_label }}" class="form-label">T/Code</label>
                                     {{ form.t_code }}
                                     {% if form.t_code.help_text %}
                                         <div class="form-text">{{ form.t_code.help_text }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-xl-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.ipbss_remedy.id_for_label }}" class="form-label">IPBSS Remedy</label>
+                                    {{ form.ipbss_remedy }}
+                                    {% if form.ipbss_remedy.help_text %}
+                                        <div class="form-text">{{ form.ipbss_remedy.help_text }}</div>
                                     {% endif %}
                                 </div>
                             </div>

@@ -78,27 +78,139 @@
                     </div>
                     <div class="fs-15 fw-medium mb-2">Project Description :</div>
                     <p class="text-muted mb-4">{{ project.description }}</p>
-                    <div class="d-flex gap-5 mb-4 flex-wrap">
-                        <div class="d-flex align-items-center gap-2 me-3">
-                            <span class="avatar avatar-md avatar-rounded me-1 bg-primary1-transparent"><i class="ri-calendar-event-line fs-18 lh-1 align-middle"></i></span>
-                            <div>
-                                <div class="fw-medium mb-0 task-title">
-                                    Start Date
+                    <!-- Restructured Project Details -->
+                    <div class="row">
+                        <!-- Left Column -->
+                        <div class="col-xl-6">
+                            <dl class="row mb-0">
+                                <dt class="col-sm-4"><i class="ri-building-line me-1 text-muted"></i>Business Area</dt>
+                                <dd class="col-sm-8">{{ project.business_area.name }}</dd>
+
+                                <dt class="col-sm-4"><i class="ri-folder-line me-1 text-muted"></i>Project Type</dt>
+                                <dd class="col-sm-8">{{ project.project_type.name }}</dd>
+
+                                <dt class="col-sm-4"><i class="ri-bar-chart-line me-1 text-muted"></i>Effort</dt>
+                                <dd class="col-sm-8">
+                                    {% if project.effort_size %}
+                                        {{ project.get_effort_size_display }} ({{ project.estimated_hours }}h)
+                                    {% else %}
+                                        <span class="text-muted">Not specified</span>
+                                    {% endif %}
+                                </dd>
+
+                                <dt class="col-sm-4"><i class="ri-lightbulb-line me-1 text-muted"></i>Clarity</dt>
+                                <dd class="col-sm-8">{{ project.clarity|default:"-" }}</dd>
+                            </dl>
+                        </div>
+                        <!-- Right Column -->
+                        <div class="col-xl-6">
+                            <dl class="row mb-0">
+                                <dt class="col-sm-4"><i class="ri-timeline-view me-1 text-muted"></i>Timeline</dt>
+                                <dd class="col-sm-8">{{ project.timeline|default:"-" }}</dd>
+
+                                <dt class="col-sm-4"><i class="ri-code-line me-1 text-muted"></i>T/Code</dt>
+                                <dd class="col-sm-8">{{ project.t_code|default:"-" }}</dd>
+
+                                <dt class="col-sm-4"><i class="ri-tools-line me-1 text-muted"></i>IPBSS Remedy</dt>
+                                <dd class="col-sm-8">{{ project.ipbss_remedy|default:"-" }}</dd>
+
+                                <dt class="col-sm-4"><i class="ri-user-add-line me-1 text-muted"></i>Created By</dt>
+                                <dd class="col-sm-8">{{ project.created_by.get_full_name|default:project.created_by.username }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Timeline and Dates -->
+                    <div class="fs-15 fw-medium mb-3">Timeline & Dates</div>
+                    <div class="row">
+                        <div class="col-xl-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="avatar avatar-md avatar-rounded bg-primary1-transparent me-2">
+                                    <i class="ri-play-circle-line fs-16"></i>
+                                </span>
+                                <div>
+                                    <p class="mb-0 fw-medium text-muted fs-12">Start Date</p>
+                                    <p class="fs-14 mb-0 fw-medium">{{ project.start_date|date:"d F, Y"|default:"Not set" }}</p>
                                 </div>
-                                <span class="fs-12 text-muted">{{ project.start_date|date:"d F, Y"|default:"Not set" }}</span>
                             </div>
                         </div>
-                        <div class="d-flex align-items-center gap-2 me-3">
-                            <span class="avatar avatar-md avatar-rounded me-1 bg-primary2-transparent"><i class="ri-time-line fs-18 lh-1 align-middle"></i></span>
-                            <div>
-                                <div class="fw-medium mb-0 task-title">
-                                    End Date
+                        <div class="col-xl-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="avatar avatar-md avatar-rounded bg-warning-transparent me-2">
+                                    <i class="ri-flag-2-line fs-16"></i>
+                                </span>
+                                <div>
+                                    <p class="mb-0 fw-medium text-muted fs-12">Estimated End</p>
+                                    <p class="fs-14 mb-0 fw-medium">{{ project.estimated_end_date|date:"d F, Y"|default:"Not set" }}</p>
                                 </div>
-                                <span class="fs-12 text-muted">{{ project.estimated_end_date|date:"d F, Y"|default:"Not set" }}</span>
                             </div>
                         </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="avatar avatar-md p-1 avatar-rounded me-1 bg-primary-transparent">
+                        <div class="col-xl-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="avatar avatar-md avatar-rounded bg-success-transparent me-2">
+                                    <i class="ri-checkbox-circle-line fs-16"></i>
+                                </span>
+                                <div>
+                                    <p class="mb-0 fw-medium text-muted fs-12">Actual End</p>
+                                    <p class="fs-14 mb-0 fw-medium">{{ project.actual_end_date|date:"d F, Y"|default:"Not completed" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% if project.week_commencing %}
+                        <div class="col-xl-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="avatar avatar-md avatar-rounded bg-info-transparent me-2">
+                                    <i class="ri-calendar-week-line fs-16"></i>
+                                </span>
+                                <div>
+                                    <p class="mb-0 fw-medium text-muted fs-12">W/C</p>
+                                    <p class="fs-14 mb-0 fw-medium">{{ project.week_commencing }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if project.duration_days %}
+                        <div class="col-xl-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="avatar avatar-md avatar-rounded bg-secondary-transparent me-2">
+                                    <i class="ri-hourglass-line fs-16"></i>
+                                </span>
+                                <div>
+                                    <p class="mb-0 fw-medium text-muted fs-12">Duration</p>
+                                    <p class="fs-14 mb-0 fw-medium">{{ project.duration_days }} days</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if project.is_overdue %}
+                        <div class="col-xl-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="avatar avatar-md avatar-rounded bg-danger-transparent me-2">
+                                    <i class="ri-alarm-warning-line fs-16"></i>
+                                </span>
+                                <div>
+                                    <p class="mb-0 fw-medium text-muted fs-12">Status Alert</p>
+                                    <p class="fs-14 mb-0 fw-medium text-danger">Project is Overdue</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-4">
+            <!-- Key Info Card -->
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Key Information</div>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex align-items-center">
+                            <span class="avatar avatar-sm p-1 avatar-rounded me-2 bg-primary-transparent">
                                 {% if project.project_manager.avatar %}
                                     <img src="{{ project.project_manager.avatar.url }}" alt="manager">
                                 {% else %}
@@ -106,21 +218,38 @@
                                 {% endif %}
                             </span>
                             <div>
-                                <div class="fw-medium mb-0 task-title">
-                                    Project Manager
-                                </div>
-                                <span class="fs-12 text-muted">{{ project.project_manager.get_full_name|default:project.project_manager.username }}</span>
+                                <p class="mb-0 fw-medium text-muted fs-12">Project Manager</p>
+                                <p class="fs-14 mb-0 fw-medium">{{ project.project_manager.get_full_name|default:project.project_manager.username }}</p>
                             </div>
-                        </div>
-                    </div>
-                    <div class="d-flex gap-5 mb-4 flex-wrap">
-                        <div class="d-flex align-items-center gap-2 me-3">
-                            <span class="avatar avatar-md avatar-rounded me-1 bg-warning-transparent"><i class="ri-flag-line fs-18 lh-1 align-middle"></i></span>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                             <span class="avatar avatar-sm avatar-rounded me-2 bg-info-transparent">
+                                <i class="ri-list-check-2 fs-16"></i>
+                            </span>
                             <div>
-                                <div class="fw-medium mb-0 task-title">
-                                    Priority
-                                </div>
-                                <span class="fs-12">
+                                <p class="mb-0 fw-medium text-muted fs-12">Status</p>
+                                <p class="fs-14 mb-0 fw-medium">
+                                    {% if project.status == 'NEW' %}
+                                        <span class="badge bg-secondary-transparent">{{ project.get_status_display }}</span>
+                                    {% elif project.status == 'IN_PROGRESS' %}
+                                        <span class="badge bg-primary-transparent">{{ project.get_status_display }}</span>
+                                    {% elif project.status == 'COMPLETE' %}
+                                        <span class="badge bg-success-transparent">{{ project.get_status_display }}</span>
+                                    {% elif project.status == 'ON_HOLD' %}
+                                        <span class="badge bg-warning-transparent">{{ project.get_status_display }}</span>
+                                    {% else %}
+                                        <span class="badge bg-danger-transparent">{{ project.get_status_display }}</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                             <span class="avatar avatar-sm avatar-rounded me-2 bg-warning-transparent">
+                                <i class="ri-flag-line fs-16"></i>
+                            </span>
+                            <div>
+                                <p class="mb-0 fw-medium text-muted fs-12">Priority</p>
+                                <p class="fs-14 mb-0 fw-medium">
                                     {% if project.priority == 'CRITICAL' or project.priority == 'HIGH' %}
                                         <span class="badge bg-danger-transparent">{{ project.get_priority_display }}</span>
                                     {% elif project.priority == 'MEDIUM' %}
@@ -128,120 +257,20 @@
                                     {% else %}
                                         <span class="badge bg-success-transparent">{{ project.get_priority_display }}</span>
                                     {% endif %}
-                                </span>
+                                </p>
                             </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-2 me-3">
-                            <span class="avatar avatar-md avatar-rounded me-1 bg-success-transparent"><i class="ri-building-line fs-18 lh-1 align-middle"></i></span>
-                            <div>
-                                <div class="fw-medium mb-0 task-title">
-                                    Business Area
-                                </div>
-                                <span class="fs-12 text-muted">{{ project.business_area.name }}</span>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="avatar avatar-md avatar-rounded me-1 bg-info-transparent"><i class="ri-bar-chart-line fs-18 lh-1 align-middle"></i></span>
-                            <div>
-                                <div class="fw-medium mb-0 task-title">
-                                    Effort Size
-                                </div>
-                                <span class="fs-12 text-muted">
-                                    {% if project.effort_size %}
-                                        {{ project.get_effort_size_display }} ({{ project.estimated_hours }}h)
-                                    {% else %}
-                                        Not specified
-                                    {% endif %}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Additional Project Information -->
-                    {% if project.clarity or project.timeline or project.t_code %}
-                    <div class="d-flex gap-5 mb-4 flex-wrap">
-                        {% if project.clarity %}
-                        <div class="d-flex align-items-center gap-2 me-3">
-                            <span class="avatar avatar-md avatar-rounded me-1 bg-primary-transparent"><i class="ri-lightbulb-line fs-18 lh-1 align-middle"></i></span>
-                            <div>
-                                <div class="fw-medium mb-0 task-title">
-                                    Clarity
-                                </div>
-                                <span class="fs-12 text-muted">{{ project.clarity|truncatechars:50 }}</span>
-                            </div>
-                        </div>
-                        {% endif %}
-                        {% if project.timeline %}
-                        <div class="d-flex align-items-center gap-2 me-3">
-                            <span class="avatar avatar-md avatar-rounded me-1 bg-secondary-transparent"><i class="ri-timeline-line fs-18 lh-1 align-middle"></i></span>
-                            <div>
-                                <div class="fw-medium mb-0 task-title">
-                                    Timeline
-                                </div>
-                                <span class="fs-12 text-muted">{{ project.timeline|truncatechars:50 }}</span>
-                            </div>
-                        </div>
-                        {% endif %}
-                        {% if project.t_code %}
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="avatar avatar-md avatar-rounded me-1 bg-dark-transparent"><i class="ri-code-line fs-18 lh-1 align-middle"></i></span>
-                            <div>
-                                <div class="fw-medium mb-0 task-title">
-                                    T/Code
-                                </div>
-                                <span class="fs-12 text-muted">{{ project.t_code }}</span>
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div>
-                    {% endif %}
-                    <!-- Full Details Section -->
-                    {% if project.clarity and project.clarity|length > 50 %}
-                    <div class="mb-4">
-                        <div class="fs-15 fw-medium mb-2">Project Clarity :</div>
-                        <p class="text-muted mb-0">{{ project.clarity }}</p>
-                    </div>
-                    {% endif %}
-                    
-                    {% if project.timeline and project.timeline|length > 50 %}
-                    <div class="mb-4">
-                        <div class="fs-15 fw-medium mb-2">Timeline Details :</div>
-                        <p class="text-muted mb-0">{{ project.timeline }}</p>
-                    </div>
-                    {% endif %}
-                    
-                    <div class="row">
-                        <div class="col-xl-6">
-                            <div class="d-flex align-items-center mb-3">
-                                <span class="avatar avatar-md avatar-rounded bg-primary-transparent me-2">
-                                    <i class="ri-calendar-line fs-16"></i>
-                                </span>
-                                <div>
-                                    <p class="mb-0 fw-medium text-muted fs-12">Created</p>
-                                    <p class="fs-14 mb-0 fw-medium">{{ project.created_at|naturaltime }}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xl-6">
-                            <div class="d-flex align-items-center mb-3">
-                                <span class="avatar avatar-md avatar-rounded bg-secondary-transparent me-2">
-                                    <i class="ri-refresh-line fs-16"></i>
-                                </span>
-                                <div>
-                                    <p class="mb-0 fw-medium text-muted fs-12">Last Updated</p>
-                                    <p class="fs-14 mb-0 fw-medium">{{ project.updated_at|naturaltime }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                        </li>
+                    </ul>
                 </div>
             </div>
-        </div>
-        <div class="col-xxl-4">
+
             <div class="card custom-card">
                 <div class="card-header">
                     <div class="card-title">
                         Project Team
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-primary-transparent">{{ assigned_users|length|add:1 }} Total</span>
                     </div>
                 </div>
                 <div class="card-body">

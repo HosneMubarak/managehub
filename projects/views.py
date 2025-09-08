@@ -221,7 +221,11 @@ def update_project_field(request, pk):
         allowed_fields = {
             'status': Project.STATUS_CHOICES,
             'priority': Project.PRIORITY_CHOICES,
-            'project_manager': None  # Special handling for ForeignKey
+            'project_manager': None,
+            'name': None,
+            'effort_size': Project.EFFORT_SIZE_CHOICES,
+            'timeline': None,
+            't_code': None
         }
         
         if field not in allowed_fields:
@@ -235,8 +239,27 @@ def update_project_field(request, pk):
                     project.project_manager = manager
                 else:
                     return JsonResponse({'success': False, 'error': 'Invalid manager selected'})
+            elif field in ['name', 'timeline', 't_code']:
+                # Handle text fields
+                if field == 'name' and not value.strip():
+                    return JsonResponse({'success': False, 'error': 'Project name cannot be empty'})
+                if field == 'name' and len(value.strip()) > 200:
+                    return JsonResponse({'success': False, 'error': 'Project name too long (max 200 characters)'})
+                if field == 'timeline' and len(value) > 200:
+                    return JsonResponse({'success': False, 'error': 'Timeline too long (max 200 characters)'})
+                if field == 't_code' and len(value) > 50:
+                    return JsonResponse({'success': False, 'error': 'T/Code must be 50 characters or less'})
+                
+                setattr(project, field, value.strip() if value else '')
+                display_value = value if value else None
+            elif field == 'effort_size':
+                # Handle effort size choice field
+                valid_choices = [choice[0] for choice in allowed_fields[field]]
+                if value and value not in valid_choices:
+                    return JsonResponse({'success': False, 'error': 'Invalid effort size'})
+                setattr(project, field, value if value else None)
             else:
-                # Handle choice fields (status, priority)
+                # Handle other choice fields (status, priority)
                 valid_choices = [choice[0] for choice in allowed_fields[field]]
                 if value not in valid_choices:
                     return JsonResponse({'success': False, 'error': 'Invalid choice'})
@@ -247,6 +270,16 @@ def update_project_field(request, pk):
             # Return updated display value
             if field == 'project_manager':
                 display_value = project.project_manager.get_full_name() or project.project_manager.username
+            elif field in ['name', 'timeline', 't_code']:
+                display_value = getattr(project, field) or ''
+            elif field == 'effort_size':
+                if project.effort_size:
+                    display_value = {
+                        'size': project.get_effort_size_display(),
+                        'hours': project.estimated_hours
+                    }
+                else:
+                    display_value = None
             else:
                 display_value = getattr(project, f'get_{field}_display')()
             

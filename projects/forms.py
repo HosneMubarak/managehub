@@ -38,7 +38,7 @@ class ProjectForm(forms.ModelForm):
             'project_id', 'name', 'description', 'business_area', 'project_type',
             'project_manager', 'effort_size', 'priority', 'status',
             'start_date', 'estimated_end_date', 'actual_end_date', 'week_commencing',
-            'clarity', 'timeline', 't_code'
+            'clarity', 'timeline', 't_code', 'ipbss_remedy'
         ]
         widgets = {
             'name': forms.TextInput(attrs={
@@ -84,6 +84,10 @@ class ProjectForm(forms.ModelForm):
             't_code': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter t/code'
+            }),
+            'ipbss_remedy': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter IPBSS Remedy identifier'
             }),
         }
     

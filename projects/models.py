@@ -121,6 +121,11 @@ class Project(TimeStampedModel):
         blank=True,
         help_text="T/code identifier"
     )
+    ipbss_remedy = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="IPBSS Remedy identifier"
+    )
     
     # Additional tracking
     created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='created_projects')
