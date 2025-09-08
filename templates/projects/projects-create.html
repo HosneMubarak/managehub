@@ -8,6 +8,48 @@
     <link rel="stylesheet" href="{% static 'assets/libs/filepond/filepond.min.css'%}">
     <link rel="stylesheet" href="{% static 'assets/libs/filepond-plugin-image-preview/filepond-plugin-image-preview.min.css'%}">
     <link rel="stylesheet" href="{% static 'assets/libs/filepond-plugin-image-edit/filepond-plugin-image-edit.min.css'%}">
+    <style>
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #0d6efd;
+        }
+        .form-section-title {
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .form-section-title i {
+            color: #0d6efd;
+        }
+        .required-field::after {
+            content: " *";
+            color: #dc3545;
+        }
+        .form-help {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+        .field-group {
+            background: white;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e9ecef;
+        }
+        .progress-indicator {
+            background: linear-gradient(90deg, #0d6efd 0%, #6610f2 100%);
+            height: 4px;
+            border-radius: 2px;
+            margin-bottom: 2rem;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -38,248 +80,298 @@
                 {% csrf_token %}
                 <div class="card custom-card">
                     <div class="card-header">
-                        <div class="card-title">
+                        <div class="card-title d-flex align-items-center">
+                            <i class="ri-folder-add-line me-2"></i>
                             {% if form.instance.pk %}Edit Project{% else %}Create Project{% endif %}
                         </div>
+                        <div class="progress-indicator"></div>
                     </div>
                     <div class="card-body">
                         {% if form.errors %}
-                            <div class="alert alert-danger">
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="ri-error-warning-line me-2"></i>
                                 <strong>Please correct the following errors:</strong>
-                                <ul class="mb-0">
+                                <ul class="mb-0 mt-2">
                                     {% for field, errors in form.errors.items %}
                                         {% for error in errors %}
-                                            <li>{{ field|title }}: {{ error }}</li>
+                                            <li><strong>{{ field|title }}:</strong> {{ error }}</li>
                                         {% endfor %}
                                     {% endfor %}
                                 </ul>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
                         {% endif %}
 
-                        <div class="row">
-                            <!-- Basic Information -->
-                            <div class="col-xl-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.project_id.id_for_label }}" class="form-label">Project ID <span class="text-danger">*</span></label>
-                                    {{ form.project_id }}
-                                    {% if form.project_id.help_text %}
-                                        <div class="form-text">{{ form.project_id.help_text }}</div>
-                                    {% endif %}
+                        <!-- Basic Information Section -->
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="ri-information-line"></i>
+                                Basic Information
+                            </h5>
+                            <div class="row">
+                                <div class="col-xl-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.project_id.id_for_label }}" class="form-label required-field">Project ID</label>
+                                        {{ form.project_id }}
+                                        {% if form.project_id.help_text %}
+                                            <div class="form-help">{{ form.project_id.help_text }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-xl-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.name.id_for_label }}" class="form-label required-field">Project Name</label>
+                                        {{ form.name }}
+                                        {% if form.name.help_text %}
+                                            <div class="form-help">{{ form.name.help_text }}</div>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-xl-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.name.id_for_label }}" class="form-label">Project Name <span class="text-danger">*</span></label>
-                                    {{ form.name }}
-                                    {% if form.name.help_text %}
-                                        <div class="form-text">{{ form.name.help_text }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-xl-12">
-                                <div class="mb-3">
-                                    <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
-                                    {{ form.description }}
-                                    {% if form.description.help_text %}
-                                        <div class="form-text">{{ form.description.help_text }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Categorization -->
-                        <div class="row">
-                            <div class="col-xl-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.business_area.id_for_label }}" class="form-label">Business Area <span class="text-danger">*</span></label>
-                                    {{ form.business_area }}
-                                    {% if form.business_area.help_text %}
-                                        <div class="form-text">{{ form.business_area.help_text }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="col-xl-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.project_type.id_for_label }}" class="form-label">Project Type <span class="text-danger">*</span></label>
-                                    {{ form.project_type }}
-                                    {% if form.project_type.help_text %}
-                                        <div class="form-text">{{ form.project_type.help_text }}</div>
-                                    {% endif %}
+                            <div class="row">
+                                <div class="col-xl-12">
+                                    <div class="mb-0">
+                                        <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                                        {{ form.description }}
+                                        {% if form.description.help_text %}
+                                            <div class="form-help">{{ form.description.help_text }}</div>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Management -->
-                        <div class="row">
-                            <div class="col-xl-4">
-                                <div class="mb-3">
-                                    <label for="{{ form.project_manager.id_for_label }}" class="form-label">Project Manager <span class="text-danger">*</span></label>
-                                    {{ form.project_manager }}
-                                    {% if form.project_manager.help_text %}
-                                        <div class="form-text">{{ form.project_manager.help_text }}</div>
-                                    {% endif %}
+                        <!-- Categorization Section -->
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="ri-folder-2-line"></i>
+                                Project Classification
+                            </h5>
+                            <div class="row">
+                                <div class="col-xl-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.business_area.id_for_label }}" class="form-label required-field">Business Area</label>
+                                        {{ form.business_area }}
+                                        {% if form.business_area.help_text %}
+                                            <div class="form-help">{{ form.business_area.help_text }}</div>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-xl-4">
-                                <div class="mb-3">
-                                    <label for="{{ form.priority.id_for_label }}" class="form-label">Priority <span class="text-danger">*</span></label>
-                                    {{ form.priority }}
-                                    {% if form.priority.help_text %}
-                                        <div class="form-text">{{ form.priority.help_text }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="col-xl-4">
-                                <div class="mb-3">
-                                    <label for="{{ form.status.id_for_label }}" class="form-label">Status <span class="text-danger">*</span></label>
-                                    {{ form.status }}
-                                    {% if form.status.help_text %}
-                                        <div class="form-text">{{ form.status.help_text }}</div>
-                                    {% endif %}
+                                <div class="col-xl-6">
+                                    <div class="mb-0">
+                                        <label for="{{ form.project_type.id_for_label }}" class="form-label required-field">Project Type</label>
+                                        {{ form.project_type }}
+                                        {% if form.project_type.help_text %}
+                                            <div class="form-help">{{ form.project_type.help_text }}</div>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-xl-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.effort_size.id_for_label }}" class="form-label">Effort Size</label>
-                                    {{ form.effort_size }}
-                                    {% if form.effort_size.help_text %}
-                                        <div class="form-text">{{ form.effort_size.help_text }}</div>
-                                    {% endif %}
+                        <!-- Management & Priority Section -->
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="ri-user-settings-line"></i>
+                                Management & Priority
+                            </h5>
+                            <div class="row">
+                                <div class="col-xl-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.project_manager.id_for_label }}" class="form-label required-field">Project Manager</label>
+                                        {{ form.project_manager }}
+                                        {% if form.project_manager.help_text %}
+                                            <div class="form-help">{{ form.project_manager.help_text }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-xl-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.priority.id_for_label }}" class="form-label required-field">Priority</label>
+                                        {{ form.priority }}
+                                        {% if form.priority.help_text %}
+                                            <div class="form-help">{{ form.priority.help_text }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-xl-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.status.id_for_label }}" class="form-label required-field">Status</label>
+                                        {{ form.status }}
+                                        {% if form.status.help_text %}
+                                            <div class="form-help">{{ form.status.help_text }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xl-6">
+                                    <div class="mb-0">
+                                        <label for="{{ form.effort_size.id_for_label }}" class="form-label">Effort Size</label>
+                                        {{ form.effort_size }}
+                                        {% if form.effort_size.help_text %}
+                                            <div class="form-help">{{ form.effort_size.help_text }}</div>
+                                        {% else %}
+                                            <div class="form-help">Select the estimated effort required for this project</div>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Timeline -->
-                        <div class="row">
-                            <div class="col-xl-4">
-                                <div class="mb-3">
-                                    <label for="{{ form.start_date.id_for_label }}" class="form-label">Start Date</label>
-                                    <div class="form-group">
+                        <!-- Timeline & Dates Section -->
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="ri-calendar-2-line"></i>
+                                Timeline & Dates
+                            </h5>
+                            <div class="row">
+                                <div class="col-xl-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.start_date.id_for_label }}" class="form-label">Start Date</label>
                                         <div class="input-group">
                                             <div class="input-group-text text-muted">
                                                 <i class="ri-calendar-line"></i>
                                             </div>
                                             {{ form.start_date }}
                                         </div>
+                                        {% if form.start_date.help_text %}
+                                            <div class="form-help">{{ form.start_date.help_text }}</div>
+                                        {% endif %}
                                     </div>
-                                    {% if form.start_date.help_text %}
-                                        <div class="form-text">{{ form.start_date.help_text }}</div>
-                                    {% endif %}
                                 </div>
-                            </div>
-                            <div class="col-xl-4">
-                                <div class="mb-3">
-                                    <label for="{{ form.estimated_end_date.id_for_label }}" class="form-label">Estimated End Date</label>
-                                    <div class="form-group">
+                                <div class="col-xl-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.estimated_end_date.id_for_label }}" class="form-label">Estimated End Date</label>
                                         <div class="input-group">
                                             <div class="input-group-text text-muted">
                                                 <i class="ri-calendar-line"></i>
                                             </div>
                                             {{ form.estimated_end_date }}
                                         </div>
+                                        {% if form.estimated_end_date.help_text %}
+                                            <div class="form-help">{{ form.estimated_end_date.help_text }}</div>
+                                        {% endif %}
                                     </div>
-                                    {% if form.estimated_end_date.help_text %}
-                                        <div class="form-text">{{ form.estimated_end_date.help_text }}</div>
-                                    {% endif %}
                                 </div>
-                            </div>
-                            <div class="col-xl-4">
-                                <div class="mb-3">
-                                    <label for="{{ form.actual_end_date.id_for_label }}" class="form-label">Actual End Date</label>
-                                    <div class="form-group">
+                                <div class="col-xl-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.actual_end_date.id_for_label }}" class="form-label">Actual End Date</label>
                                         <div class="input-group">
                                             <div class="input-group-text text-muted">
-                                                <i class="ri-calendar-line"></i>
+                                                <i class="ri-calendar-check-line"></i>
                                             </div>
                                             {{ form.actual_end_date }}
                                         </div>
+                                        {% if form.actual_end_date.help_text %}
+                                            <div class="form-help">{{ form.actual_end_date.help_text }}</div>
+                                        {% else %}
+                                            <div class="form-help">Leave blank if project is not yet completed</div>
+                                        {% endif %}
                                     </div>
-                                    {% if form.actual_end_date.help_text %}
-                                        <div class="form-text">{{ form.actual_end_date.help_text }}</div>
-                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xl-12">
+                                    <div class="mb-0">
+                                        <label for="{{ form.week_commencing.id_for_label }}" class="form-label">Week Commencing</label>
+                                        {{ form.week_commencing }}
+                                        {% if form.week_commencing.help_text %}
+                                            <div class="form-help">{{ form.week_commencing.help_text }}</div>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-xl-4">
-                                <div class="mb-3">
-                                    <label for="{{ form.week_commencing.id_for_label }}" class="form-label">Week Commencing</label>
-                                    {{ form.week_commencing }}
-                                    {% if form.week_commencing.help_text %}
-                                        <div class="form-text">{{ form.week_commencing.help_text }}</div>
-                                    {% endif %}
+                        <!-- Technical Details Section -->
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="ri-code-s-slash-line"></i>
+                                Technical Details
+                            </h5>
+                            <div class="row">
+                                <div class="col-xl-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.t_code.id_for_label }}" class="form-label">T/Code</label>
+                                        {{ form.t_code }}
+                                        {% if form.t_code.help_text %}
+                                            <div class="form-help">{{ form.t_code.help_text }}</div>
+                                        {% else %}
+                                            <div class="form-help">Technical code or identifier for this project</div>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-xl-4">
-                                <div class="mb-3">
-                                    <label for="{{ form.t_code.id_for_label }}" class="form-label">T/Code</label>
-                                    {{ form.t_code }}
-                                    {% if form.t_code.help_text %}
-                                        <div class="form-text">{{ form.t_code.help_text }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="col-xl-4">
-                                <div class="mb-3">
-                                    <label for="{{ form.ipbss_remedy.id_for_label }}" class="form-label">IPBSS Remedy</label>
-                                    {{ form.ipbss_remedy }}
-                                    {% if form.ipbss_remedy.help_text %}
-                                        <div class="form-text">{{ form.ipbss_remedy.help_text }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Additional Project Details -->
-                        <div class="row">
-                            <div class="col-xl-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.clarity.id_for_label }}" class="form-label">Clarity</label>
-                                    {{ form.clarity }}
-                                    {% if form.clarity.help_text %}
-                                        <div class="form-text">{{ form.clarity.help_text }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="col-xl-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.timeline.id_for_label }}" class="form-label">Timeline</label>
-                                    {{ form.timeline }}
-                                    {% if form.timeline.help_text %}
-                                        <div class="form-text">{{ form.timeline.help_text }}</div>
-                                    {% endif %}
+                                <div class="col-xl-6">
+                                    <div class="mb-0">
+                                        <label for="{{ form.ipbss_remedy.id_for_label }}" class="form-label">IPBSS Remedy</label>
+                                        {{ form.ipbss_remedy }}
+                                        {% if form.ipbss_remedy.help_text %}
+                                            <div class="form-help">{{ form.ipbss_remedy.help_text }}</div>
+                                        {% else %}
+                                            <div class="form-help">IPBSS Remedy identifier if applicable</div>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Team Assignment -->
-                        <div class="row">
-                            <div class="col-xl-12">
-                                <div class="mb-3">
-                                    <label class="form-label">Team Members</label>
-                                    <div class="row">
-                                        {% for user in form.assigned_users %}
-                                            <div class="col-md-4 col-lg-3">
-                                                <div class="form-check">
-                                                    {{ user.tag }}
-                                                    <label class="form-check-label" for="{{ user.id_for_label }}">
-                                                        {{ user.choice_label }}
-                                                    </label>
-                                                </div>
+                        <!-- Additional Details Section -->
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="ri-file-text-line"></i>
+                                Additional Details
+                            </h5>
+                            <div class="row">
+                                <div class="col-xl-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.clarity.id_for_label }}" class="form-label">Clarity</label>
+                                        {{ form.clarity }}
+                                        {% if form.clarity.help_text %}
+                                            <div class="form-help">{{ form.clarity.help_text }}</div>
+                                        {% else %}
+                                            <div class="form-help">Describe the clarity and understanding of project requirements</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-xl-6">
+                                    <div class="mb-0">
+                                        <label for="{{ form.timeline.id_for_label }}" class="form-label">Timeline</label>
+                                        {{ form.timeline }}
+                                        {% if form.timeline.help_text %}
+                                            <div class="form-help">{{ form.timeline.help_text }}</div>
+                                        {% else %}
+                                            <div class="form-help">Additional timeline information or milestones</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Team Assignment Section -->
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="ri-team-line"></i>
+                                Team Assignment
+                            </h5>
+                            <div class="mb-0">
+                                <label class="form-label">Team Members</label>
+                                <div class="form-help mb-3">Select team members who will be working on this project</div>
+                                <div class="row">
+                                    {% for user in form.assigned_users %}
+                                        <div class="col-md-4 col-lg-3">
+                                            <div class="form-check mb-2">
+                                                {{ user.tag }}
+                                                <label class="form-check-label" for="{{ user.id_for_label }}">
+                                                    {{ user.choice_label }}
+                                                </label>
                                             </div>
-                                        {% endfor %}
-                                    </div>
-                                    {% if form.assigned_users.help_text %}
-                                        <div class="form-text">{{ form.assigned_users.help_text }}</div>
-                                    {% endif %}
+                                        </div>
+                                    {% endfor %}
                                 </div>
+                                {% if form.assigned_users.help_text %}
+                                    <div class="form-help">{{ form.assigned_users.help_text }}</div>
+                                {% endif %}
                             </div>
                         </div>
 
@@ -287,12 +379,21 @@
                             <!-- Removed has_clarity and is_template fields -->
                         </div>
                     </div>
-                    <div class="card-footer">
-                        <div class="d-flex justify-content-end gap-2">
-                            <a href="{% url 'projects:list' %}" class="btn btn-light">Cancel</a>
-                            <button type="submit" class="btn btn-primary">
-                                {% if form.instance.pk %}Update Project{% else %}Create Project{% endif %}
-                            </button>
+                    <div class="card-footer bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="text-muted">
+                                <i class="ri-information-line me-1"></i>
+                                <small>Fields marked with <span class="text-danger">*</span> are required</small>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'projects:list' %}" class="btn btn-light">
+                                    <i class="ri-arrow-left-line me-1"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="ri-save-line me-1"></i>
+                                    {% if form.instance.pk %}Update Project{% else %}Create Project{% endif %}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -317,4 +418,82 @@
     <script src="{% static 'assets/libs/filepond-plugin-image-resize/filepond-plugin-image-resize.min.js'%}"></script>
     <script src="{% static 'assets/libs/filepond-plugin-image-transform/filepond-plugin-image-transform.min.js'%}"></script>
     <script src="{% static 'assets/js/filepond.js'%}"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form validation and enhancement
+        const form = document.querySelector('form');
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
+        
+        // Add real-time validation feedback
+        const requiredFields = form.querySelectorAll('input[required], select[required]');
+        
+        requiredFields.forEach(field => {
+            field.addEventListener('blur', function() {
+                validateField(this);
+            });
+            
+            field.addEventListener('input', function() {
+                if (this.classList.contains('is-invalid')) {
+                    validateField(this);
+                }
+            });
+        });
+        
+        function validateField(field) {
+            const isValid = field.checkValidity();
+            field.classList.toggle('is-valid', isValid && field.value.trim() !== '');
+            field.classList.toggle('is-invalid', !isValid);
+        }
+        
+        // Form submission handling
+        form.addEventListener('submit', function(e) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="ri-loader-2-line me-1 spinner-border spinner-border-sm"></i>Processing...';
+            
+            // Re-enable button after 5 seconds as fallback
+            setTimeout(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }, 5000);
+        });
+        
+        // Auto-populate project ID based on name (if empty)
+        const nameField = document.querySelector('#id_name');
+        const projectIdField = document.querySelector('#id_project_id');
+        
+        if (nameField && projectIdField && !projectIdField.value) {
+            nameField.addEventListener('input', function() {
+                if (!projectIdField.value) {
+                    const slug = this.value
+                        .toLowerCase()
+                        .replace(/[^a-z0-9\s-]/g, '')
+                        .replace(/\s+/g, '-')
+                        .substring(0, 20);
+                    projectIdField.value = slug;
+                }
+            });
+        }
+        
+        // Show success message on successful form submission
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('success') === 'true') {
+            const toast = document.createElement('div');
+            toast.className = 'toast align-items-center text-white bg-success border-0 position-fixed top-0 end-0 m-3';
+            toast.style.zIndex = '9999';
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="ri-check-line me-2"></i>Project saved successfully!
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+        }
+    });
+    </script>
 {% endblock %}

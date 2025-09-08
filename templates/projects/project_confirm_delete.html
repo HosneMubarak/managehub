@@ -3,6 +3,50 @@
 
 {% block title %}Delete Project - ManageHub{% endblock %}
 
+{% block styles %}
+<style>
+    .delete-confirmation-card {
+        border: 2px solid #dc3545;
+        box-shadow: 0 0 20px rgba(220, 53, 69, 0.1);
+    }
+    .danger-icon {
+        font-size: 3rem;
+        color: #dc3545;
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    .project-detail-item {
+        background: #f8f9fa;
+        border-radius: 6px;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        border-left: 3px solid #6c757d;
+    }
+    .confirmation-input {
+        border: 2px solid #dc3545;
+        background-color: #fff5f5;
+    }
+    .confirmation-input:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+    .delete-btn-disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .safety-checklist {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        border: 1px solid #ffeaa7;
+        border-radius: 8px;
+        padding: 1rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid">
     <!-- Page Header -->
@@ -23,63 +67,149 @@
 
     <!-- Start::row-1 -->
     <div class="row justify-content-center">
-        <div class="col-xl-6">
-            <div class="card custom-card">
-                <div class="card-header">
-                    <div class="card-title text-danger">
-                        <i class="ri-delete-bin-line me-2"></i>Confirm Project Deletion
+        <div class="col-xl-8 col-lg-10">
+            <div class="card custom-card delete-confirmation-card">
+                <div class="card-header bg-danger-transparent">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <i class="ri-error-warning-line danger-icon me-3"></i>
+                        <div>
+                            <h4 class="card-title text-danger mb-1">Confirm Project Deletion</h4>
+                            <p class="text-muted mb-0">This action is permanent and cannot be undone</p>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-danger" role="alert">
-                        <h6 class="alert-heading">Warning!</h6>
-                        <p class="mb-0">You are about to permanently delete this project. This action cannot be undone.</p>
-                    </div>
-                    
-                    <div class="project-details mb-4">
-                        <h6 class="fw-semibold mb-3">Project Details:</h6>
-                        <div class="row">
-                            <div class="col-sm-4"><strong>Project ID:</strong></div>
-                            <div class="col-sm-8">{{ project.project_id }}</div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-4"><strong>Name:</strong></div>
-                            <div class="col-sm-8">{{ project.name }}</div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-4"><strong>Status:</strong></div>
-                            <div class="col-sm-8">
-                                <span class="badge bg-{{ project.status|lower }}-transparent">{{ project.get_status_display }}</span>
+                    <!-- Critical Warning -->
+                    <div class="alert alert-danger border-danger" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="ri-alarm-warning-line fs-20 me-2"></i>
+                            <div>
+                                <h6 class="alert-heading mb-1">⚠️ PERMANENT DELETION WARNING</h6>
+                                <p class="mb-0">You are about to permanently delete <strong>"{{ project.name }}"</strong>. This action will immediately remove all project data and cannot be recovered.</p>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-sm-4"><strong>Manager:</strong></div>
-                            <div class="col-sm-8">{{ project.project_manager.get_full_name|default:project.project_manager.username }}</div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-4"><strong>Team Members:</strong></div>
-                            <div class="col-sm-8">{{ project.assigned_users.count }} assigned</div>
+                    </div>
+                    
+                    <!-- Project Details -->
+                    <div class="mb-4">
+                        <h6 class="fw-semibold mb-3 d-flex align-items-center">
+                            <i class="ri-information-line me-2 text-primary"></i>
+                            Project Details to be Deleted:
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="project-detail-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">Project ID:</span>
+                                        <strong>{{ project.project_id }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="project-detail-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">Status:</span>
+                                        <span class="badge bg-{% if project.status == 'COMPLETE' %}success{% elif project.status == 'IN_PROGRESS' %}primary{% elif project.status == 'ON_HOLD' %}warning{% else %}secondary{% endif %}-transparent">
+                                            {{ project.get_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="project-detail-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">Project Manager:</span>
+                                        <strong>{{ project.project_manager.get_full_name|default:project.project_manager.username }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="project-detail-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">Team Members:</span>
+                                        <strong>{{ project.assigned_users.count }} assigned</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if project.start_date %}
+                            <div class="col-md-6">
+                                <div class="project-detail-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">Start Date:</span>
+                                        <strong>{{ project.start_date|date:"M d, Y" }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if project.estimated_end_date %}
+                            <div class="col-md-6">
+                                <div class="project-detail-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">End Date:</span>
+                                        <strong>{{ project.estimated_end_date|date:"M d, Y" }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                     
-                    <div class="alert alert-warning" role="alert">
-                        <h6 class="alert-heading">What will be deleted:</h6>
-                        <ul class="mb-0">
-                            <li>The project and all its data</li>
-                            <li>All team member assignments</li>
-                            <li>All project comments and history</li>
-                            <li>All related project records</li>
-                        </ul>
+                    <!-- Safety Checklist -->
+                    <div class="safety-checklist mb-4">
+                        <h6 class="fw-semibold mb-3 d-flex align-items-center text-warning">
+                            <i class="ri-shield-check-line me-2"></i>
+                            Safety Checklist - What will be permanently deleted:
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-2"><i class="ri-close-circle-line text-danger me-2"></i>Project data and settings</li>
+                                    <li class="mb-2"><i class="ri-close-circle-line text-danger me-2"></i>All team assignments</li>
+                                    <li class="mb-2"><i class="ri-close-circle-line text-danger me-2"></i>Project timeline and dates</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-2"><i class="ri-close-circle-line text-danger me-2"></i>Comments and activity history</li>
+                                    <li class="mb-2"><i class="ri-close-circle-line text-danger me-2"></i>All related project records</li>
+                                    <li class="mb-2"><i class="ri-close-circle-line text-danger me-2"></i>Associated files and documents</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                     
-                    <form method="post" class="d-flex gap-2 justify-content-end">
+                    <!-- Confirmation Input -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold text-danger">
+                            <i class="ri-key-line me-1"></i>
+                            Type the project name "<strong>{{ project.name }}</strong>" to confirm deletion:
+                        </label>
+                        <input type="text" id="confirmationInput" class="form-control confirmation-input" 
+                               placeholder="Enter project name exactly as shown above" autocomplete="off">
+                        <div class="form-text text-muted">
+                            <i class="ri-information-line me-1"></i>
+                            This confirmation helps prevent accidental deletions
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <form method="post" id="deleteForm">
                         {% csrf_token %}
-                        <a href="{% url 'projects:detail' project.id %}" class="btn btn-secondary">
-                            <i class="ri-arrow-left-line me-1"></i>Cancel
-                        </a>
-                        <button type="submit" class="btn btn-danger">
-                            <i class="ri-delete-bin-line me-1"></i>Delete Project
-                        </button>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="text-muted">
+                                <i class="ri-time-line me-1"></i>
+                                <small>This action cannot be undone</small>
+                            </div>
+                            <div class="d-flex gap-3">
+                                <a href="{% url 'projects:detail' project.id %}" class="btn btn-light btn-lg">
+                                    <i class="ri-arrow-left-line me-2"></i>Cancel & Go Back
+                                </a>
+                                <button type="submit" id="deleteButton" class="btn btn-danger btn-lg delete-btn-disabled" disabled>
+                                    <i class="ri-delete-bin-line me-2"></i>
+                                    <span id="deleteButtonText">Delete Project</span>
+                                </button>
+                            </div>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -87,4 +217,147 @@
     </div>
     <!-- End::row-1 -->
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmationInput = document.getElementById('confirmationInput');
+    const deleteButton = document.getElementById('deleteButton');
+    const deleteButtonText = document.getElementById('deleteButtonText');
+    const deleteForm = document.getElementById('deleteForm');
+    const projectName = "{{ project.name|escapejs }}";
+    
+    let isSubmitting = false;
+    
+    // Enable/disable delete button based on confirmation input
+    confirmationInput.addEventListener('input', function() {
+        const inputValue = this.value.trim();
+        const isMatch = inputValue === projectName;
+        
+        deleteButton.disabled = !isMatch;
+        deleteButton.classList.toggle('delete-btn-disabled', !isMatch);
+        
+        // Visual feedback for input validation
+        if (inputValue.length > 0) {
+            if (isMatch) {
+                confirmationInput.classList.remove('is-invalid');
+                confirmationInput.classList.add('is-valid');
+            } else {
+                confirmationInput.classList.remove('is-valid');
+                confirmationInput.classList.add('is-invalid');
+            }
+        } else {
+            confirmationInput.classList.remove('is-valid', 'is-invalid');
+        }
+    });
+    
+    // Handle form submission with loading state and double-click prevention
+    deleteForm.addEventListener('submit', function(e) {
+        if (isSubmitting) {
+            e.preventDefault();
+            return false;
+        }
+        
+        const inputValue = confirmationInput.value.trim();
+        if (inputValue !== projectName) {
+            e.preventDefault();
+            confirmationInput.focus();
+            confirmationInput.classList.add('is-invalid');
+            
+            // Show error message
+            showToast('Please enter the exact project name to confirm deletion', 'danger');
+            return false;
+        }
+        
+        // Prevent double submission
+        isSubmitting = true;
+        deleteButton.disabled = true;
+        
+        // Update button to show loading state
+        deleteButtonText.innerHTML = 'Deleting...';
+        deleteButton.innerHTML = '<i class="ri-loader-2-line me-2 spinner-border spinner-border-sm"></i>' + deleteButtonText.innerHTML;
+        
+        // Show confirmation toast
+        showToast('Deleting project... Please wait.', 'warning');
+        
+        // Re-enable after timeout as fallback
+        setTimeout(() => {
+            if (isSubmitting) {
+                isSubmitting = false;
+                deleteButton.disabled = false;
+                deleteButtonText.innerHTML = 'Delete Project';
+                deleteButton.innerHTML = '<i class="ri-delete-bin-line me-2"></i>' + deleteButtonText.innerHTML;
+            }
+        }, 10000);
+    });
+    
+    // Focus on confirmation input when page loads
+    setTimeout(() => {
+        confirmationInput.focus();
+    }, 500);
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Escape key to cancel
+        if (e.key === 'Escape') {
+            window.location.href = "{% url 'projects:detail' project.id %}";
+        }
+        
+        // Enter key to submit if confirmation is valid
+        if (e.key === 'Enter' && confirmationInput.value.trim() === projectName && !deleteButton.disabled) {
+            deleteForm.submit();
+        }
+    });
+    
+    // Utility function to show toast notifications
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0 position-fixed top-0 end-0 m-3`;
+        toast.style.zIndex = '9999';
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="ri-${type === 'danger' ? 'error-warning' : type === 'warning' ? 'alarm-warning' : 'information'}-line me-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        const bsToast = new bootstrap.Toast(toast, { delay: 5000 });
+        bsToast.show();
+        
+        // Remove toast element after it's hidden
+        toast.addEventListener('hidden.bs.toast', () => {
+            toast.remove();
+        });
+    }
+    
+    // Show success message if redirected with success parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('deleted') === 'true') {
+        showToast('Project has been successfully deleted!', 'success');
+        
+        // Redirect to projects list after showing success message
+        setTimeout(() => {
+            window.location.href = "{% url 'projects:list' %}";
+        }, 2000);
+    }
+    
+    // Warn user before leaving page if they've started typing
+    let hasStartedTyping = false;
+    confirmationInput.addEventListener('input', function() {
+        hasStartedTyping = this.value.trim().length > 0;
+    });
+    
+    window.addEventListener('beforeunload', function(e) {
+        if (hasStartedTyping && !isSubmitting) {
+            e.preventDefault();
+            e.returnValue = 'Are you sure you want to leave? Your confirmation input will be lost.';
+            return e.returnValue;
+        }
+    });
+});
+</script>
 {% endblock %}

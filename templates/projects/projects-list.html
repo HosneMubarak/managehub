@@ -4,19 +4,67 @@
 
 {% block styles %}
 <style>
+/* Enhanced Table Styling */
+.projects-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.projects-table thead th {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    color: #495057;
+    padding: 1rem 0.75rem;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.projects-table tbody tr {
+    transition: all 0.2s ease;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.projects-table tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.02);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.projects-table td {
+    vertical-align: middle;
+    padding: 1rem 0.75rem;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+/* Inline Edit Containers */
 .inline-edit-container {
     cursor: pointer;
     position: relative;
+    border-radius: 6px;
+    transition: all 0.2s ease;
 }
 
 .inline-edit-container:hover .display-value {
-    background-color: rgba(0, 123, 255, 0.1);
-    border-radius: 4px;
-    padding: 2px 4px;
+    background-color: rgba(13, 110, 253, 0.08);
+    border-radius: 6px;
+    padding: 4px 8px;
+    transform: scale(1.02);
 }
 
 .inline-edit-container .edit-select {
     min-width: 120px;
+    border: 2px solid #0d6efd;
+    border-radius: 6px;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
 }
 
 .inline-edit-container[data-field="project_manager"] .edit-select {
@@ -24,105 +72,135 @@
 }
 
 .display-value {
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
+    border-radius: 4px;
 }
 
 .table td {
     vertical-align: middle;
 }
 
-/* Styles for hover-editable fields (Name and Timeline only) */
+/* Enhanced Hover-Editable Fields */
 .hover-editable {
     position: relative;
     display: inline-block;
     width: 100%;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.hover-editable:hover {
+    background-color: rgba(13, 110, 253, 0.03);
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.1);
 }
 
 .hover-editable:hover .edit-btn {
     opacity: 1;
     visibility: visible;
+    transform: translateY(-50%) scale(1);
 }
 
 .edit-btn {
     position: absolute;
     top: 50%;
-    right: 4px;
-    transform: translateY(-50%);
+    right: 6px;
+    transform: translateY(-50%) scale(0.8);
     opacity: 0;
     visibility: hidden;
-    transition: all 0.2s ease;
-    z-index: 10;
-    background: #0d6efd;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 15;
+    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
     border: none;
     color: white;
-    border-radius: 3px;
-    padding: 3px 8px;
+    border-radius: 6px;
+    padding: 4px 10px;
     font-size: 11px;
+    font-weight: 500;
     cursor: pointer;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+    backdrop-filter: blur(10px);
 }
 
 .edit-btn:hover {
-    background: #0b5ed7;
+    background: linear-gradient(135deg, #0b5ed7 0%, #084298 100%);
     transform: translateY(-50%) scale(1.05);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
 }
 
-/* Direct editable fields (Effort and T/Code) */
-.direct-editable {
-    position: relative;
-    cursor: pointer;
+.edit-btn:active {
+    transform: translateY(-50%) scale(0.95);
 }
 
-.direct-editable:hover .display-content {
-    background-color: rgba(13, 110, 253, 0.08);
-    border-radius: 4px;
-}
-
+/* Enhanced Edit Forms */
 .edit-form {
     display: none;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     width: 100%;
-    padding: 2px;
+    padding: 4px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(13, 110, 253, 0.2);
 }
 
 .edit-form.active {
     display: flex;
+    animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .edit-input {
     flex: 1;
-    padding: 6px 10px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
+    padding: 8px 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
     font-size: 13px;
     background: white;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition: all 0.2s ease;
+    font-weight: 500;
 }
 
 .edit-input:focus {
     outline: none;
     border-color: #0d6efd;
-    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+    background: #f8f9ff;
 }
 
 .submit-btn {
-    background: #198754;
+    background: linear-gradient(135deg, #198754 0%, #157347 100%);
     border: none;
     color: white;
-    border-radius: 4px;
-    padding: 6px 12px;
+    border-radius: 6px;
+    padding: 8px 16px;
     font-size: 11px;
     cursor: pointer;
     white-space: nowrap;
-    font-weight: 500;
-    transition: all 0.15s ease-in-out;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(25, 135, 84, 0.3);
 }
 
 .submit-btn:hover {
-    background: #157347;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: linear-gradient(135deg, #157347 0%, #0f5132 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(25, 135, 84, 0.4);
+}
+
+.submit-btn:active {
+    transform: translateY(0);
 }
 
 .submit-btn:disabled {
@@ -130,42 +208,171 @@
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
+    opacity: 0.6;
 }
 
 .cancel-btn {
-    background: #6c757d;
+    background: linear-gradient(135deg, #6c757d 0%, #5c636a 100%);
     border: none;
     color: white;
-    border-radius: 4px;
-    padding: 6px 12px;
+    border-radius: 6px;
+    padding: 8px 16px;
     font-size: 11px;
     cursor: pointer;
     white-space: nowrap;
-    font-weight: 500;
-    transition: all 0.15s ease-in-out;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
 }
 
 .cancel-btn:hover {
-    background: #5c636a;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: linear-gradient(135deg, #5c636a 0%, #495057 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+}
+
+.cancel-btn:active {
+    transform: translateY(0);
 }
 
 .display-content {
-    transition: background-color 0.2s ease;
-    padding: 4px;
-    border-radius: 4px;
-    min-height: 24px;
+    transition: all 0.2s ease;
+    padding: 6px 8px;
+    border-radius: 6px;
+    min-height: 32px;
     display: flex;
     align-items: center;
+    position: relative;
 }
 
-.hover-editable .display-content {
-    padding-right: 32px; /* Space for edit button */
-}
-
-.hover-editable:hover .display-content {
+.display-content:hover {
     background-color: rgba(13, 110, 253, 0.05);
+    transform: translateX(2px);
+}
+
+/* Success Animation for Updated Fields */
+@keyframes successPulse {
+    0% {
+        background-color: rgba(25, 135, 84, 0.2);
+        transform: scale(1);
+    }
+    50% {
+        background-color: rgba(25, 135, 84, 0.3);
+        transform: scale(1.02);
+    }
+    100% {
+        background-color: transparent;
+        transform: scale(1);
+    }
+}
+
+.field-updated {
+    animation: successPulse 1.5s ease-out;
+}
+
+/* Enhanced Status and Priority Badges */
+.badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+
+.badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Toast Notification Styles */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+}
+
+.toast {
+    min-width: 300px;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    backdrop-filter: blur(10px);
+}
+
+.toast.success {
+    background: linear-gradient(135deg, rgba(25, 135, 84, 0.95) 0%, rgba(21, 115, 71, 0.95) 100%);
+    color: white;
+}
+
+.toast.error {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.95) 0%, rgba(176, 42, 55, 0.95) 100%);
+    color: white;
+}
+
+/* Responsive Design Enhancements */
+@media (max-width: 1200px) {
+    .projects-table td {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .edit-btn {
+        font-size: 10px;
+        padding: 3px 8px;
+    }
+}
+
+@media (max-width: 768px) {
+    .projects-table {
+        font-size: 13px;
+    }
+    
+    .projects-table thead th {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .projects-table td {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .edit-btn {
+        font-size: 9px;
+        padding: 2px 6px;
+        right: 2px;
+    }
+    
+    .submit-btn, .cancel-btn {
+        font-size: 10px;
+        padding: 6px 10px;
+    }
+    
+    .edit-input {
+        padding: 6px 8px;
+        font-size: 12px;
+    }
+    
+    .badge {
+        font-size: 10px;
+        padding: 4px 8px;
+    }
+}
+
+@media (max-width: 576px) {
+    .projects-table {
+        font-size: 12px;
+    }
+    
+    .card-body {
+        padding: 0.5rem;
+    }
+    
+    .table-responsive {
+        border-radius: 6px;
+    }
 }
 
 .project-name-link {
@@ -308,7 +515,7 @@
                 <div class="card-body p-0">
                     {% if projects %}
                         <div class="table-responsive">
-                            <table class="table text-nowrap">
+                            <table class="table text-nowrap projects-table">
                                 <thead>
                                     <tr>
                                         <th scope="col">Project Name</th>
@@ -429,6 +636,7 @@
                                                         <span class="text-muted">-</span>
                                                     {% endif %}
                                                 </div>
+                                                <button class="edit-btn" type="button">Edit</button>
                                                 <div class="edit-form">
                                                     <input type="text" class="edit-input" value="{{ project.t_code }}" placeholder="Enter T/Code">
                                                     <button class="submit-btn" type="button">Save</button>
@@ -595,6 +803,9 @@
     {% endif %}
 
 {% endblock %}
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
 
 {% block scripts %}
 <script>
