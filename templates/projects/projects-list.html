@@ -825,11 +825,6 @@
                                                     <p class="text-muted mb-0 project-list-description">
                                                         {{ project.description|truncatechars:60|default:"No description" }}
                                                     </p>
-                                                    {% if project.clarity %}
-                                                        <small class="text-info d-block">
-                                                            <i class="ri-lightbulb-line me-1"></i>{{ project.clarity|truncatechars:40 }}
-                                                        </small>
-                                                    {% endif %}
                                                 </div>
                                                 <button class="edit-btn" type="button">Edit</button>
                                                 <div class="edit-form">
