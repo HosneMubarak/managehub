@@ -16,6 +16,13 @@
             margin-bottom: 1.5rem;
             border-left: 4px solid #0d6efd;
         }
+        
+        /* Dark mode support for form sections */
+        [data-theme-mode=dark] .form-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid #0d6efd;
+        }
+        
         .form-section-title {
             color: #495057;
             font-weight: 600;
@@ -24,6 +31,12 @@
             align-items: center;
             gap: 0.5rem;
         }
+        
+        /* Dark mode support for form section titles */
+        [data-theme-mode=dark] .form-section-title {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
         .form-section-title i {
             color: #0d6efd;
         }
@@ -36,6 +49,12 @@
             color: #6c757d;
             margin-top: 0.25rem;
         }
+        
+        /* Dark mode support for form help text */
+        [data-theme-mode=dark] .form-help {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
         .field-group {
             background: white;
             border-radius: 6px;
@@ -43,11 +62,84 @@
             margin-bottom: 1rem;
             border: 1px solid #e9ecef;
         }
+        
+        /* Dark mode support for field groups */
+        [data-theme-mode=dark] .field-group {
+            background: rgba(var(--body-bg-rgb));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
         .progress-indicator {
             background: linear-gradient(90deg, #0d6efd 0%, #6610f2 100%);
             height: 4px;
             border-radius: 2px;
             margin-bottom: 2rem;
+        }
+        
+        /* Dark mode support for form inputs */
+        [data-theme-mode=dark] .form-control {
+            background: rgba(var(--body-bg-rgb));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        [data-theme-mode=dark] .form-control:focus {
+            background: rgba(var(--body-bg-rgb));
+            border-color: #0d6efd;
+            color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+        
+        [data-theme-mode=dark] .form-select {
+            background: rgba(var(--body-bg-rgb));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        [data-theme-mode=dark] .form-select:focus {
+            background: rgba(var(--body-bg-rgb));
+            border-color: #0d6efd;
+            color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+        
+        /* Dark mode support for input group text */
+        [data-theme-mode=dark] .input-group-text {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        /* Dark mode support for form check labels */
+        [data-theme-mode=dark] .form-check-label {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        /* Dark mode support for card footer */
+        [data-theme-mode=dark] .card-footer.bg-light {
+            background: rgba(255, 255, 255, 0.02) !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Dark mode support for validation states */
+        [data-theme-mode=dark] .form-control.is-valid {
+            border-color: #198754;
+            background: rgba(var(--body-bg-rgb));
+        }
+        
+        [data-theme-mode=dark] .form-control.is-invalid {
+            border-color: #dc3545;
+            background: rgba(var(--body-bg-rgb));
+        }
+        
+        [data-theme-mode=dark] .form-select.is-valid {
+            border-color: #198754;
+            background: rgba(var(--body-bg-rgb));
+        }
+        
+        [data-theme-mode=dark] .form-select.is-invalid {
+            border-color: #dc3545;
+            background: rgba(var(--body-bg-rgb));
         }
     </style>
 {% endblock %}
