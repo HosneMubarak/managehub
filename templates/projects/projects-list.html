@@ -28,6 +28,30 @@
     z-index: 10;
 }
 
+/* Dark mode support for table header */
+[data-theme-mode=dark] .projects-table thead th {
+    background: linear-gradient(135deg, rgba(45, 45, 48, 0.9) 0%, rgba(35, 35, 38, 0.9) 100%);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+[data-theme-mode=dark] .projects-table {
+    background: rgb(var(--body-bg-rgb));
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+[data-theme-mode=dark] .projects-table tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+[data-theme-mode=dark] .projects-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+[data-theme-mode=dark] .projects-table td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
 .projects-table tbody tr {
     transition: all 0.2s ease;
     border-bottom: 1px solid #f1f3f4;
