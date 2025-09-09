@@ -225,7 +225,8 @@ def update_project_field(request, pk):
             'name': None,
             'effort_size': Project.EFFORT_SIZE_CHOICES,
             'timeline': None,
-            't_code': None
+            't_code': None,
+            'description': None
         }
         
         if field not in allowed_fields:
@@ -239,7 +240,7 @@ def update_project_field(request, pk):
                     project.project_manager = manager
                 else:
                     return JsonResponse({'success': False, 'error': 'Invalid manager selected'})
-            elif field in ['name', 'timeline', 't_code']:
+            elif field in ['name', 'timeline', 't_code', 'description']:
                 # Handle text fields
                 if field == 'name' and not value.strip():
                     return JsonResponse({'success': False, 'error': 'Project name cannot be empty'})
@@ -249,11 +250,13 @@ def update_project_field(request, pk):
                     return JsonResponse({'success': False, 'error': 'Timeline too long (max 200 characters)'})
                 if field == 't_code' and len(value) > 50:
                     return JsonResponse({'success': False, 'error': 'T/Code must be 50 characters or less'})
+                if field == 'description' and len(value) > 1000:
+                    return JsonResponse({'success': False, 'error': 'Description too long (max 1000 characters)'})
                 
                 setattr(project, field, value.strip() if value else '')
                 display_value = value if value else None
             elif field == 'effort_size':
-                # Handle effort size choice field
+                # Handle effort size choice field (without hours display)
                 valid_choices = [choice[0] for choice in allowed_fields[field]]
                 if value and value not in valid_choices:
                     return JsonResponse({'success': False, 'error': 'Invalid effort size'})
@@ -270,14 +273,11 @@ def update_project_field(request, pk):
             # Return updated display value
             if field == 'project_manager':
                 display_value = project.project_manager.get_full_name() or project.project_manager.username
-            elif field in ['name', 'timeline', 't_code']:
+            elif field in ['name', 'timeline', 't_code', 'description']:
                 display_value = getattr(project, field) or ''
             elif field == 'effort_size':
                 if project.effort_size:
-                    display_value = {
-                        'size': project.get_effort_size_display(),
-                        'hours': project.estimated_hours
-                    }
+                    display_value = project.get_effort_size_display()
                 else:
                     display_value = None
             else:

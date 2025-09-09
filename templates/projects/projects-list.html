@@ -406,6 +406,84 @@
     min-width: 120px;
     cursor: pointer;
 }
+
+/* Description textarea styling */
+.edit-form textarea.edit-input {
+    min-height: 60px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+/* Team multi-select styling */
+.edit-form select[multiple].edit-input {
+    min-width: 200px;
+    min-height: 100px;
+    cursor: pointer;
+}
+
+/* Team display styling */
+.avatar-list-stacked .avatar {
+    margin-right: -8px;
+    border: 2px solid #fff;
+    transition: all 0.2s ease;
+}
+
+.avatar-list-stacked .avatar:hover {
+    transform: translateY(-2px);
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Enhanced inline edit for team selection */
+.inline-edit-container[data-field="assigned_users"] .edit-select {
+    min-width: 200px;
+    max-height: 120px;
+}
+
+/* Description field specific styling */
+.hover-editable[data-field="description"] .display-content {
+    min-height: 40px;
+}
+
+.hover-editable[data-field="description"] .edit-form textarea {
+    width: 100%;
+    min-width: 250px;
+}
+
+/* Team Members display styling */
+.team-members-display {
+    min-width: 200px;
+    max-width: 250px;
+}
+
+.team-member-item {
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.team-member-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0 !important;
+}
+
+.team-member-item .fw-medium {
+    font-size: 13px;
+    line-height: 1.4;
+    color: #333;
+}
+
+.team-member-item .avatar {
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
+    flex-shrink: 0;
+}
+
+.team-member-item .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 </style>
 {% endblock %}
 
@@ -522,10 +600,10 @@
                                         <th scope="col">Description</th>
                                         <th scope="col">Effort</th>
                                         <th scope="col">Timeline</th>
-                                        <th scope="col" class="text-start">T/Code</th>
+                                        <th scope="col" class="text-start">Resources</th>
                                         <th scope="col">Status</th>
                                         <th scope="col">Priority</th>
-                                        <th scope="col">Manager</th>
+                                        <th scope="col">Project Manager</th>
                                         <th scope="col">Actions</th>
                                     </tr>
                                 </thead>
@@ -571,21 +649,30 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <p class="text-muted mb-0 project-list-description">
-                                                {{ project.description|truncatechars:60 }}
-                                            </p>
-                                            {% if project.clarity %}
-                                                <small class="text-info d-block">
-                                                    <i class="ri-lightbulb-line me-1"></i>{{ project.clarity|truncatechars:40 }}
-                                                </small>
-                                            {% endif %}
+                                            <div class="hover-editable" data-field="description" data-project-id="{{ project.id }}">
+                                                <div class="display-content">
+                                                    <p class="text-muted mb-0 project-list-description">
+                                                        {{ project.description|truncatechars:60|default:"No description" }}
+                                                    </p>
+                                                    {% if project.clarity %}
+                                                        <small class="text-info d-block">
+                                                            <i class="ri-lightbulb-line me-1"></i>{{ project.clarity|truncatechars:40 }}
+                                                        </small>
+                                                    {% endif %}
+                                                </div>
+                                                <button class="edit-btn" type="button">Edit</button>
+                                                <div class="edit-form">
+                                                    <textarea class="edit-input" rows="2" placeholder="Enter project description">{{ project.description }}</textarea>
+                                                    <button class="submit-btn" type="button">Save</button>
+                                                    <button class="cancel-btn" type="button">Cancel</button>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>
                                             <div class="inline-edit-container" data-field="effort_size" data-project-id="{{ project.id }}">
                                                 <span class="display-value">
                                                     {% if project.effort_size %}
                                                         <span class="badge bg-info-transparent">{{ project.get_effort_size_display }}</span>
-                                                        <small class="d-block text-muted">{{ project.estimated_hours }}h</small>
                                                     {% else %}
                                                         <span class="text-muted">Not set</span>
                                                     {% endif %}
@@ -628,20 +715,21 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <div class="hover-editable" data-field="t_code" data-project-id="{{ project.id }}">
-                                                <div class="display-content">
-                                                    {% if project.t_code %}
-                                                        <code class="text-primary">{{ project.t_code }}</code>
-                                                    {% else %}
-                                                        <span class="text-muted">-</span>
-                                                    {% endif %}
-                                                </div>
-                                                <button class="edit-btn" type="button">Edit</button>
-                                                <div class="edit-form">
-                                                    <input type="text" class="edit-input" value="{{ project.t_code }}" placeholder="Enter T/Code">
-                                                    <button class="submit-btn" type="button">Save</button>
-                                                    <button class="cancel-btn" type="button">Cancel</button>
-                                                </div>
+                                            <div class="team-members-display">
+                                                {% for user in project.assigned_users.all %}
+                                                    <div class="team-member-item mb-1 d-flex align-items-center">
+                                                        {% if user.avatar %}
+                                                            <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name }}" class="avatar avatar-xs rounded-circle me-2">
+                                                        {% else %}
+                                                            <span class="avatar avatar-xs rounded-circle bg-primary text-white me-2 d-flex align-items-center justify-content-center">
+                                                                {{ user.first_name|first }}{{ user.last_name|first }}
+                                                            </span>
+                                                        {% endif %}
+                                                        <span class="fw-medium text-dark">{{ user.get_full_name }}</span>
+                                                    </div>
+                                                {% empty %}
+                                                    <span class="text-muted">No team members</span>
+                                                {% endfor %}
                                             </div>
                                         </td>
                                         <td>
@@ -1153,38 +1241,48 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function updateDisplayValue(container, field, displayValue) {
         const displayElement = container.querySelector('.display-value');
-        const editSelect = container.querySelector('.edit-select');
+        const editInput = container.querySelector('.edit-input, .edit-select');
         
         if (field === 'status') {
-            const statusBadgeClass = getStatusBadgeClass(editSelect.value);
+            const statusBadgeClass = getStatusBadgeClass(editInput.value);
             displayElement.innerHTML = `<span class="badge ${statusBadgeClass}">${displayValue}</span>`;
         } else if (field === 'priority') {
-            const priorityBadgeClass = getPriorityBadgeClass(editSelect.value);
+            const priorityBadgeClass = getPriorityBadgeClass(editInput.value);
             displayElement.innerHTML = `<span class="badge ${priorityBadgeClass}">${displayValue}</span>`;
         } else if (field === 'effort_size') {
             if (displayValue) {
-                displayElement.innerHTML = `
-                    <span class="badge bg-info-transparent">${displayValue.size}</span>
-                    <small class="d-block text-muted">${displayValue.hours}h</small>
-                `;
+                displayElement.innerHTML = `<span class="badge bg-info-transparent">${displayValue}</span>`;
             } else {
                 displayElement.innerHTML = '<span class="text-muted">Not set</span>';
             }
         } else if (field === 'project_manager') {
             // For manager, we'll keep the simple text display for now
             displayElement.innerHTML = `<span class="text-truncate">${displayValue}</span>`;
+        } else if (field === 'assigned_users') {
+            // Update team display with avatars and count
+            updateTeamDisplay(displayElement, displayValue);
+        } else if (field === 'description') {
+            // Update description display with truncation
+            updateDescriptionDisplay(displayElement, displayValue);
+        } else {
+            // Default text display for other fields
+            displayElement.innerHTML = `<span class="text-truncate">${displayValue || 'Not set'}</span>`;
         }
         
         displayElement.classList.remove('d-none');
-        editSelect.classList.add('d-none');
+        if (editInput) {
+            editInput.classList.add('d-none');
+        }
     }
     
     function cancelEdit(container) {
         const displayValue = container.querySelector('.display-value');
-        const editSelect = container.querySelector('.edit-select');
+        const editInput = container.querySelector('.edit-input, .edit-select');
         
         displayValue.classList.remove('d-none');
-        editSelect.classList.add('d-none');
+        if (editInput) {
+            editInput.classList.add('d-none');
+        }
     }
     
     function getStatusBadgeClass(status) {
@@ -1260,6 +1358,68 @@ document.addEventListener('DOMContentLoaded', function() {
         container.style.zIndex = '1055';
         document.body.appendChild(container);
         return container;
+    }
+    
+    function updateTeamDisplay(displayElement, teamData) {
+        if (!teamData || teamData.length === 0) {
+            displayElement.innerHTML = `
+                <div class="avatar-list-stacked mb-1"></div>
+                <small class="text-muted d-block">No team assigned</small>
+            `;
+            return;
+        }
+        
+        let avatarsHtml = '';
+        const visibleCount = Math.min(teamData.length, 3);
+        
+        for (let i = 0; i < visibleCount; i++) {
+            const user = teamData[i];
+            if (user.avatar) {
+                avatarsHtml += `
+                    <span class="avatar avatar-xs avatar-rounded" title="${user.name}">
+                        <img src="${user.avatar}" alt="${user.name}">
+                    </span>
+                `;
+            } else {
+                const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                avatarsHtml += `
+                    <span class="avatar avatar-xs avatar-rounded" title="${user.name}">
+                        <div class="bg-primary text-white d-flex align-items-center justify-content-center h-100">
+                            ${initials}
+                        </div>
+                    </span>
+                `;
+            }
+        }
+        
+        if (teamData.length > 3) {
+            avatarsHtml += `
+                <span class="avatar avatar-xs bg-light text-default border border-2 avatar-rounded">
+                    +${teamData.length - 3}
+                </span>
+            `;
+        }
+        
+        displayElement.innerHTML = `
+            <div class="avatar-list-stacked mb-1">
+                ${avatarsHtml}
+            </div>
+            <small class="text-muted d-block">
+                ${teamData.length} member${teamData.length !== 1 ? 's' : ''}
+            </small>
+        `;
+    }
+    
+    function updateDescriptionDisplay(displayElement, description) {
+        const truncatedDesc = description && description.length > 60 ? 
+            description.substring(0, 60) + '...' : 
+            (description || 'No description');
+            
+        displayElement.innerHTML = `
+            <p class="text-muted mb-0 project-list-description">
+                ${truncatedDesc}
+            </p>
+        `;
     }
 });
 </script>
