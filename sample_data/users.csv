@@ -1,0 +1,9 @@
+email,username,first_name,last_name,is_active,is_staff,gender,occupation,phone_number,country,city_of_origin,bio
+john.doe@managehub.com,john.doe,John,Doe,True,False,Male,network_engineer,+1234567890,US,New York,Senior Network Engineer with 10 years experience
+jane.smith@managehub.com,jane.smith,Jane,Smith,True,True,Female,it_manager,+1234567891,US,San Francisco,IT Manager specializing in project management
+mike.wilson@managehub.com,mike.wilson,Mike,Wilson,True,False,Male,devops_engineer,+1234567892,US,Austin,DevOps Engineer focused on automation
+sarah.johnson@managehub.com,sarah.johnson,Sarah,Johnson,True,False,Female,security_analyst,+1234567893,US,Seattle,Cybersecurity specialist
+david.brown@managehub.com,david.brown,David,Brown,True,False,Male,system_admin,+1234567894,US,Chicago,System Administrator with Linux expertise
+lisa.davis@managehub.com,lisa.davis,Lisa,Davis,True,False,Female,tech_support,+1234567895,US,Boston,Technical Support Lead
+robert.miller@managehub.com,robert.miller,Robert,Miller,True,False,Male,network_engineer,+1234567896,US,Denver,Network Infrastructure Specialist
+emily.garcia@managehub.com,emily.garcia,Emily,Garcia,True,False,Female,devops_engineer,+1234567897,US,Miami,Cloud DevOps Engineer

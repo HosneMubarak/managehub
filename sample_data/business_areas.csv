@@ -1,0 +1,9 @@
+name,description,is_active
+IT,Information Technology Department,True
+CTO,Chief Technology Office,True
+OE,Operational Excellence,True
+Consumer,Consumer Products Division,True
+Finance,Finance Department,True
+HR,Human Resources,True
+Marketing,Marketing Department,True
+Sales,Sales Department,True

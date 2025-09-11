@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django_countries',
     'django_filters',
     'phonenumber_field',
+    'import_export',
     
     # Local apps
     'common',
@@ -175,8 +176,13 @@ MEDIA_URL = getenv('MEDIA_URL', '/media/')
 MEDIA_ROOT = getenv('MEDIA_ROOT', os.path.join(BASE_DIR, "media"))
 
 # File Upload Settings
-FILE_UPLOAD_MAX_MEMORY_SIZE = int(getenv('FILE_UPLOAD_MAX_MEMORY_SIZE', '5242880'))  # 5MB
-DATA_UPLOAD_MAX_MEMORY_SIZE = int(getenv('DATA_UPLOAD_MAX_MEMORY_SIZE', '5242880'))  # 5MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = int(getenv('FILE_UPLOAD_MAX_MEMORY_SIZE', '52428800'))  # 50MB for import files
+DATA_UPLOAD_MAX_MEMORY_SIZE = int(getenv('DATA_UPLOAD_MAX_MEMORY_SIZE', '52428800'))  # 50MB for import files
+
+# Import-Export Settings
+IMPORT_EXPORT_USE_TRANSACTIONS = True
+IMPORT_EXPORT_SKIP_ADMIN_LOG = False
+IMPORT_EXPORT_TMP_STORAGE_CLASS = 'import_export.tmp_storages.TempFolderStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

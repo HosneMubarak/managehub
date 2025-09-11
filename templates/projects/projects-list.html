@@ -356,7 +356,7 @@
 }
 
 /* Dark mode support for success animation */
-[data-theme-mode=dark] @keyframes successPulse {
+@keyframes successPulseDark {
     0% {
         background-color: rgba(25, 135, 84, 0.3);
         transform: scale(1);
@@ -369,6 +369,10 @@
         background-color: transparent;
         transform: scale(1);
     }
+}
+
+[data-theme-mode=dark] .field-updated {
+    animation: successPulseDark 1.5s ease-out;
 }
 
 .field-updated {
@@ -428,6 +432,16 @@
         font-size: 10px;
         padding: 3px 8px;
     }
+    
+    .team-members-display {
+        min-width: 180px;
+        max-width: 220px;
+    }
+    
+    .assign-team-btn {
+        font-size: 10px;
+        padding: 3px 6px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -464,6 +478,53 @@
         font-size: 10px;
         padding: 4px 8px;
     }
+    
+    /* Team assignment responsive */
+    .team-members-display {
+        min-width: 150px;
+        max-width: 180px;
+    }
+    
+    .assign-team-btn {
+        font-size: 9px;
+        padding: 2px 4px;
+    }
+    
+    .assign-team-btn .ri-user-add-line {
+        margin-right: 2px;
+    }
+    
+    .team-member-item {
+        padding: 2px 4px;
+    }
+    
+    .team-member-item .fw-medium {
+        font-size: 11px;
+    }
+    
+    .remove-member-btn {
+        padding: 1px 3px;
+        font-size: 8px;
+    }
+    
+    /* Modal responsive */
+    .modal-dialog.modal-lg {
+        max-width: 90%;
+        margin: 1rem auto;
+    }
+    
+    .user-select-item {
+        padding: 6px 8px;
+        margin-bottom: 4px;
+    }
+    
+    .user-select-item .fw-medium {
+        font-size: 13px;
+    }
+    
+    .user-select-item .text-muted {
+        font-size: 11px;
+    }
 }
 
 @media (max-width: 576px) {
@@ -477,6 +538,73 @@
     
     .table-responsive {
         border-radius: 6px;
+    }
+    
+    /* Team assignment mobile */
+    .team-members-display {
+        min-width: 120px;
+        max-width: 150px;
+    }
+    
+    .assign-team-btn {
+        font-size: 8px;
+        padding: 2px 3px;
+    }
+    
+    .assign-team-btn .ri-user-add-line {
+        display: none; /* Hide icon on very small screens */
+    }
+    
+    .team-member-item .avatar {
+        width: 16px;
+        height: 16px;
+        font-size: 8px;
+    }
+    
+    .team-member-item .fw-medium {
+        font-size: 10px;
+    }
+    
+    /* Modal mobile */
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+    
+    .modal-body {
+        padding: 1rem 0.75rem;
+    }
+    
+    .modal-footer {
+        padding: 0.75rem;
+    }
+    
+    .user-select-item {
+        padding: 4px 6px;
+        margin-bottom: 3px;
+    }
+    
+    .user-select-item .avatar {
+        width: 24px;
+        height: 24px;
+        font-size: 10px;
+    }
+    
+    .user-select-item .fw-medium {
+        font-size: 12px;
+    }
+    
+    .user-select-item .text-muted {
+        font-size: 10px;
+    }
+    
+    /* Stack modal buttons on mobile */
+    .modal-footer .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .modal-footer .btn:last-child {
+        margin-bottom: 0;
     }
 }
 
@@ -654,6 +782,198 @@
 
 [data-theme-mode=dark] .table-responsive::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.5);
+}
+
+/* Team Assignment Styling */
+.team-members-display {
+    min-width: 220px;
+    max-width: 280px;
+}
+
+.assign-team-btn {
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.assign-team-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.2);
+}
+
+.team-member-item {
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.team-member-item:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+    border-color: rgba(13, 110, 253, 0.1);
+}
+
+.remove-member-btn {
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    padding: 2px 4px;
+    font-size: 10px;
+}
+
+.team-member-item:hover .remove-member-btn {
+    opacity: 1;
+    visibility: visible;
+}
+
+.remove-member-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Dark mode support for team assignment */
+[data-theme-mode=dark] .team-member-item:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+    border-color: rgba(13, 110, 253, 0.2);
+}
+
+[data-theme-mode=dark] .assign-team-btn:hover {
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+}
+
+/* Multi-select styling */
+.user-select-item {
+    padding: 8px 12px;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-select-item:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+    border-color: #0d6efd;
+}
+
+.user-select-item.selected {
+    background-color: rgba(13, 110, 253, 0.1);
+    border-color: #0d6efd;
+}
+
+.user-select-item input[type="checkbox"] {
+    margin: 0;
+}
+
+/* Dark mode support for multi-select */
+[data-theme-mode=dark] .user-select-item {
+    border-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(var(--body-bg-rgb));
+}
+
+[data-theme-mode=dark] .user-select-item:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+    border-color: #0d6efd;
+}
+
+[data-theme-mode=dark] .user-select-item.selected {
+    background-color: rgba(13, 110, 253, 0.15);
+    border-color: #0d6efd;
+}
+
+/* Team Member Badge Styling */
+.team-member-badge {
+    position: relative;
+    padding: 6px 12px;
+    margin: 4px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(13, 110, 253, 0.2);
+}
+
+.team-member-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.2);
+}
+
+.remove-team-member-btn {
+    position: relative;
+    padding: 2px 4px;
+    margin-left: 4px;
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.remove-team-member-btn:hover {
+    background: rgba(220, 53, 69, 0.8);
+    transform: scale(1.1);
+}
+
+.remove-team-member-btn:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+}
+
+.remove-team-member-btn:active {
+    transform: scale(0.95);
+}
+
+/* Dark mode support for team member badges */
+[data-theme-mode=dark] .team-member-badge {
+    border-color: rgba(13, 110, 253, 0.3);
+}
+
+[data-theme-mode=dark] .team-member-badge:hover {
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+}
+
+[data-theme-mode=dark] .remove-team-member-btn {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme-mode=dark] .remove-team-member-btn:hover {
+    background: rgba(220, 53, 69, 0.9);
+}
+
+[data-theme-mode=dark] .remove-team-member-btn:focus {
+    outline-color: rgba(255, 255, 255, 0.9);
+}
+
+/* Responsive styling for remove buttons */
+@media (max-width: 768px) {
+    .remove-team-member-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 14px;
+        padding: 3px 5px;
+    }
+}
+
+@media (max-width: 576px) {
+    .team-member-badge {
+        padding: 4px 8px;
+        margin: 2px;
+        font-size: 12px;
+    }
+    
+    .remove-team-member-btn {
+        width: 22px;
+        height: 22px;
+        font-size: 13px;
+        margin-left: 2px;
+    }
 }
 </style>
 {% endblock %}
@@ -882,20 +1202,55 @@
                                         </td>
                                         <td>
                                             <div class="team-members-display">
-                                                {% for user in project.assigned_users.all %}
-                                                    <div class="team-member-item mb-1 d-flex align-items-center">
-                                                        {% if user.avatar %}
-                                                            <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name }}" class="avatar avatar-xs rounded-circle me-2">
+                                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                                    <div class="team-count">
+                                                        {% if project.assigned_users.count > 0 %}
+                                                            <span class="badge bg-primary-transparent">{{ project.assigned_users.count }} member{{ project.assigned_users.count|pluralize }}</span>
                                                         {% else %}
-                                                            <span class="avatar avatar-xs rounded-circle bg-primary text-white me-2 d-flex align-items-center justify-content-center">
-                                                                {{ user.first_name|first }}{{ user.last_name|first }}
-                                                            </span>
+                                                            <span class="text-muted fs-12">No members</span>
                                                         {% endif %}
-                                                        <span class="fw-medium text-dark">{{ user.get_full_name }}</span>
                                                     </div>
-                                                {% empty %}
-                                                    <span class="text-muted">No team members</span>
-                                                {% endfor %}
+                                                    <button class="btn btn-sm btn-outline-primary assign-team-btn" 
+                                                            data-project-id="{{ project.id }}"
+                                                            data-project-name="{{ project.name }}"
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#assignTeamModal"
+                                                            title="Assign Team Members"
+                                                            aria-label="Assign team members to {{ project.name }}">
+                                                        <i class="ri-user-add-line me-1" aria-hidden="true"></i>Assign
+                                                    </button>
+                                                </div>
+                                                
+                                                <!-- Team Members List -->
+                                                <div class="team-members-list">
+                                                    {% for user in project.assigned_users.all %}
+                                                        <div class="team-member-item mb-1 d-flex align-items-center justify-content-between">
+                                                            <div class="d-flex align-items-center">
+                                                                {% if user.avatar %}
+                                                                    <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name }}" class="avatar avatar-xs rounded-circle me-2">
+                                                                {% else %}
+                                                                    <span class="avatar avatar-xs rounded-circle bg-primary text-white me-2 d-flex align-items-center justify-content-center">
+                                                                        {{ user.first_name|first }}{{ user.last_name|first }}
+                                                                    </span>
+                                                                {% endif %}
+                                                                <span class="fw-medium text-dark fs-12">{{ user.get_full_name }}</span>
+                                                            </div>
+                                                            <button class="btn btn-sm btn-icon btn-outline-danger remove-member-btn" 
+                                                                    data-project-id="{{ project.id }}"
+                                                                    data-user-id="{{ user.id }}"
+                                                                    data-user-name="{{ user.get_full_name }}"
+                                                                    title="Remove {{ user.get_full_name }}"
+                                                                    aria-label="Remove {{ user.get_full_name }} from project">
+                                                                <i class="ri-close-line" aria-hidden="true"></i>
+                                                            </button>
+                                                        </div>
+                                                    {% empty %}
+                                                        <div class="text-center py-2">
+                                                            <i class="ri-user-add-line fs-24 text-muted" aria-hidden="true"></i>
+                                                            <p class="text-muted fs-12 mb-0">Click Assign to add members</p>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
                                             </div>
                                         </td>
                                         <td>
@@ -1055,6 +1410,103 @@
             {% endif %}
         </ul>
     {% endif %}
+
+    <!-- Team Assignment Modal -->
+    <div class="modal fade" id="assignTeamModal" tabindex="-1" aria-labelledby="assignTeamModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="assignTeamModalLabel">
+                        <i class="ri-user-add-line me-2"></i>Assign Team Members
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <h6 class="fw-medium mb-2">Project: <span id="modalProjectName" class="text-primary"></span></h6>
+                    </div>
+                    
+                    <!-- Search Box -->
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="ri-search-line"></i>
+                            </span>
+                            <input type="text" class="form-control" id="userSearchInput" placeholder="Search users by name..." aria-label="Search users by name">
+                        </div>
+                    </div>
+                    
+                    <!-- Current Team Members -->
+                    <div id="currentTeamSection" class="mb-4">
+                        <h6 class="fw-medium mb-2">Current Team Members</h6>
+                        <div id="currentTeamList" class="d-flex flex-wrap gap-2">
+                            <!-- Current team members will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Available Users -->
+                    <div>
+                        <h6 class="fw-medium mb-2">Available Users</h6>
+                        <div id="availableUsersList" class="user-selection-container" style="max-height: 300px; overflow-y: auto;">
+                            <!-- Available users will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Loading State -->
+                    <div id="modalLoadingState" class="text-center py-4 d-none">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-muted mt-2">Loading users...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="ri-close-line me-1"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary" id="saveTeamAssignments">
+                        <i class="ri-save-line me-1"></i>Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Remove Member Confirmation Modal -->
+    <div class="modal fade" id="removeMemberModal" tabindex="-1" aria-labelledby="removeMemberModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="removeMemberModalLabel">
+                        <i class="ri-user-unfollow-line me-2 text-danger"></i>Remove Team Member
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center py-3">
+                        <div class="avatar avatar-xl avatar-rounded bg-danger-transparent mb-3">
+                            <i class="ri-user-unfollow-line fs-24"></i>
+                        </div>
+                        <h6 class="fw-medium mb-2">Remove Team Member</h6>
+                        <p class="text-muted mb-0">
+                            Are you sure you want to remove <strong id="memberNameToRemove"></strong> from this project?
+                        </p>
+                        <p class="text-muted fs-12 mt-2">
+                            This action cannot be undone. The user will lose access to this project.
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="ri-close-line me-1"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-danger" id="confirmRemoveMember">
+                        <i class="ri-user-unfollow-line me-1"></i>Remove Member
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 {% endblock %}
 
@@ -1587,6 +2039,337 @@ document.addEventListener('DOMContentLoaded', function() {
             </p>
         `;
     }
+    
+    // Team Assignment Functionality
+    let currentProjectId = null;
+    let currentProjectTeam = [];
+    let availableUsers = [];
+    let selectedUsers = new Set();
+    
+    // Handle assign team button clicks
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.assign-team-btn')) {
+            const btn = e.target.closest('.assign-team-btn');
+            currentProjectId = btn.dataset.projectId;
+            const projectName = btn.dataset.projectName;
+            
+            // Update modal title
+            document.getElementById('modalProjectName').textContent = projectName;
+            
+            // Load team data
+            loadTeamAssignmentData(currentProjectId);
+        }
+        
+        // Handle remove member button clicks
+        if (e.target.closest('.remove-member-btn')) {
+            const btn = e.target.closest('.remove-member-btn');
+            const projectId = btn.dataset.projectId;
+            const userId = btn.dataset.userId;
+            const userName = btn.dataset.userName;
+            
+            // Show confirmation modal
+            document.getElementById('memberNameToRemove').textContent = userName;
+            document.getElementById('confirmRemoveMember').onclick = function() {
+                removeMemberFromProject(projectId, userId, userName);
+            };
+            
+            const modal = new bootstrap.Modal(document.getElementById('removeMemberModal'));
+            modal.show();
+        }
+    });
+    
+    // Load team assignment data
+    function loadTeamAssignmentData(projectId) {
+        const modalLoadingState = document.getElementById('modalLoadingState');
+        const currentTeamList = document.getElementById('currentTeamList');
+        const availableUsersList = document.getElementById('availableUsersList');
+        
+        // Show loading state
+        modalLoadingState.classList.remove('d-none');
+        currentTeamList.innerHTML = '';
+        availableUsersList.innerHTML = '';
+        
+        // Fetch project team and available users
+        fetch(`/projects/${projectId}/team-data/`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                currentProjectTeam = data.current_team || [];
+                availableUsers = data.available_users || [];
+                selectedUsers.clear();
+                
+                // Populate current team
+                populateCurrentTeam();
+                
+                // Populate available users
+                populateAvailableUsers();
+                
+                // Hide loading state
+                modalLoadingState.classList.add('d-none');
+            } else {
+                showErrorMessage(data.error || 'Failed to load team data');
+                modalLoadingState.classList.add('d-none');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorMessage('Network error occurred');
+            modalLoadingState.classList.add('d-none');
+        });
+    }
+    
+    // Populate current team members
+    function populateCurrentTeam() {
+        const currentTeamList = document.getElementById('currentTeamList');
+        
+        if (currentProjectTeam.length === 0) {
+            currentTeamList.innerHTML = '<span class="text-muted">No team members assigned</span>';
+            return;
+        }
+        
+        currentTeamList.innerHTML = currentProjectTeam.map(user => `
+            <span class="badge bg-primary-transparent d-flex align-items-center gap-2 team-member-badge" data-user-id="${user.id}">
+                ${user.avatar ? 
+                    `<img src="${user.avatar}" alt="${user.name}" class="avatar avatar-xs rounded-circle">` :
+                    `<span class="avatar avatar-xs rounded-circle bg-primary text-white d-flex align-items-center justify-content-center">
+                        ${user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                    </span>`
+                }
+                <span>${user.name}</span>
+            </span>
+        `).join('');
+        
+    }
+    
+    // Populate available users
+    function populateAvailableUsers() {
+        const availableUsersList = document.getElementById('availableUsersList');
+        
+        if (availableUsers.length === 0) {
+            availableUsersList.innerHTML = '<p class="text-muted text-center py-3">No available users to assign</p>';
+            return;
+        }
+        
+        availableUsersList.innerHTML = availableUsers.map(user => `
+            <div class="user-select-item" data-user-id="${user.id}">
+                <input type="checkbox" class="form-check-input" id="user_${user.id}">
+                ${user.avatar ? 
+                    `<img src="${user.avatar}" alt="${user.name}" class="avatar avatar-sm rounded-circle">` :
+                    `<span class="avatar avatar-sm rounded-circle bg-primary text-white d-flex align-items-center justify-content-center">
+                        ${user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                    </span>`
+                }
+                <div class="flex-fill">
+                    <div class="fw-medium">${user.name}</div>
+                    <div class="text-muted fs-12">${user.email || 'Team Member'}</div>
+                </div>
+            </div>
+        `).join('');
+        
+        // Add click handlers for user selection
+        availableUsersList.querySelectorAll('.user-select-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (e.target.type !== 'checkbox') {
+                    const checkbox = this.querySelector('input[type="checkbox"]');
+                    checkbox.checked = !checkbox.checked;
+                }
+                
+                const userId = this.dataset.userId;
+                const checkbox = this.querySelector('input[type="checkbox"]');
+                
+                if (checkbox.checked) {
+                    selectedUsers.add(userId);
+                    this.classList.add('selected');
+                } else {
+                    selectedUsers.delete(userId);
+                    this.classList.remove('selected');
+                }
+            });
+        });
+    }
+    
+    // Remove from current team
+    function removeFromCurrentTeam(userId) {
+        try {
+            // Find the user data before removing from the array
+            const userToRemove = currentProjectTeam.find(user => user.id === userId);
+            
+            if (!userToRemove) {
+                console.warn('User not found in current team:', userId);
+                showToast('User not found in current team', 'error');
+                return;
+            }
+            
+            // Add fade-out animation to the badge
+            const badgeElement = document.querySelector(`[data-user-id="${userId}"]`);
+            if (badgeElement) {
+                badgeElement.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                badgeElement.style.opacity = '0';
+                badgeElement.style.transform = 'scale(0.8)';
+            }
+            
+            // Remove after animation completes
+            setTimeout(() => {
+                try {
+                    // Remove from current team array
+                    currentProjectTeam = currentProjectTeam.filter(user => user.id !== userId);
+                    
+                    // Add back to available users if not already there
+                    const userExists = availableUsers.find(user => user.id === userId);
+                    if (!userExists) {
+                        availableUsers.push(userToRemove);
+                    }
+                    
+                    // Remove from selected users set if it was selected
+                    selectedUsers.delete(userId);
+                    
+                    // Update both displays
+                    populateCurrentTeam();
+                    populateAvailableUsers();
+                    
+                    // Show success feedback
+                    showToast(`${userToRemove.name} removed from team`, 'success');
+                } catch (error) {
+                    console.error('Error removing team member:', error);
+                    showToast('Failed to remove team member', 'error');
+                }
+            }, 300);
+        } catch (error) {
+            console.error('Error in removeFromCurrentTeam:', error);
+            showToast('An error occurred while removing the team member', 'error');
+        }
+    }
+    
+    // Handle keyboard navigation for remove buttons
+    function handleRemoveKeydown(event, userId) {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            removeFromCurrentTeam(userId);
+        }
+    }
+    
+    // Handle user search
+    document.getElementById('userSearchInput').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const userItems = document.querySelectorAll('.user-select-item');
+        
+        userItems.forEach(item => {
+            const userName = item.querySelector('.fw-medium').textContent.toLowerCase();
+            const userEmail = item.querySelector('.text-muted').textContent.toLowerCase();
+            
+            if (userName.includes(searchTerm) || userEmail.includes(searchTerm)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+    
+    // Save team assignments
+    document.getElementById('saveTeamAssignments').addEventListener('click', function() {
+        if (!currentProjectId) return;
+        
+        const btn = this;
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ri-loader-4-line me-1 spin"></i>Saving...';
+        
+        // Prepare data
+        const currentTeamIds = currentProjectTeam.map(user => user.id);
+        const selectedUserIds = Array.from(selectedUsers);
+        const finalTeamIds = [...currentTeamIds, ...selectedUserIds];
+        
+        // Send assignment request
+        const formData = new FormData();
+        formData.append('users', JSON.stringify(finalTeamIds));
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        
+        fetch(`/projects/${currentProjectId}/bulk-assign/`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccessMessage('Team assignments updated successfully');
+                
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('assignTeamModal'));
+                modal.hide();
+                
+                // Refresh the page to show updated team members
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                showErrorMessage(data.error || 'Failed to update team assignments');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorMessage('Network error occurred');
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        });
+    });
+    
+    // Remove member from project
+    function removeMemberFromProject(projectId, userId, userName) {
+        const formData = new FormData();
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        
+        fetch(`/projects/${projectId}/assignment/${userId}/remove-ajax/`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccessMessage(`${userName} removed from project successfully`);
+                
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('removeMemberModal'));
+                modal.hide();
+                
+                // Refresh the page to show updated team members
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                showErrorMessage(data.error || 'Failed to remove team member');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorMessage('Network error occurred');
+        });
+    }
+    
+    // Add CSS for spinning animation
+    const style = document.createElement('style');
+    style.textContent = `
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
 });
 </script>
 {% endblock %}

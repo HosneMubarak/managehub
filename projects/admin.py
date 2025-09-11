@@ -1,18 +1,25 @@
 from django.contrib import admin
+from import_export.admin import ImportExportModelAdmin, ExportActionMixin
 from .models import (
     BusinessArea, ProjectType,
     Project, ProjectComment, ProjectStatusHistory
 )
+from .resources import (
+    BusinessAreaResource, ProjectTypeResource, ProjectResource, 
+    ProjectCommentResource
+)
 
 @admin.register(BusinessArea)
-class BusinessAreaAdmin(admin.ModelAdmin):
+class BusinessAreaAdmin(ImportExportModelAdmin):
+    resource_class = BusinessAreaResource
     list_display = ['name', 'is_active', 'created_at']
     list_filter = ['is_active', 'created_at']
     search_fields = ['name', 'description']
     ordering = ['name']
 
 @admin.register(ProjectType)
-class ProjectTypeAdmin(admin.ModelAdmin):
+class ProjectTypeAdmin(ImportExportModelAdmin):
+    resource_class = ProjectTypeResource
     list_display = ['name', 'description']
     search_fields = ['name', 'description']
     ordering = ['name']
@@ -24,7 +31,8 @@ class ProjectCommentInline(admin.TabularInline):
     readonly_fields = ['author']
 
 @admin.register(Project)
-class ProjectAdmin(admin.ModelAdmin):
+class ProjectAdmin(ImportExportModelAdmin):
+    resource_class = ProjectResource
     list_display = [
         'project_id', 'name', 'business_area', 'project_manager', 
         'status', 'priority', 'start_date', 'estimated_end_date', 'created_at'
@@ -53,6 +61,10 @@ class ProjectAdmin(admin.ModelAdmin):
         ('Timeline', {
             'fields': ('start_date', 'estimated_end_date', 'actual_end_date', 'week_commencing')
         }),
+        ('Additional Fields', {
+            'fields': ('clarity', 'timeline', 't_code', 'ipbss_remedy'),
+            'classes': ('collapse',)
+        }),
         ('Metadata', {
             'fields': ('created_by',),
             'classes': ('collapse',)
@@ -68,7 +80,8 @@ class ProjectAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
 @admin.register(ProjectComment)
-class ProjectCommentAdmin(admin.ModelAdmin):
+class ProjectCommentAdmin(ImportExportModelAdmin):
+    resource_class = ProjectCommentResource
     list_display = ['project', 'author', 'created_at']
     list_filter = ['created_at']
     search_fields = ['project__name', 'project__project_id', 'author__first_name', 'author__last_name', 'comment']

@@ -16,4 +16,9 @@ urlpatterns = [
     path('<uuid:pk>/assign/', views.manage_project_assignment, name='manage_assignment'),
     path('<uuid:pk>/assignment/<uuid:user_id>/remove/', views.remove_project_assignment, name='remove_assignment'),
     path('<uuid:pk>/update-field/', views.update_project_field, name='update_field'),
+    
+    # Team assignment endpoints for project list
+    path('<uuid:pk>/team-data/', views.get_project_team_data, name='team_data'),
+    path('<uuid:pk>/bulk-assign/', views.bulk_assign_users, name='bulk_assign'),
+    path('<uuid:pk>/assignment/<uuid:user_id>/remove-ajax/', views.remove_project_assignment_ajax, name='remove_assignment_ajax'),
 ]

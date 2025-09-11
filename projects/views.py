@@ -295,3 +295,99 @@ def update_project_field(request, pk):
             return JsonResponse({'success': False, 'error': str(e)})
     
     return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+def get_project_team_data(request, pk):
+    """Get project team data for assignment modal"""
+    if request.method == 'GET' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        project = get_object_or_404(Project, id=pk)
+        
+        try:
+            # Get current team members
+            current_team = []
+            for user in project.assigned_users.all():
+                current_team.append({
+                    'id': str(user.id),
+                    'name': user.get_full_name() or user.username,
+                    'email': user.email,
+                    'avatar': user.avatar.url if user.avatar else None
+                })
+            
+            # Get available users (not assigned to this project)
+            available_users = []
+            for user in User.objects.filter(is_active=True).exclude(
+                id__in=project.assigned_users.values_list('id', flat=True)
+            ):
+                available_users.append({
+                    'id': str(user.id),
+                    'name': user.get_full_name() or user.username,
+                    'email': user.email,
+                    'avatar': user.avatar.url if user.avatar else None
+                })
+            
+            return JsonResponse({
+                'success': True,
+                'current_team': current_team,
+                'available_users': available_users
+            })
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+def bulk_assign_users(request, pk):
+    """Bulk assign users to project"""
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        project = get_object_or_404(Project, id=pk)
+        
+        try:
+            import json
+            user_ids_json = request.POST.get('users', '[]')
+            user_ids = json.loads(user_ids_json)
+            
+            # Validate user IDs and get user objects
+            users = User.objects.filter(id__in=user_ids, is_active=True)
+            
+            # Clear current assignments and set new ones
+            project.assigned_users.set(users)
+            
+            # Prepare response data
+            assigned_count = users.count()
+            user_names = [user.get_full_name() or user.username for user in users]
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'Successfully assigned {assigned_count} users to project',
+                'assigned_users': user_names
+            })
+            
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'error': 'Invalid user data format'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+def remove_project_assignment_ajax(request, pk, user_id):
+    """Remove user from project via AJAX"""
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        project = get_object_or_404(Project, id=pk)
+        
+        try:
+            user = User.objects.get(id=user_id)
+            if project.assigned_users.filter(id=user.id).exists():
+                project.assigned_users.remove(user)
+                user_name = user.get_full_name() or user.username
+                return JsonResponse({
+                    'success': True,
+                    'message': f'{user_name} removed from project successfully'
+                })
+            else:
+                return JsonResponse({'success': False, 'error': 'User is not assigned to this project'})
+                
+        except User.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'User not found'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
