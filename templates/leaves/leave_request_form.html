@@ -1,0 +1,279 @@
+{% extends 'components/base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if object %}Edit Leave Request{% else %}New Leave Request{% endif %} - ManageHub
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <h4 class="page-title">
+                    {% if object %}Edit Leave Request{% else %}Request Leave{% endif %}
+                </h4>
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'leaves:dashboard' %}">Leave</a></li>
+                        <li class="breadcrumb-item active">
+                            {% if object %}Edit Request{% else %}New Request{% endif %}
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="header-title">
+                        {% if object %}Edit Leave Request{% else %}Leave Request Form{% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="leave-request-form">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.leave_type.id_for_label }}" class="form-label">
+                                        Leave Type <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.leave_type }}
+                                    {% if form.leave_type.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.leave_type.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">{{ form.leave_type.help_text }}</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Leave Balance</label>
+                                    <div id="balance-info" class="p-2 bg-light rounded">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Available:</span>
+                                            <span id="available-days" class="fw-bold">-</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Used:</span>
+                                            <span id="used-days">-</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Pending:</span>
+                                            <span id="pending-days">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.start_date.id_for_label }}" class="form-label">
+                                        Start Date <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.start_date }}
+                                    {% if form.start_date.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.start_date.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">{{ form.start_date.help_text }}</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.end_date.id_for_label }}" class="form-label">
+                                        End Date <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.end_date }}
+                                    {% if form.end_date.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.end_date.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">{{ form.end_date.help_text }}</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.reason.id_for_label }}" class="form-label">
+                                Reason <span class="text-danger">*</span>
+                            </label>
+                            {{ form.reason }}
+                            {% if form.reason.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.reason.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{{ form.reason.help_text }}</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="alert alert-info">
+                                <h6><i class="mdi mdi-information"></i> Leave Request Guidelines</h6>
+                                <ul class="mb-0">
+                                    <li>Leave requests must be submitted at least 24 hours in advance</li>
+                                    <li>Annual leave requests require manager approval</li>
+                                    <li>Sick leave can be submitted retroactively with proper documentation</li>
+                                    <li>Half-day leave types (.5) will automatically calculate as 0.5 days</li>
+                                    <li>Weekends are automatically excluded from duration calculations</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="text-end">
+                            <a href="{% url 'leaves:my_requests' %}" class="btn btn-light me-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                {% if object %}Update Request{% else %}Submit Request{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Leave Balance -->
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="header-title">Leave Balance</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <h5 class="text-muted">Available Days</h5>
+                        <h3 class="text-primary" id="available-days">
+                            {% if leave_summary %}{{ leave_summary.remaining_days|floatformat:1 }}{% else %}-{% endif %}
+                        </h3>
+                    </div>
+                    
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <p class="text-muted mb-1">Used</p>
+                            <h6 id="used-days">
+                                {% if leave_summary %}{{ leave_summary.approved_days|floatformat:1 }}{% else %}-{% endif %}
+                            </h6>
+                        </div>
+                        <div class="col-6">
+                            <p class="text-muted mb-1">Pending</p>
+                            <h6 id="pending-days">
+                                {% if leave_summary %}{{ leave_summary.pending_days|floatformat:1 }}{% else %}-{% endif %}
+                            </h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leave Type Legend -->
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="header-title">Leave Types</h4>
+                </div>
+                <div class="card-body">
+                    <div id="leave-types-info">
+                        {% for leave_type in leave_types %}
+                            <div class="mb-2" data-leave-type="{{ leave_type.id }}">
+                                <span class="badge rounded-pill fs-6 me-2" style="background-color: {{ leave_type.color_code }};">
+                                    {{ leave_type.code }}
+                                </span>
+                                <span>{{ leave_type.name }}</span>
+                                {% if leave_type.is_half_day %}
+                                    <small class="text-muted">(Half Day)</small>
+                                {% endif %}
+                                {% if not leave_type.is_paid %}
+                                    <small class="text-warning">(Unpaid)</small>
+                                {% endif %}
+                            </div>
+                        {% empty %}
+                            <p class="text-muted">No leave types available</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Duration Calculator -->
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="header-title">Duration Calculator</h4>
+                </div>
+                <div class="card-body">
+                    <div id="duration-info" class="text-center">
+                        <div class="mb-2">
+                            <span class="h4" id="calculated-duration">0</span>
+                            <span class="text-muted">days</span>
+                        </div>
+                        <small class="text-muted">Duration will be calculated automatically</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const leaveTypeSelect = document.getElementById('{{ form.leave_type.id_for_label }}');
+        const startDateInput = document.getElementById('{{ form.start_date.id_for_label }}');
+        const endDateInput = document.getElementById('{{ form.end_date.id_for_label }}');
+        
+        // Load leave balance when leave type changes
+        function loadLeaveBalance() {
+            if (leaveTypeSelect.value) {
+                fetch('{% url "leaves:balance_ajax" %}')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('available-days').textContent = data.remaining_days.toFixed(1);
+                        document.getElementById('used-days').textContent = data.approved_days.toFixed(1);
+                        document.getElementById('pending-days').textContent = data.pending_days.toFixed(1);
+                    })
+                    .catch(error => {
+                        console.error('Error loading balance:', error);
+                    });
+            }
+        }
+        
+        // Calculate duration when dates change
+        function calculateDuration() {
+            const startDate = new Date(startDateInput.value);
+            const endDate = new Date(endDateInput.value);
+            
+            if (startDate && endDate && startDate <= endDate) {
+                // Simple calculation - in real implementation, this would exclude weekends
+                const timeDiff = endDate.getTime() - startDate.getTime();
+                const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+                
+                document.getElementById('calculated-duration').textContent = daysDiff;
+            } else {
+                document.getElementById('calculated-duration').textContent = '0';
+            }
+        }
+        
+        // Event listeners
+        leaveTypeSelect.addEventListener('change', loadLeaveBalance);
+        startDateInput.addEventListener('change', calculateDuration);
+        endDateInput.addEventListener('change', calculateDuration);
+        
+        // Initial load
+        loadLeaveBalance();
+        calculateDuration();
+    });
+    </script>
+{% endblock %}
+
+{% block extra_js %}
+
+{% endblock %}

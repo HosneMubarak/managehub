@@ -397,14 +397,20 @@
 
   /* header dropdowns scroll */
   var myHeadernotification = document.getElementById("header-notification-scroll");
-  new SimpleBar(myHeadernotification, { autoHide: true });
+  if (myHeadernotification) {
+    new SimpleBar(myHeadernotification, { autoHide: true });
+  }
 
   var myHeaderCart = document.getElementById("header-cart-items-scroll");
-  new SimpleBar(myHeaderCart, { autoHide: true });
+  if (myHeaderCart) {
+    new SimpleBar(myHeaderCart, { autoHide: true });
+  }
   /* header dropdowns scroll */
 
-  const autoCompleteJS = new autoComplete({
-    selector: "#header-search",
+  const headerSearchElement = document.getElementById("header-search");
+  if (headerSearchElement) {
+    const autoCompleteJS = new autoComplete({
+      selector: "#header-search",
     data: {
       src: [
         "What is the meaning of life?",

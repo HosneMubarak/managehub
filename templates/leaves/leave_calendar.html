@@ -1,0 +1,110 @@
+{% extends 'components/base.html' %}
+{% load static %}
+
+{% block title %}Leave Calendar - ManageHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <h4 class="page-title">Leave Calendar - {{ month_name }}</h4>
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'leaves:dashboard' %}">Leave</a></li>
+                        <li class="breadcrumb-item active">Calendar</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            {{ filter_form.department }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ filter_form.month }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ filter_form.year }}
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary">Update Calendar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6><i class="mdi mdi-information"></i> Calendar Legend</h6>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <span class="badge bg-success me-1">AL</span> Annual Leave
+                            </div>
+                            <div class="col-md-3">
+                                <span class="badge bg-danger me-1">SL</span> Sick Leave
+                            </div>
+                            <div class="col-md-3">
+                                <span class="badge bg-warning me-1">NH</span> National Holiday
+                            </div>
+                            <div class="col-md-3">
+                                <span class="badge bg-secondary me-1">W</span> Weekend
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Day</th>
+                                    <th>Leave Requests</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for date, data in calendar_data.items %}
+                                <tr {% if data.is_weekend %}class="table-secondary"{% elif data.is_holiday %}class="table-warning"{% endif %}>
+                                    <td>{{ date|date:"M d" }}</td>
+                                    <td>{{ date|date:"l" }}</td>
+                                    <td>
+                                        {% if data.leave_requests %}
+                                            {% for request in data.leave_requests %}
+                                                <span class="badge me-1" style="background-color: {{ request.leave_type.color_code }};" 
+                                                      title="{{ request.employee.get_full_name }} - {{ request.leave_type.name }}">
+                                                    {{ request.leave_type.code }}
+                                                </span>
+                                            {% endfor %}
+                                        {% elif data.is_holiday %}
+                                            <span class="badge bg-warning">Holiday</span>
+                                        {% elif data.is_weekend %}
+                                            <span class="text-muted">Weekend</span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

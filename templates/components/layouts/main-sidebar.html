@@ -70,6 +70,32 @@
 											</li>
 										</ul>
 									</li>
+									<li class="slide has-sub">
+										<a href="javascript:void(0);" class="side-menu__item">Leave Management
+											<i class="fe fe-chevron-right side-menu__angle"></i></a>
+										<ul class="slide-menu child2">
+											<li class="slide">
+												<a href="{% url 'leaves:dashboard' %}" class="side-menu__item">Dashboard</a>
+											</li>
+											<li class="slide">
+												<a href="{% url 'leaves:create' %}" class="side-menu__item">Request Leave</a>
+											</li>
+											<li class="slide">
+												<a href="{% url 'leaves:my_requests' %}" class="side-menu__item">My Requests</a>
+											</li>
+											<li class="slide">
+												<a href="{% url 'leaves:calendar' %}" class="side-menu__item">Leave Calendar</a>
+											</li>
+											{% if user.is_staff %}
+											<li class="slide">
+												<a href="{% url 'leaves:list' %}" class="side-menu__item">All Requests</a>
+											</li>
+											<li class="slide">
+												<a href="{% url 'leaves:entitlements' %}" class="side-menu__item">Entitlements</a>
+											</li>
+											{% endif %}
+										</ul>
+									</li>
 								</ul>
 							</li>
 							<!-- End::slide -->

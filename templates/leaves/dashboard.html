@@ -1,0 +1,281 @@
+{% extends 'components/base.html' %}
+{% load static %}
+
+{% block title %}Leave Dashboard - ManageHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <h4 class="page-title">Leave Management Dashboard</h4>
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Home</a></li>
+                        <li class="breadcrumb-item active">Leave Dashboard</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leave Summary Cards -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-6">
+                            <h5 class="text-muted fw-normal mt-0 text-truncate" title="Total Available">Total Available</h5>
+                            <h3 class="my-2 py-1">{{ leave_summary.total_available|floatformat:1 }}</h3>
+                            <p class="mb-0 text-muted">
+                                <span class="text-nowrap">days this year</span>
+                            </p>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-end">
+                                <div id="total-available-chart" data-colors="#00acc1"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-6">
+                            <h5 class="text-muted fw-normal mt-0 text-truncate" title="Days Used">Days Used</h5>
+                            <h3 class="my-2 py-1">{{ leave_summary.approved_days|floatformat:1 }}</h3>
+                            <p class="mb-0 text-muted">
+                                <span class="text-success me-2">
+                                    <i class="mdi mdi-arrow-up-bold"></i> {{ leave_summary.utilization_rate|floatformat:1 }}%
+                                </span>
+                                <span class="text-nowrap">utilization</span>
+                            </p>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-end">
+                                <div id="days-used-chart" data-colors="#f1556c"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-6">
+                            <h5 class="text-muted fw-normal mt-0 text-truncate" title="Pending Requests">Pending</h5>
+                            <h3 class="my-2 py-1">{{ leave_summary.pending_days|floatformat:1 }}</h3>
+                            <p class="mb-0 text-muted">
+                                <span class="text-nowrap">days pending</span>
+                            </p>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-end">
+                                <div id="pending-chart" data-colors="#ffbc00"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-6">
+                            <h5 class="text-muted fw-normal mt-0 text-truncate" title="Remaining Days">Remaining</h5>
+                            <h3 class="my-2 py-1">{{ leave_summary.remaining_days|floatformat:1 }}</h3>
+                            <p class="mb-0 text-muted">
+                                <span class="text-nowrap">days available</span>
+                            </p>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-end">
+                                <div id="remaining-chart" data-colors="#39afd1"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Leave Requests -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="header-title">Recent Leave Requests</h4>
+                </div>
+                <div class="card-body">
+                    {% if recent_requests %}
+                        <div class="table-responsive">
+                            <table class="table table-sm table-centered mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Dates</th>
+                                        <th>Duration</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for request in recent_requests %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge" style="background-color: {{ request.leave_type.color_code }};">
+                                                {{ request.leave_type.code }}
+                                            </span>
+                                        </td>
+                                        <td>{{ request.start_date }} to {{ request.end_date }}</td>
+                                        <td>{{ request.duration_days|floatformat:1 }} days</td>
+                                        <td>
+                                            {% if request.status == 'PENDING' %}
+                                                <span class="badge bg-warning">{{ request.get_status_display }}</span>
+                                            {% elif request.status == 'APPROVED' %}
+                                                <span class="badge bg-success">{{ request.get_status_display }}</span>
+                                            {% elif request.status == 'REJECTED' %}
+                                                <span class="badge bg-danger">{{ request.get_status_display }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ request.get_status_display }}</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="{% url 'leaves:my_requests' %}" class="btn btn-light btn-sm">View All Requests</a>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="mdi mdi-calendar-clock h1 text-muted"></i>
+                            <h4 class="text-muted">No leave requests yet</h4>
+                            <p class="text-muted">Start by creating your first leave request</p>
+                            <a href="{% url 'leaves:create' %}" class="btn btn-primary">Request Leave</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions & Upcoming Leave -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="header-title">Quick Actions</h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'leaves:create' %}" class="btn btn-primary">
+                            <i class="mdi mdi-plus me-1"></i> Request Leave
+                        </a>
+                        <a href="{% url 'leaves:my_requests' %}" class="btn btn-outline-primary">
+                            <i class="mdi mdi-format-list-bulleted me-1"></i> My Requests
+                        </a>
+                        <a href="{% url 'leaves:calendar' %}" class="btn btn-outline-secondary">
+                            <i class="mdi mdi-calendar me-1"></i> Leave Calendar
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upcoming Leave -->
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="header-title">Upcoming Leave</h4>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_leave %}
+                        {% for leave in upcoming_leave %}
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-shrink-0">
+                                <span class="badge rounded-pill" style="background-color: {{ leave.leave_type.color_code }};">
+                                    {{ leave.leave_type.code }}
+                                </span>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1">{{ leave.leave_type.name }}</h6>
+                                <p class="mb-0 text-muted">
+                                    {{ leave.start_date|date:"M d" }} - {{ leave.end_date|date:"M d" }}
+                                    ({{ leave.duration_days|floatformat:1 }} days)
+                                </p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="mdi mdi-calendar-check text-muted h3"></i>
+                            <p class="text-muted mb-0">No upcoming leave scheduled</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manager Section -->
+    {% if pending_approvals %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="header-title">Pending Approvals</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-centered mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Type</th>
+                                    <th>Dates</th>
+                                    <th>Duration</th>
+                                    <th>Requested</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for request in pending_approvals %}
+                                <tr>
+                                    <td>{{ request.employee.get_full_name }}</td>
+                                    <td>
+                                        <span class="badge" style="background-color: {{ request.leave_type.color_code }};">
+                                            {{ request.leave_type.code }}
+                                        </span>
+                                    </td>
+                                    <td>{{ request.start_date }} to {{ request.end_date }}</td>
+                                    <td>{{ request.duration_days|floatformat:1 }} days</td>
+                                    <td>{{ request.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <a href="{% url 'leaves:detail' request.id %}" class="btn btn-sm btn-outline-primary">
+                                            Review
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Add any dashboard-specific JavaScript here -->
+{% endblock %}

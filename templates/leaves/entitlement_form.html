@@ -1,0 +1,162 @@
+{% extends 'components/base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if object %}Edit Entitlement{% else %}New Entitlement{% endif %} - ManageHub
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <h4 class="page-title">
+                    {% if object %}Edit Employee Entitlement{% else %}New Employee Entitlement{% endif %}
+                </h4>
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'leaves:dashboard' %}">Leave</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'leaves:entitlements' %}">Entitlements</a></li>
+                        <li class="breadcrumb-item active">
+                            {% if object %}Edit{% else %}New{% endif %}
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="header-title">
+                        {% if object %}Edit Entitlement{% else %}Employee Entitlement Form{% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.employee.id_for_label }}" class="form-label">
+                                        Employee <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.employee }}
+                                    {% if form.employee.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.employee.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.department.id_for_label }}" class="form-label">
+                                        Department <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.department }}
+                                    {% if form.department.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.department.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.year.id_for_label }}" class="form-label">
+                                        Year <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.year }}
+                                    {% if form.year.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.year.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.annual_holiday_entitlement.id_for_label }}" class="form-label">
+                                        Annual Holiday Entitlement <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.annual_holiday_entitlement }}
+                                    {% if form.annual_holiday_entitlement.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.annual_holiday_entitlement.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Days per year</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.days_carried_over.id_for_label }}" class="form-label">
+                                        Days Carried Over
+                                    </label>
+                                    {{ form.days_carried_over }}
+                                    {% if form.days_carried_over.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.days_carried_over.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">From previous year</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.time_in_lieu.id_for_label }}" class="form-label">
+                                        Time in Lieu (TIL)
+                                    </label>
+                                    {{ form.time_in_lieu }}
+                                    {% if form.time_in_lieu.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.time_in_lieu.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">TIL days available</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="alert alert-info">
+                                <h6><i class="mdi mdi-information"></i> Entitlement Information</h6>
+                                <ul class="mb-0">
+                                    <li>Annual Holiday Entitlement: Standard annual leave days for the employee</li>
+                                    <li>Days Carried Over: Unused leave days from the previous year</li>
+                                    <li>Time in Lieu: Additional days earned through overtime or special circumstances</li>
+                                    <li>Total available days will be calculated automatically</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="text-end">
+                            <a href="{% url 'leaves:entitlements' %}" class="btn btn-light me-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                {% if object %}Update Entitlement{% else %}Create Entitlement{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -9,6 +9,7 @@ urlpatterns = [
     path('', include('dashboard.urls')),
     path('projects/', include('projects.urls')),
     path('users/', include('users.urls')),
+    path('leaves/', include('leaves.urls')),
 ]
 
 admin.site.site_header = "ManageHub Admin"
