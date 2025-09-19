@@ -488,6 +488,77 @@ class LeaveReportService:
         }
     
     @staticmethod
+    def process_year_end_carry_over(year, max_carry_over_days=None, dry_run=False):
+        """
+        Process year-end carry over for all employees
+        
+        Args:
+            year (int): The year to process carry over for (target year)
+            max_carry_over_days (Decimal): Maximum days that can be carried over
+            dry_run (bool): If True, don't save changes, just return what would be processed
+        
+        Returns:
+            dict: Summary of carry over processing
+        """
+        from decimal import Decimal
+        
+        results = {
+            'processed_employees': 0,
+            'total_days_carried_over': Decimal('0.0'),
+            'employees_with_carry_over': [],
+            'employees_without_previous_year': [],
+            'errors': []
+        }
+        
+        # Get all entitlements for the target year
+        entitlements = EmployeeEntitlement.objects.filter(year=year)
+        
+        for entitlement in entitlements:
+            try:
+                # Calculate carry over days
+                unused_days = entitlement.calculate_unused_days_from_previous_year()
+                
+                if unused_days > 0:
+                    # Apply maximum carry over limit if specified
+                    if max_carry_over_days is not None:
+                        carry_over_days = min(unused_days, Decimal(str(max_carry_over_days)))
+                    else:
+                        carry_over_days = unused_days
+                    
+                    if not dry_run:
+                        entitlement.days_carried_over = carry_over_days
+                        entitlement.save()
+                    
+                    results['employees_with_carry_over'].append({
+                        'employee': entitlement.employee.get_full_name(),
+                        'unused_days': float(unused_days),
+                        'carried_over_days': float(carry_over_days),
+                        'capped': unused_days > carry_over_days if max_carry_over_days else False
+                    })
+                    
+                    results['total_days_carried_over'] += carry_over_days
+                else:
+                    # Check if previous year entitlement exists
+                    previous_year = year - 1
+                    if not EmployeeEntitlement.objects.filter(
+                        employee=entitlement.employee, 
+                        year=previous_year
+                    ).exists():
+                        results['employees_without_previous_year'].append(
+                            entitlement.employee.get_full_name()
+                        )
+                
+                results['processed_employees'] += 1
+                
+            except Exception as e:
+                results['errors'].append({
+                    'employee': entitlement.employee.get_full_name(),
+                    'error': str(e)
+                })
+        
+        return results
+    
+    @staticmethod
     def generate_annual_summary(year, department=None):
         """
         Generate annual leave summary for all employees

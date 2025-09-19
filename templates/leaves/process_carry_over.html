@@ -1,0 +1,417 @@
+{% extends 'components/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Process Year-End Carry Over - ManageHub{% endblock %}
+
+{% block styles %}
+<style>
+    /* Enhanced Form Styling */
+    .carry-over-form {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .help-card {
+        background: linear-gradient(135deg, rgba(13, 110, 253, 0.02) 0%, rgba(13, 110, 253, 0.01) 100%);
+        border: 1px solid rgba(13, 110, 253, 0.1);
+        border-radius: 8px;
+    }
+
+    .results-table {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .results-table thead th {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: none;
+        font-weight: 600;
+        color: #495057;
+        padding: 1rem 0.75rem;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .results-table tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.02);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-content app-content">
+    <div class="container-fluid">
+        
+        <!-- Page Header -->
+        <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2">
+            <div>
+                <nav>
+                    <ol class="breadcrumb mb-1">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'leaves:dashboard' %}">Leave Management</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Process Carry Over</li>
+                    </ol>
+                </nav>
+                <h1 class="page-title fw-medium fs-18 mb-0">Year-End Carry Over Processing</h1>
+            </div>
+            <div class="btn-list">
+                <a href="{% url 'leaves:entitlements' %}" class="btn btn-light btn-wave">
+                    <i class="ri-arrow-left-line me-1"></i>Back to Entitlements
+                </a>
+            </div>
+        </div>
+        <!-- Page Header Close -->
+
+        <!-- Start::row-1 -->
+        <div class="row row-sm mt-lg-4">
+            <!-- Main Form -->
+            <div class="col-xl-8">
+                <div class="card custom-card carry-over-form">
+                    <div class="card-header d-flex align-items-center justify-content-between p-3 border-bottom">
+                        <div class="card-title mb-0">
+                            <i class="ri-calendar-event-line me-2 text-primary"></i>
+                            <span class="fw-semibold">Process Year-End Carry Over</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-info-transparent fs-11">
+                                <i class="ri-time-line me-1"></i>Year-End Processing
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Info Alert -->
+                        <div class="alert alert-primary border-0 mb-4" style="background: linear-gradient(135deg, rgba(13, 110, 253, 0.08) 0%, rgba(13, 110, 253, 0.04) 100%);">
+                            <div class="d-flex align-items-start">
+                                <span class="avatar avatar-sm bg-primary-transparent me-3 mt-1">
+                                    <i class="ri-information-line fs-14"></i>
+                                </span>
+                                <div class="flex-fill">
+                                    <h6 class="fw-semibold mb-1 text-primary">About Carry Over Processing</h6>
+                                    <p class="mb-0 text-muted fs-13">
+                                        This process automatically calculates unused leave days from the previous year 
+                                        and carries them over to the selected year. Only annual leave entitlement days 
+                                        can be carried over (not TIL or previously carried over days).
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Processing Form -->
+                        <div class="form-section">
+                            <h6 class="fw-semibold mb-3 text-dark">
+                                <i class="ri-settings-3-line me-2 text-primary"></i>Processing Configuration
+                            </h6>
+                            <form method="post" class="row g-3">
+                                {% csrf_token %}
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="ri-calendar-line me-1 text-muted"></i>Target Year
+                                </label>
+                                <select name="year" class="form-select" required>
+                                    {% for yr in years %}
+                                        <option value="{{ yr }}" {% if yr == year %}selected{% endif %}>{{ yr }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Year to process carry over for</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="ri-time-line me-1 text-muted"></i>Maximum Carry Over Days
+                                </label>
+                                <input type="number" name="max_carry_over" class="form-control" 
+                                       step="0.5" min="0" placeholder="No limit" value="{{ max_carry_over }}">
+                                <div class="form-text">Maximum days that can be carried over (optional)</div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="dry_run" id="dry_run" 
+                                           {% if dry_run %}checked{% endif %}>
+                                    <label class="form-check-label" for="dry_run">
+                                        <i class="ri-eye-line me-1"></i>Dry Run (Preview only, don't save changes)
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="force" id="force">
+                                    <label class="form-check-label" for="force">
+                                        <i class="ri-alert-line me-1"></i>Force processing (override existing carry over values)
+                                    </label>
+                                </div>
+                            </div>
+
+                                <div class="col-12 mt-4">
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        <button type="submit" class="btn btn-primary btn-wave">
+                                            <i class="ri-play-line me-1"></i>Process Carry Over
+                                        </button>
+                                        <button type="button" class="btn btn-info btn-wave" onclick="this.form.dry_run.checked=true; this.form.submit();">
+                                            <i class="ri-eye-line me-1"></i>Preview (Dry Run)
+                                        </button>
+                                        <a href="{% url 'leaves:entitlements' %}" class="btn btn-light btn-wave">
+                                            <i class="ri-arrow-left-line me-1"></i>Cancel
+                                        </a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Cards -->
+            <div class="col-xl-4">
+                <!-- How It Works Card -->
+                <div class="card custom-card help-card mb-4">
+                    <div class="card-header d-flex align-items-center p-3 border-bottom">
+                        <div class="card-title mb-0">
+                            <i class="ri-lightbulb-line me-2 text-warning"></i>
+                            <span class="fw-semibold">How It Works</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="d-flex flex-column gap-3">
+                            <div class="d-flex align-items-start gap-3">
+                                <span class="avatar avatar-sm bg-primary-transparent rounded-circle d-flex align-items-center justify-content-center">
+                                    <span class="fw-semibold fs-12">1</span>
+                                </span>
+                                <div class="flex-fill">
+                                    <div class="fw-medium fs-13 text-dark">Calculate Unused Days</div>
+                                    <div class="text-muted fs-12 mt-1">
+                                        System calculates unused annual leave days from the previous year
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex align-items-start gap-3">
+                                <span class="avatar avatar-sm bg-success-transparent rounded-circle d-flex align-items-center justify-content-center">
+                                    <span class="fw-semibold fs-12">2</span>
+                                </span>
+                                <div class="flex-fill">
+                                    <div class="fw-medium fs-13 text-dark">Apply Limits</div>
+                                    <div class="text-muted fs-12 mt-1">
+                                        If maximum carry over is set, unused days are capped at that limit
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex align-items-start gap-3">
+                                <span class="avatar avatar-sm bg-info-transparent rounded-circle d-flex align-items-center justify-content-center">
+                                    <span class="fw-semibold fs-12">3</span>
+                                </span>
+                                <div class="flex-fill">
+                                    <div class="fw-medium fs-13 text-dark">Update Entitlements</div>
+                                    <div class="text-muted fs-12 mt-1">
+                                        Carried over days are added to the target year's entitlement
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Safety Features Card -->
+                <div class="card custom-card help-card">
+                    <div class="card-header d-flex align-items-center p-3 border-bottom">
+                        <div class="card-title mb-0">
+                            <i class="ri-shield-check-line me-2 text-success"></i>
+                            <span class="fw-semibold">Safety Features</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="d-flex flex-column gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="avatar avatar-xs bg-success-transparent rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="ri-check-line fs-10 text-success"></i>
+                                </span>
+                                <span class="fs-13 text-dark">Dry run mode for testing</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="avatar avatar-xs bg-success-transparent rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="ri-check-line fs-10 text-success"></i>
+                                </span>
+                                <span class="fs-13 text-dark">Prevents negative carry over</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="avatar avatar-xs bg-success-transparent rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="ri-check-line fs-10 text-success"></i>
+                                </span>
+                                <span class="fs-13 text-dark">Only processes annual entitlement</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="avatar avatar-xs bg-success-transparent rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="ri-check-line fs-10 text-success"></i>
+                                </span>
+                                <span class="fs-13 text-dark">Detailed processing reports</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        {% if results %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card custom-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="ri-file-list-3-line me-2"></i>Processing Results
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Summary Stats -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="avatar avatar-sm bg-primary-transparent">
+                                        <i class="ri-user-line fs-16"></i>
+                                    </span>
+                                    <div>
+                                        <div class="fw-medium">{{ results.processed_employees }}</div>
+                                        <div class="text-muted fs-12">Employees Processed</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="avatar avatar-sm bg-success-transparent">
+                                        <i class="ri-calendar-check-line fs-16"></i>
+                                    </span>
+                                    <div>
+                                        <div class="fw-medium">{{ results.employees_with_carry_over|length }}</div>
+                                        <div class="text-muted fs-12">With Carry Over</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="avatar avatar-sm bg-info-transparent">
+                                        <i class="ri-time-line fs-16"></i>
+                                    </span>
+                                    <div>
+                                        <div class="fw-medium">{{ results.total_days_carried_over }}</div>
+                                        <div class="text-muted fs-12">Total Days Carried</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="avatar avatar-sm bg-warning-transparent">
+                                        <i class="ri-error-warning-line fs-16"></i>
+                                    </span>
+                                    <div>
+                                        <div class="fw-medium">{{ results.errors|length }}</div>
+                                        <div class="text-muted fs-12">Errors</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Employees with Carry Over -->
+                        {% if results.employees_with_carry_over %}
+                        <div class="mb-4">
+                            <h6 class="fw-medium mb-3">
+                                <i class="ri-check-double-line me-1 text-success"></i>
+                                Employees with Carry Over ({{ results.employees_with_carry_over|length }})
+                            </h6>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Employee</th>
+                                            <th>Unused Days</th>
+                                            <th>Carried Over</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for emp in results.employees_with_carry_over %}
+                                        <tr>
+                                            <td>{{ emp.employee }}</td>
+                                            <td>{{ emp.unused_days }} days</td>
+                                            <td>{{ emp.carried_over_days }} days</td>
+                                            <td>
+                                                {% if emp.capped %}
+                                                    <span class="badge bg-warning-transparent">Capped</span>
+                                                {% else %}
+                                                    <span class="badge bg-success-transparent">Full</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Employees without Previous Year -->
+                        {% if results.employees_without_previous_year %}
+                        <div class="mb-4">
+                            <h6 class="fw-medium mb-3">
+                                <i class="ri-information-line me-1 text-info"></i>
+                                Employees without Previous Year Entitlement ({{ results.employees_without_previous_year|length }})
+                            </h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for emp in results.employees_without_previous_year %}
+                                    <span class="badge bg-info-transparent">{{ emp }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Errors -->
+                        {% if results.errors %}
+                        <div class="mb-4">
+                            <h6 class="fw-medium mb-3">
+                                <i class="ri-error-warning-line me-1 text-danger"></i>
+                                Processing Errors ({{ results.errors|length }})
+                            </h6>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Employee</th>
+                                            <th>Error</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for error in results.errors %}
+                                        <tr>
+                                            <td>{{ error.employee }}</td>
+                                            <td class="text-danger">{{ error.error }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

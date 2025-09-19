@@ -27,6 +27,9 @@ urlpatterns = [
     # Reports
     path('reports/', views.reports_view, name='reports'),
     
+    # Carry Over Processing
+    path('process-carry-over/', views.process_carry_over_view, name='process_carry_over'),
+    
     # Leave request management endpoints
     path('requests/<uuid:pk>/comment/', views.add_comment_ajax, name='add_comment'),
     path('requests/<uuid:pk>/approve/', views.approve_leave_ajax, name='approve'),

@@ -70,6 +70,19 @@ class EmployeeEntitlement(TimeStampedModel):
         unique_together = ['employee', 'year']
         ordering = ['-year', 'employee__first_name']
     
+    def save(self, *args, **kwargs):
+        """Override save to automatically calculate carry over if not set"""
+        # Only auto-calculate if this is a new record and days_carried_over is 0
+        is_new = self.pk is None
+        
+        if is_new and self.days_carried_over == 0:
+            # Auto-calculate carry over from previous year
+            carry_over_days = self.calculate_unused_days_from_previous_year()
+            if carry_over_days > 0:
+                self.days_carried_over = carry_over_days
+        
+        super().save(*args, **kwargs)
+    
     def __str__(self):
         return f"{self.employee.get_full_name()} - {self.year}"
     
@@ -92,6 +105,46 @@ class EmployeeEntitlement(TimeStampedModel):
         """Calculate remaining entitlement"""
         return self.total_available_days - self.days_taken
     
+    def calculate_unused_days_from_previous_year(self):
+        """Calculate unused days from previous year that can be carried over"""
+        previous_year = self.year - 1
+        
+        try:
+            previous_entitlement = EmployeeEntitlement.objects.get(
+                employee=self.employee,
+                year=previous_year
+            )
+            
+            # Calculate unused days from previous year
+            # Only annual entitlement can be carried over (not TIL or already carried over days)
+            unused_days = previous_entitlement.annual_holiday_entitlement - previous_entitlement.days_taken
+            
+            # Ensure we don't carry over negative days
+            return max(Decimal('0.0'), unused_days)
+            
+        except EmployeeEntitlement.DoesNotExist:
+            # No previous year entitlement found
+            return Decimal('0.0')
+    
+    def auto_calculate_carried_over_days(self, max_carry_over=None):
+        """
+        Automatically calculate and set carried over days from previous year
+        
+        Args:
+            max_carry_over (Decimal): Maximum days that can be carried over (default: no limit)
+        
+        Returns:
+            Decimal: The calculated carried over days
+        """
+        unused_days = self.calculate_unused_days_from_previous_year()
+        
+        # Apply maximum carry over limit if specified
+        if max_carry_over is not None:
+            unused_days = min(unused_days, Decimal(str(max_carry_over)))
+        
+        self.days_carried_over = unused_days
+        return unused_days
+
     @property
     def utilization_rate(self):
         """Calculate utilization rate as percentage"""

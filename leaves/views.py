@@ -728,6 +728,62 @@ def reports_view(request):
     return render(request, 'leaves/reports.html', context)
 
 
+@login_required
+def process_carry_over_view(request):
+    """Process year-end carry over through web interface"""
+    # TODO: Re-implement proper permission checks later
+    # Currently allowing all users to process carry over for development
+    #
+    # Original permission check (commented out):
+    # if not (request.user.is_staff or request.user.is_superuser):
+    #     return HttpResponseForbidden()
+    
+    if request.method == 'POST':
+        year = int(request.POST.get('year', timezone.now().year))
+        max_carry_over = request.POST.get('max_carry_over')
+        dry_run = request.POST.get('dry_run') == 'on'
+        force = request.POST.get('force') == 'on'
+        
+        try:
+            max_carry_over_decimal = Decimal(str(max_carry_over)) if max_carry_over else None
+            
+            results = LeaveReportService.process_year_end_carry_over(
+                year=year,
+                max_carry_over_days=max_carry_over_decimal,
+                dry_run=dry_run
+            )
+            
+            if dry_run:
+                messages.info(request, f'Dry run complete - would process carry over for {len(results["employees_with_carry_over"])} employees')
+            elif results['employees_with_carry_over']:
+                messages.success(request, f'Successfully processed carry over for {len(results["employees_with_carry_over"])} employees')
+            else:
+                messages.warning(request, 'No employees had unused days to carry over')
+            
+            # Add detailed results to context
+            context = {
+                'results': results,
+                'year': year,
+                'max_carry_over': max_carry_over,
+                'dry_run': dry_run,
+                'years': range(timezone.now().year - 2, timezone.now().year + 3)
+            }
+            
+        except Exception as e:
+            messages.error(request, f'Error processing carry over: {str(e)}')
+            context = {
+                'year': year,
+                'years': range(timezone.now().year - 2, timezone.now().year + 3)
+            }
+    else:
+        context = {
+            'year': timezone.now().year,
+            'years': range(timezone.now().year - 2, timezone.now().year + 3)
+        }
+    
+    return render(request, 'leaves/process_carry_over.html', context)
+
+
 def generate_calendar_weeks(year, month, calendar_data):
     """Generate calendar weeks for grid display"""
     from collections import namedtuple
