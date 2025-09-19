@@ -6,31 +6,6 @@
 
 {% block styles %}
 <style>
-    /* Stats Cards */
-    .stats-card {
-        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
-        border: 1px solid rgba(0,0,0,0.05);
-        border-left: 4px solid #0d6efd;
-        border-radius: 0 12px 12px 0;
-        padding: 1.5rem;
-        transition: all 0.3s ease;
-    }
-
-    .stats-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        border-left-color: #6610f2;
-    }
-
-    [data-theme-mode=dark] .stats-card {
-        background: linear-gradient(135deg, rgb(var(--body-bg-rgb)) 0%, rgba(255,255,255,0.02) 100%);
-        border: 1px solid rgba(255,255,255,0.1);
-        border-left: 4px solid #0d6efd;
-    }
-
-    [data-theme-mode=dark] .stats-card:hover {
-        border-left-color: #6610f2;
-    }
 
     /* Enhanced Table Styling */
     .table-enhanced {
@@ -138,71 +113,71 @@
     <!-- Page Header Close -->
 
     <!-- Start::row-1 -->
-    <div class="row">
+    <div class="row row-sm mt-lg-4">
         <!-- Stats Cards -->
-        <div class="col-xl-3">
-            <div class="card custom-card stats-card">
+        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+            <div class="card custom-card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="me-3">
-                            <span class="avatar avatar-md bg-primary">
-                                <i class="ri-file-list-3-line fs-16"></i>
+                            <span class="avatar avatar-md bg-primary-transparent">
+                                <i class="ri-file-list-3-line fs-18"></i>
                             </span>
                         </div>
                         <div class="flex-fill">
+                            <span class="d-block fw-medium">Total Requests</span>
                             <h4 class="fw-semibold mb-0">{{ stats.total|default:0 }}</h4>
-                            <p class="text-muted mb-0">Total Requests</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-xl-3">
-            <div class="card custom-card stats-card">
+        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+            <div class="card custom-card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="me-3">
-                            <span class="avatar avatar-md bg-warning">
-                                <i class="ri-time-line fs-16"></i>
+                            <span class="avatar avatar-md bg-warning-transparent">
+                                <i class="ri-time-line fs-18"></i>
                             </span>
                         </div>
                         <div class="flex-fill">
+                            <span class="d-block fw-medium">Pending Review</span>
                             <h4 class="fw-semibold mb-0">{{ stats.pending|default:0 }}</h4>
-                            <p class="text-muted mb-0">Pending Review</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-xl-3">
-            <div class="card custom-card stats-card">
+        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+            <div class="card custom-card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="me-3">
-                            <span class="avatar avatar-md bg-success">
-                                <i class="ri-check-line fs-16"></i>
+                            <span class="avatar avatar-md bg-success-transparent">
+                                <i class="ri-check-double-line fs-18"></i>
                             </span>
                         </div>
                         <div class="flex-fill">
+                            <span class="d-block fw-medium">Approved Requests</span>
                             <h4 class="fw-semibold mb-0">{{ stats.approved|default:0 }}</h4>
-                            <p class="text-muted mb-0">Approved</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-xl-3">
-            <div class="card custom-card stats-card">
+        <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+            <div class="card custom-card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="me-3">
-                            <span class="avatar avatar-md bg-danger">
-                                <i class="ri-close-line fs-16"></i>
+                            <span class="avatar avatar-md bg-danger-transparent">
+                                <i class="ri-close-line fs-18"></i>
                             </span>
                         </div>
                         <div class="flex-fill">
+                            <span class="d-block fw-medium">Rejected Requests</span>
                             <h4 class="fw-semibold mb-0">{{ stats.rejected|default:0 }}</h4>
-                            <p class="text-muted mb-0">Rejected</p>
                         </div>
                     </div>
                 </div>
@@ -391,9 +366,13 @@
                             <ul class="pagination justify-content-end">
                                 {% if page_obj.has_previous %}
                                     <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                        <a class="page-link" href="?{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.leave_type %}leave_type={{ request.GET.leave_type }}&{% endif %}{% if request.GET.year %}year={{ request.GET.year }}&{% endif %}{% if request.GET.employee %}employee={{ request.GET.employee }}&{% endif %}{% if request.GET.start_date_from %}start_date_from={{ request.GET.start_date_from }}&{% endif %}{% if request.GET.start_date_to %}start_date_to={{ request.GET.start_date_to }}&{% endif %}page={{ page_obj.previous_page_number }}">
                                             <i class="ri-arrow-left-line"></i> Previous
                                         </a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link"><i class="ri-arrow-left-line"></i> Previous</span>
                                     </li>
                                 {% endif %}
                                 
@@ -404,16 +383,20 @@
                                         </li>
                                     {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                                         <li class="page-item">
-                                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                            <a class="page-link" href="?{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.leave_type %}leave_type={{ request.GET.leave_type }}&{% endif %}{% if request.GET.year %}year={{ request.GET.year }}&{% endif %}{% if request.GET.employee %}employee={{ request.GET.employee }}&{% endif %}{% if request.GET.start_date_from %}start_date_from={{ request.GET.start_date_from }}&{% endif %}{% if request.GET.start_date_to %}start_date_to={{ request.GET.start_date_to }}&{% endif %}page={{ num }}">{{ num }}</a>
                                         </li>
                                     {% endif %}
                                 {% endfor %}
                                 
                                 {% if page_obj.has_next %}
                                     <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                        <a class="page-link" href="?{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.leave_type %}leave_type={{ request.GET.leave_type }}&{% endif %}{% if request.GET.year %}year={{ request.GET.year }}&{% endif %}{% if request.GET.employee %}employee={{ request.GET.employee }}&{% endif %}{% if request.GET.start_date_from %}start_date_from={{ request.GET.start_date_from }}&{% endif %}{% if request.GET.start_date_to %}start_date_to={{ request.GET.start_date_to }}&{% endif %}page={{ page_obj.next_page_number }}">
                                             Next <i class="ri-arrow-right-line"></i>
                                         </a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">Next <i class="ri-arrow-right-line"></i></span>
                                     </li>
                                 {% endif %}
                             </ul>

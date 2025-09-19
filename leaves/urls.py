@@ -10,6 +10,7 @@ urlpatterns = [
     # Leave Requests
     path('requests/', views.LeaveRequestListView.as_view(), name='list'),
     path('requests/my/', views.MyLeaveRequestsView.as_view(), name='my_requests'),
+    path('requests/employee/<uuid:user_id>/', views.EmployeeLeaveRequestsView.as_view(), name='employee_requests'),
     path('requests/create/', views.LeaveRequestCreateView.as_view(), name='create'),
     path('requests/create-for-user/', views.AdminLeaveRequestCreateView.as_view(), name='admin_create'),
     path('requests/<uuid:id>/', views.LeaveRequestDetailView.as_view(), name='detail'),

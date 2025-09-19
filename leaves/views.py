@@ -4,7 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404, HttpResponseForbidden
 from django.utils import timezone
 from django.core.paginator import Paginator
 from django.db.models import Q, Count, Sum
@@ -30,7 +30,7 @@ class LeaveRequestListView(LoginRequiredMixin, ListView):
     model = LeaveRequest
     template_name = 'leaves/leave_request_list.html'
     context_object_name = 'leave_requests'
-    paginate_by = 20
+    paginate_by = 10
     
     def get_queryset(self):
         queryset = LeaveRequest.objects.select_related(
@@ -65,14 +65,17 @@ class LeaveRequestListView(LoginRequiredMixin, ListView):
         context['filter_form'] = LeaveRequestFilterForm(self.request.GET)
         
         # Add summary statistics
-        total_requests = self.get_queryset().count()
-        pending_requests = self.get_queryset().filter(status='PENDING').count()
-        approved_requests = self.get_queryset().filter(status='APPROVED').count()
+        queryset = self.get_queryset()
+        total_requests = queryset.count()
+        pending_requests = queryset.filter(status='PENDING').count()
+        approved_requests = queryset.filter(status='APPROVED').count()
+        rejected_requests = queryset.filter(status='REJECTED').count()
         
         context['stats'] = {
             'total': total_requests,
             'pending': pending_requests,
             'approved': approved_requests,
+            'rejected': rejected_requests,
         }
         
         return context
@@ -86,9 +89,25 @@ class MyLeaveRequestsView(LoginRequiredMixin, ListView):
     paginate_by = 10
     
     def get_queryset(self):
-        return LeaveRequest.objects.filter(
+        queryset = LeaveRequest.objects.filter(
             employee=self.request.user
         ).select_related('leave_type', 'approved_by').order_by('-start_date')
+        
+        # Apply filters
+        status = self.request.GET.get('status')
+        leave_type = self.request.GET.get('leave_type')
+        year = self.request.GET.get('year')
+        
+        if status:
+            queryset = queryset.filter(status=status)
+        
+        if leave_type:
+            queryset = queryset.filter(leave_type_id=leave_type)
+        
+        if year:
+            queryset = queryset.filter(start_date__year=year)
+        
+        return queryset
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -98,6 +117,73 @@ class MyLeaveRequestsView(LoginRequiredMixin, ListView):
             self.request.user
         )
         context['leave_summary'] = summary
+        
+        # Get leave requests by status
+        requests = self.get_queryset()
+        context['stats'] = {
+            'total': requests.count(),
+            'pending': requests.filter(status='PENDING').count(),
+            'approved': requests.filter(status='APPROVED').count(),
+            'rejected': requests.filter(status='REJECTED').count(),
+        }
+        
+        return context
+
+
+class EmployeeLeaveRequestsView(LoginRequiredMixin, ListView):
+    """View a specific employee's leave requests (for staff/admin)"""
+    model = LeaveRequest
+    template_name = 'leaves/employee_leave_requests.html'
+    context_object_name = 'leave_requests'
+    paginate_by = 10
+    
+    def dispatch(self, request, *args, **kwargs):
+        # Only staff can view other employees' requests
+        if not (request.user.is_staff or request.user.is_superuser):
+            return HttpResponseForbidden("You don't have permission to view this page.")
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get_queryset(self):
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        
+        # Get the employee from URL parameter
+        user_id = self.kwargs.get('user_id')
+        try:
+            # Use id field (UUID) instead of pkid
+            self.employee = User.objects.get(id=user_id, is_active=True)
+        except User.DoesNotExist:
+            raise Http404("Employee not found")
+        
+        queryset = LeaveRequest.objects.filter(
+            employee=self.employee
+        ).select_related('leave_type', 'approved_by').order_by('-start_date')
+        
+        # Apply filters
+        status = self.request.GET.get('status')
+        leave_type = self.request.GET.get('leave_type')
+        year = self.request.GET.get('year')
+        
+        if status:
+            queryset = queryset.filter(status=status)
+        
+        if leave_type:
+            queryset = queryset.filter(leave_type_id=leave_type)
+        
+        if year:
+            queryset = queryset.filter(start_date__year=year)
+        
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Get employee leave summary
+        summary = LeaveCalculationService.get_employee_leave_summary(
+            self.employee
+        )
+        context['leave_summary'] = summary
+        context['employee'] = self.employee
         
         # Get leave requests by status
         requests = self.get_queryset()
@@ -379,7 +465,7 @@ def entitlement_list_view(request):
         entitlements = entitlements.filter(department_id=department)
     
     # Paginate results
-    paginator = Paginator(entitlements, 20)
+    paginator = Paginator(entitlements, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     

@@ -104,6 +104,46 @@
         font-size: 0.75rem;
     }
 
+    /* Professional Employee Name Link */
+    .employee-name-link {
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+    .employee-name-link:hover {
+        color: #0d6efd !important;
+        text-decoration: none !important;
+    }
+
+    .employee-name-link::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: -2px;
+        left: 0;
+        background-color: #0d6efd;
+        transition: width 0.3s ease;
+    }
+
+    .employee-name-link:hover::after {
+        width: 100%;
+    }
+
+    /* Enhanced Badge Styling */
+    .badge-sm {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    .employee-info:hover {
+        background-color: rgba(13, 110, 253, 0.02);
+        border-radius: 8px;
+        padding: 0.5rem;
+        margin: -0.5rem;
+        transition: all 0.2s ease;
+    }
+
     /* Action Dropdown Styling */
     .action-dropdown .dropdown-toggle {
         border: none;
@@ -272,8 +312,30 @@
                                                     {% endif %}
                                                 </div>
                                                 <div class="employee-details">
-                                                    <h6 class="mb-0">{{ entitlement.employee.get_full_name }}</h6>
-                                                    <small class="text-muted">{{ entitlement.employee.email }}</small>
+                                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                                        <h6 class="mb-0">
+                                                            <a href="{% url 'leaves:employee_requests' entitlement.employee.id %}" 
+                                                               class="text-decoration-none text-dark fw-semibold employee-name-link"
+                                                               title="View {{ entitlement.employee.get_full_name }}'s leave requests">
+                                                                {{ entitlement.employee.get_full_name }}
+                                                            </a>
+                                                        </h6>
+                                                        <span class="badge bg-success-transparent badge-sm">
+                                                            <i class="ri-check-line"></i>
+                                                        </span>
+                                                    </div>
+                                                    <div class="d-flex align-items-center gap-2 text-muted">
+                                                        <small class="d-flex align-items-center gap-1">
+                                                            <i class="ri-mail-line fs-12"></i>
+                                                            {{ entitlement.employee.email }}
+                                                        </small>
+                                                        {% if entitlement.employee.occupation %}
+                                                            <small class="d-flex align-items-center gap-1">
+                                                                <i class="ri-briefcase-line fs-12"></i>
+                                                                {{ entitlement.employee.get_occupation_display }}
+                                                            </small>
+                                                        {% endif %}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </td>
@@ -363,25 +425,33 @@
                                     <ul class="pagination pagination-rounded">
                                         {% if entitlements.has_previous %}
                                             <li class="paginate_button page-item previous">
-                                                <a href="?page={{ entitlements.previous_page_number }}" class="page-link">Previous</a>
+                                                <a href="?{% if selected_year %}year={{ selected_year }}&{% endif %}{% if selected_department %}department={{ selected_department }}&{% endif %}page={{ entitlements.previous_page_number }}" class="page-link">Previous</a>
+                                            </li>
+                                        {% else %}
+                                            <li class="paginate_button page-item previous disabled">
+                                                <span class="page-link">Previous</span>
                                             </li>
                                         {% endif %}
                                         
                                         {% for num in entitlements.paginator.page_range %}
                                             {% if entitlements.number == num %}
                                                 <li class="paginate_button page-item active">
-                                                    <a href="#" class="page-link">{{ num }}</a>
+                                                    <span class="page-link">{{ num }}</span>
                                                 </li>
                                             {% elif num > entitlements.number|add:'-3' and num < entitlements.number|add:'3' %}
                                                 <li class="paginate_button page-item">
-                                                    <a href="?page={{ num }}" class="page-link">{{ num }}</a>
+                                                    <a href="?{% if selected_year %}year={{ selected_year }}&{% endif %}{% if selected_department %}department={{ selected_department }}&{% endif %}page={{ num }}" class="page-link">{{ num }}</a>
                                                 </li>
                                             {% endif %}
                                         {% endfor %}
                                         
                                         {% if entitlements.has_next %}
                                             <li class="paginate_button page-item next">
-                                                <a href="?page={{ entitlements.next_page_number }}" class="page-link">Next</a>
+                                                <a href="?{% if selected_year %}year={{ selected_year }}&{% endif %}{% if selected_department %}department={{ selected_department }}&{% endif %}page={{ entitlements.next_page_number }}" class="page-link">Next</a>
+                                            </li>
+                                        {% else %}
+                                            <li class="paginate_button page-item next disabled">
+                                                <span class="page-link">Next</span>
                                             </li>
                                         {% endif %}
                                     </ul>
