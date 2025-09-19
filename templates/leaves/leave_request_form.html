@@ -9,6 +9,86 @@
 {% block styles %}
     <!-- dragula css-->
     <link rel="stylesheet" href="{% static 'assets/libs/dragula/dragula.min.css'%}">
+    <style>
+        /* Form Section Styling */
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #0d6efd;
+        }
+
+        .form-section:hover {
+            border-left-color: #6610f2;
+            background: rgba(13, 110, 253, 0.04);
+            box-shadow: 0 2px 8px rgba(13, 110, 253, 0.1);
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .form-section-title {
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-section-title i {
+            margin-right: 0.5rem;
+            color: #0d6efd;
+            font-size: 1.2rem;
+        }
+
+        /* Dark mode support for form sections */
+        [data-theme-mode=dark] .form-section {
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 4px solid #0d6efd;
+        }
+
+        [data-theme-mode=dark] .form-section:hover {
+            border-left-color: #6610f2;
+            background: rgba(13, 110, 253, 0.08);
+            box-shadow: 0 2px 8px rgba(13, 110, 253, 0.2);
+        }
+
+        [data-theme-mode=dark] .form-section-title {
+            color: rgba(255, 255, 255, 0.9);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Required field indicator */
+        .required-field::after {
+            content: " *";
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        /* Form help text */
+        .form-help {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+
+        [data-theme-mode=dark] .form-help {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Progress indicator */
+        .progress-indicator {
+            background: linear-gradient(90deg, #0d6efd 0%, #6610f2 100%);
+            height: 4px;
+            border-radius: 2px;
+            margin-bottom: 2rem;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -39,155 +119,163 @@
     <!-- Start::row-1 -->
     <div class="row">
         <div class="col-xxl-8">
-            <div class="card custom-card">
-                <div class="card-header justify-content-between">
-                    <div class="card-title">
-                        {% if object %}Edit Leave Request{% else %}Leave Request Form{% endif %}
+            <form method="post" id="leave-request-form">
+                {% csrf_token %}
+                <div class="card custom-card">
+                    <div class="card-header">
+                        <div class="card-title d-flex align-items-center">
+                            <i class="ri-calendar-add-line me-2"></i>
+                            {% if object %}Edit Leave Request{% else %}Create Leave Request{% endif %}
+                        </div>
+                        <div class="progress-indicator"></div>
                     </div>
-                    <div>
-                        <span class="badge bg-info-transparent">
-                            <i class="ri-calendar-line me-1"></i>
-                            {% if object %}Editing Request{% else %}New Request{% endif %}
-                        </span>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <form method="post" id="leave-request-form">
-                        {% csrf_token %}
-                        
-                        {% if form.non_field_errors %}
-                            <div class="alert alert-danger border-0 shadow-sm">
+                    <div class="card-body">
+                        {% if form.errors %}
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                 <i class="ri-error-warning-line me-2"></i>
-                                {{ form.non_field_errors }}
+                                <strong>Please correct the following errors:</strong>
+                                <ul class="mb-0 mt-2">
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
                         {% endif %}
 
-                        <!-- Leave Type and Duration Section -->
-                        <div class="row">
-                            <div class="col-xl-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.leave_type.id_for_label }}" class="form-label">
-                                        <i class="ri-bookmark-line me-1 text-muted"></i>Leave Type <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.leave_type }}
-                                    {% if form.leave_type.errors %}
-                                        <div class="invalid-feedback d-block">
-                                            {{ form.leave_type.errors }}
-                                        </div>
-                                    {% endif %}
-                                    <small class="form-text text-muted">{{ form.leave_type.help_text }}</small>
+                        <!-- Leave Type & Duration Section -->
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="ri-bookmark-line"></i>
+                                Leave Type & Duration
+                            </h5>
+                            <div class="row">
+                                <div class="col-xl-6">
+                                    <div class="mb-0">
+                                        <label for="{{ form.leave_type.id_for_label }}" class="form-label required-field">Leave Type</label>
+                                        {{ form.leave_type }}
+                                        {% if form.leave_type.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.leave_type.errors }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-help">{{ form.leave_type.help_text }}</div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-xl-6">
-                                <div class="mb-3">
-                                    <label class="form-label">
-                                        <i class="ri-hourglass-line me-1 text-muted"></i>Calculated Duration
-                                    </label>
-                                    <div class="p-3 bg-primary-transparent rounded border">
-                                        <div class="d-flex align-items-center justify-content-center">
-                                            <span class="h4 mb-0 text-primary" id="calculated-duration">0</span>
-                                            <span class="text-muted ms-2">days</span>
+                                <div class="col-xl-6">
+                                    <div class="mb-0">
+                                        <label class="form-label">Calculated Duration</label>
+                                        <div class="p-3 bg-primary-transparent rounded border">
+                                            <div class="d-flex align-items-center justify-content-center">
+                                                <span class="h4 mb-0 text-primary" id="calculated-duration">0</span>
+                                                <span class="text-muted ms-2">days</span>
+                                            </div>
+                                            <small class="text-muted d-block text-center mt-1">
+                                                Excludes weekends and holidays
+                                            </small>
                                         </div>
-                                        <small class="text-muted d-block text-center mt-1">
-                                            Excludes weekends and holidays
-                                        </small>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Date Selection Section -->
-                        <div class="row">
-                            <div class="col-xl-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.start_date.id_for_label }}" class="form-label">
-                                        <i class="ri-calendar-check-line me-1 text-muted"></i>Start Date <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.start_date }}
-                                    {% if form.start_date.errors %}
-                                        <div class="invalid-feedback d-block">
-                                            {{ form.start_date.errors }}
-                                        </div>
-                                    {% endif %}
-                                    <small class="form-text text-muted">{{ form.start_date.help_text }}</small>
-                                </div>
-                            </div>
-                            <div class="col-xl-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.end_date.id_for_label }}" class="form-label">
-                                        <i class="ri-calendar-close-line me-1 text-muted"></i>End Date <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.end_date }}
-                                    {% if form.end_date.errors %}
-                                        <div class="invalid-feedback d-block">
-                                            {{ form.end_date.errors }}
-                                        </div>
-                                    {% endif %}
-                                    <small class="form-text text-muted">{{ form.end_date.help_text }}</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Reason Section -->
-                        <div class="mb-4">
-                            <label for="{{ form.reason.id_for_label }}" class="form-label">
-                                <i class="ri-message-3-line me-1 text-muted"></i>Reason <span class="text-danger">*</span>
-                            </label>
-                            {{ form.reason }}
-                            {% if form.reason.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ form.reason.errors }}
-                                </div>
-                            {% endif %}
-                            <small class="form-text text-muted">{{ form.reason.help_text }}</small>
-                        </div>
-
-                        <hr class="my-4">
-
-                        <!-- Guidelines Section -->
-                        <div class="mb-4">
-                            <div class="fs-15 fw-medium mb-3">
-                                <i class="ri-information-line me-2 text-primary"></i>Leave Request Guidelines
-                            </div>
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="ri-calendar-line"></i>
+                                Date Selection
+                            </h5>
                             <div class="row">
                                 <div class="col-xl-6">
-                                    <ul class="list-unstyled mb-0">
-                                        <li class="mb-2">
-                                            <i class="ri-check-line text-success me-2"></i>
-                                            <span class="text-muted">Submit at least 24 hours in advance</span>
-                                        </li>
-                                        <li class="mb-2">
-                                            <i class="ri-check-line text-success me-2"></i>
-                                            <span class="text-muted">Annual leave requires manager approval</span>
-                                        </li>
-                                        <li class="mb-2">
-                                            <i class="ri-close-line text-danger me-2"></i>
-                                            <span class="text-muted">Cannot start or end on weekends (Fri-Sat)</span>
-                                        </li>
-                                    </ul>
+                                    <div class="mb-0">
+                                        <label for="{{ form.start_date.id_for_label }}" class="form-label required-field">Start Date</label>
+                                        {{ form.start_date }}
+                                        {% if form.start_date.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.start_date.errors }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-help">{{ form.start_date.help_text }}</div>
+                                    </div>
                                 </div>
                                 <div class="col-xl-6">
-                                    <ul class="list-unstyled mb-0">
-                                        <li class="mb-2">
-                                            <i class="ri-check-line text-success me-2"></i>
-                                            <span class="text-muted">Sick leave can be submitted retroactively</span>
-                                        </li>
-                                        <li class="mb-2">
-                                            <i class="ri-check-line text-success me-2"></i>
-                                            <span class="text-muted">Weekends excluded from calculations</span>
-                                        </li>
-                                        <li class="mb-2">
-                                            <i class="ri-information-line text-info me-2"></i>
-                                            <span class="text-muted">Business days only (Mon-Fri)</span>
-                                        </li>
-                                    </ul>
+                                    <div class="mb-0">
+                                        <label for="{{ form.end_date.id_for_label }}" class="form-label required-field">End Date</label>
+                                        {{ form.end_date }}
+                                        {% if form.end_date.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.end_date.errors }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-help">{{ form.end_date.help_text }}</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Action Buttons -->
+                        <!-- Reason & Details Section -->
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="ri-message-3-line"></i>
+                                Reason & Details
+                            </h5>
+                            <div class="row">
+                                <div class="col-xl-12">
+                                    <div class="mb-0">
+                                        <label for="{{ form.reason.id_for_label }}" class="form-label required-field">Reason</label>
+                                        {{ form.reason }}
+                                        {% if form.reason.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.reason.errors }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-help">{{ form.reason.help_text }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Guidelines & Information Section -->
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="ri-information-line"></i>
+                                Guidelines & Information
+                            </h5>
+                            <div class="row">
+                                <div class="col-xl-6">
+                                    <div class="alert alert-success border-0">
+                                        <h6 class="alert-heading">
+                                            <i class="ri-check-line me-2"></i>Requirements
+                                        </h6>
+                                        <ul class="mb-0">
+                                            <li class="mb-1">Submit at least 24 hours in advance</li>
+                                            <li class="mb-1">Annual leave requires manager approval</li>
+                                            <li class="mb-0">Sick leave can be submitted retroactively</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-xl-6">
+                                    <div class="alert alert-info border-0">
+                                        <h6 class="alert-heading">
+                                            <i class="ri-calendar-line me-2"></i>Calculation Notes
+                                        </h6>
+                                        <ul class="mb-0">
+                                            <li class="mb-1">Weekends excluded from calculations</li>
+                                            <li class="mb-1">Business days only (Mon-Fri)</li>
+                                            <li class="mb-0">Cannot start or end on weekends (Fri-Sat)</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Form Footer -->
+                    <div class="card-footer bg-light">
                         <div class="d-flex justify-content-end gap-2">
-                            <a href="{% url 'leaves:my_requests' %}" class="btn btn-white btn-wave">
+                            <a href="{% url 'leaves:my_requests' %}" class="btn btn-light btn-wave">
                                 <i class="ri-arrow-left-line me-1"></i>Cancel
                             </a>
                             <button type="submit" class="btn btn-primary btn-wave">
@@ -195,9 +283,9 @@
                                 {% if object %}Update Request{% else %}Submit Request{% endif %}
                             </button>
                         </div>
-                    </form>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
 
         <div class="col-xxl-4">

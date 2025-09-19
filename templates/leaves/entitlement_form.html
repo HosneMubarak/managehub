@@ -12,9 +12,17 @@
     <style>
         /* Form Section Styling */
         .form-section {
-            margin-bottom: 2rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #0d6efd;
+        }
+
+        .form-section:hover {
+            border-left-color: #6610f2;
+            background: rgba(13, 110, 253, 0.04);
+            box-shadow: 0 2px 8px rgba(13, 110, 253, 0.1);
         }
 
         .form-section:last-child {
@@ -41,6 +49,14 @@
         /* Dark mode support for form sections */
         [data-theme-mode=dark] .form-section {
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #0d6efd;
+            background: rgba(13, 110, 253, 0.05);
+        }
+
+        [data-theme-mode=dark] .form-section:hover {
+            border-left-color: #6610f2;
+            background: rgba(13, 110, 253, 0.08);
+            box-shadow: 0 2px 8px rgba(13, 110, 253, 0.2);
         }
 
         [data-theme-mode=dark] .form-section-title {
