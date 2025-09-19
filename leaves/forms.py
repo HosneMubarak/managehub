@@ -63,6 +63,26 @@ class LeaveRequestForm(forms.ModelForm):
         end_date = cleaned_data.get('end_date')
         leave_type = cleaned_data.get('leave_type')
         
+        # Validate that start and end dates are not weekends
+        if start_date:
+            if start_date.weekday() in [4, 5]:  # Friday=4, Saturday=5 (common in many regions)
+                raise ValidationError({
+                    'start_date': 'Leave requests cannot start on weekends (Friday or Saturday).'
+                })
+        
+        if end_date:
+            if end_date.weekday() in [4, 5]:  # Friday=4, Saturday=5 (common in many regions)
+                raise ValidationError({
+                    'end_date': 'Leave requests cannot end on weekends (Friday or Saturday).'
+                })
+        
+        # Validate date range
+        if start_date and end_date:
+            if start_date > end_date:
+                raise ValidationError({
+                    'end_date': 'End date must be after or equal to start date.'
+                })
+        
         if start_date and end_date and leave_type and self.employee:
             # Check eligibility
             eligibility = LeaveCalculationService.check_leave_eligibility(
@@ -320,17 +340,17 @@ class LeaveCalendarFilterForm(forms.Form):
         queryset=Department.objects.filter(is_active=True),
         required=False,
         empty_label="All Departments",
-        widget=forms.Select(attrs={'class': 'form-control'})
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
     
     month = forms.ChoiceField(
         required=False,
-        widget=forms.Select(attrs={'class': 'form-control'})
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
     
     year = forms.ChoiceField(
         required=False,
-        widget=forms.Select(attrs={'class': 'form-control'})
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
     
     def __init__(self, *args, **kwargs):
@@ -351,6 +371,33 @@ class LeaveCalendarFilterForm(forms.Form):
             year_choices.append((year, str(year)))
         
         self.fields['year'].choices = year_choices
+    
+    def clean_month(self):
+        """Validate month field"""
+        month = self.cleaned_data.get('month')
+        if month and month != '':
+            try:
+                month_int = int(month)
+                if not (1 <= month_int <= 12):
+                    raise forms.ValidationError("Month must be between 1 and 12")
+                return month_int
+            except (ValueError, TypeError):
+                raise forms.ValidationError("Invalid month value")
+        return None
+    
+    def clean_year(self):
+        """Validate year field"""
+        year = self.cleaned_data.get('year')
+        if year and year != '':
+            try:
+                year_int = int(year)
+                current_year = timezone.now().year
+                if not (current_year - 10 <= year_int <= current_year + 10):
+                    raise forms.ValidationError(f"Year must be between {current_year - 10} and {current_year + 10}")
+                return year_int
+            except (ValueError, TypeError):
+                raise forms.ValidationError("Invalid year value")
+        return None
 
 
 class BulkLeaveImportForm(forms.Form):

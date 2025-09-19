@@ -10,7 +10,6 @@
 {% endblock %}
 
 {% block content %}
-    {% csrf_token %}
     <!-- Page Header -->
     <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2">
         <div>
@@ -25,7 +24,7 @@
         </div>
         <div class="btn-list">
             {% if leave_request.status == 'PENDING' and leave_request.employee == request.user %}
-                <a href="{% url 'leaves:edit' leave_request.id %}" class="btn btn-primary btn-wave">
+                <a href="{% url 'leaves:edit_request' leave_request.id %}" class="btn btn-primary btn-wave">
                     <i class="ri-edit-line align-middle me-1 lh-1"></i> Edit Request
                 </a>
             {% endif %}

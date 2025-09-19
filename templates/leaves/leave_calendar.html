@@ -1,42 +1,180 @@
 {% extends 'components/base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}Leave Calendar - ManageHub{% endblock %}
 
+{% block styles %}
+    <!-- dragula css-->
+    <link rel="stylesheet" href="{% static 'assets/libs/dragula/dragula.min.css'%}">
+    <style>
+    /* Professional Calendar Styling */
+    .calendar-day {
+        position: relative;
+        transition: all 0.2s ease;
+    }
+    
+    .calendar-day:hover {
+        background-color: var(--bs-light);
+    }
+    
+    .calendar-day.today {
+        background-color: rgba(var(--primary-rgb), 0.05);
+        border-color: var(--primary) !important;
+    }
+    
+    .calendar-day.weekend {
+        background-color: rgba(var(--secondary-rgb), 0.08);
+        position: relative;
+    }
+    
+    .calendar-day.weekend::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 10px,
+            rgba(var(--secondary-rgb), 0.1) 10px,
+            rgba(var(--secondary-rgb), 0.1) 20px
+        );
+        pointer-events: none;
+    }
+    
+    .calendar-day.holiday {
+        background-color: rgba(var(--warning-rgb), 0.05);
+    }
+    
+    .calendar-day.other-month {
+        background-color: rgba(var(--light-rgb), 0.5);
+        opacity: 0.6;
+    }
+    
+    .calendar-day-header {
+        background-color: var(--bs-gray-100);
+    }
+    
+    .day-number {
+        font-size: 1.1rem;
+        line-height: 1;
+    }
+    
+    .leave-item {
+        font-size: 0.75rem;
+        line-height: 1.2;
+    }
+    
+    .leave-item:hover {
+        background-color: rgba(var(--bs-dark-rgb), 0.05);
+        border-radius: 4px;
+        padding: 2px 4px;
+        margin: -2px -4px;
+    }
+    
+    .calendar-day-content {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .leave-requests {
+        flex: 1;
+        overflow: hidden;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .calendar-day-content {
+            min-height: 80px !important;
+            padding: 0.5rem !important;
+        }
+        
+        .day-number {
+            font-size: 0.9rem;
+        }
+        
+        .leave-item {
+            font-size: 0.7rem;
+        }
+        
+        .calendar-day-header .p-3 {
+            padding: 0.75rem !important;
+            font-size: 0.8rem;
+        }
+    }
+    
+    /* Calendar grid borders */
+    .calendar-day:first-child {
+        border-left: none !important;
+    }
+    
+    .calendar-body .row:last-child {
+        border-bottom: none !important;
+    }
+    
+    /* Tooltip styling */
+    .tooltip {
+        font-size: 0.75rem;
+    }
+    </style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box">
-                <h4 class="page-title">Leave Calendar - {{ month_name }}</h4>
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Home</a></li>
-                        <li class="breadcrumb-item"><a href="{% url 'leaves:dashboard' %}">Leave</a></li>
-                        <li class="breadcrumb-item active">Calendar</li>
-                    </ol>
-                </div>
-            </div>
+    <!-- Page Header -->
+    <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2">
+        <div>
+            <nav>
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'leaves:my_requests' %}">Leave Requests</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Calendar</li>
+                </ol>
+            </nav>
+            <h1 class="page-title fw-medium fs-18 mb-0">Leave Calendar - {{ month_name }}</h1>
+        </div>
+        <div class="btn-list">
+            <a href="{% url 'leaves:my_requests' %}" class="btn btn-white btn-wave me-0">
+                <i class="ri-arrow-left-line me-1"></i> Back to Requests
+            </a>
         </div>
     </div>
+    <!-- Page Header Close -->
 
     <!-- Filters -->
     <div class="row">
         <div class="col-12">
             <div class="card">
+                <div class="card-header">
+                    <h4 class="header-title">Filter Calendar</h4>
+                </div>
                 <div class="card-body">
                     <form method="get" class="row g-3">
                         <div class="col-md-4">
+                            <label for="{{ filter_form.department.id_for_label }}" class="form-label">
+                                <i class="ri-building-line me-1 text-muted"></i>Department
+                            </label>
                             {{ filter_form.department }}
                         </div>
                         <div class="col-md-3">
+                            <label for="{{ filter_form.month.id_for_label }}" class="form-label">
+                                <i class="ri-calendar-line me-1 text-muted"></i>Month
+                            </label>
                             {{ filter_form.month }}
                         </div>
                         <div class="col-md-3">
+                            <label for="{{ filter_form.year.id_for_label }}" class="form-label">
+                                <i class="ri-calendar-event-line me-1 text-muted"></i>Year
+                            </label>
                             {{ filter_form.year }}
                         </div>
-                        <div class="col-md-2">
-                            <button type="submit" class="btn btn-primary">Update Calendar</button>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="ri-search-line me-1"></i>Update Calendar
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -44,67 +182,219 @@
         </div>
     </div>
 
-    <!-- Calendar -->
-    <div class="row">
+    <!-- Calendar Navigation -->
+    <div class="row mb-3">
         <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <div class="alert alert-info">
-                        <h6><i class="mdi mdi-information"></i> Calendar Legend</h6>
-                        <div class="row">
-                            <div class="col-md-3">
-                                <span class="badge bg-success me-1">AL</span> Annual Leave
-                            </div>
-                            <div class="col-md-3">
-                                <span class="badge bg-danger me-1">SL</span> Sick Leave
-                            </div>
-                            <div class="col-md-3">
-                                <span class="badge bg-warning me-1">NH</span> National Holiday
-                            </div>
-                            <div class="col-md-3">
-                                <span class="badge bg-secondary me-1">W</span> Weekend
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-3">
+                    <a href="?month={{ prev_month }}&year={{ prev_year }}&department={{ filter_form.department.value|default:'' }}" 
+                       class="btn btn-icon btn-light btn-wave">
+                        <i class="ri-arrow-left-line"></i>
+                    </a>
+                    <h4 class="mb-0 fw-medium">{{ month_name }}</h4>
+                    <a href="?month={{ next_month }}&year={{ next_year }}&department={{ filter_form.department.value|default:'' }}" 
+                       class="btn btn-icon btn-light btn-wave">
+                        <i class="ri-arrow-right-line"></i>
+                    </a>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-primary-transparent">
+                        <i class="ri-calendar-line me-1"></i>{{ current_year }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Legend -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="ri-information-line me-2"></i>Calendar Legend
+                    </div>
+                </div>
+                <div class="card-body py-3">
+                    <div class="row g-3">
+                        <div class="col-xl-3 col-md-6">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="avatar avatar-sm bg-success-transparent">
+                                    <i class="ri-check-line fs-14"></i>
+                                </span>
+                                <span class="fw-medium">Annual Leave</span>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-sm">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Day</th>
-                                    <th>Leave Requests</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for date, data in calendar_data.items %}
-                                <tr {% if data.is_weekend %}class="table-secondary"{% elif data.is_holiday %}class="table-warning"{% endif %}>
-                                    <td>{{ date|date:"M d" }}</td>
-                                    <td>{{ date|date:"l" }}</td>
-                                    <td>
-                                        {% if data.leave_requests %}
-                                            {% for request in data.leave_requests %}
-                                                <span class="badge me-1" style="background-color: {{ request.leave_type.color_code }};" 
-                                                      title="{{ request.employee.get_full_name }} - {{ request.leave_type.name }}">
-                                                    {{ request.leave_type.code }}
-                                                </span>
-                                            {% endfor %}
-                                        {% elif data.is_holiday %}
-                                            <span class="badge bg-warning">Holiday</span>
-                                        {% elif data.is_weekend %}
-                                            <span class="text-muted">Weekend</span>
-                                        {% else %}
-                                            <span class="text-muted">-</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="avatar avatar-sm bg-danger-transparent">
+                                    <i class="ri-heart-pulse-line fs-14"></i>
+                                </span>
+                                <span class="fw-medium">Sick Leave</span>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="avatar avatar-sm bg-warning-transparent">
+                                    <i class="ri-calendar-event-line fs-14"></i>
+                                </span>
+                                <span class="fw-medium">National Holiday</span>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="avatar avatar-sm bg-secondary-transparent">
+                                    <i class="ri-calendar-2-line fs-14"></i>
+                                </span>
+                                <span class="fw-medium">Weekend</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- Calendar Grid -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card custom-card">
+                <div class="card-body p-0">
+                    <!-- Calendar Header -->
+                    <div class="calendar-header border-bottom">
+                        <div class="row g-0">
+                            <div class="col calendar-day-header">
+                                <div class="p-3 text-center fw-medium text-muted">Saturday</div>
+                            </div>
+                            <div class="col calendar-day-header border-start">
+                                <div class="p-3 text-center fw-medium text-muted">Sunday</div>
+                            </div>
+                            <div class="col calendar-day-header border-start">
+                                <div class="p-3 text-center fw-medium text-muted">Monday</div>
+                            </div>
+                            <div class="col calendar-day-header border-start">
+                                <div class="p-3 text-center fw-medium text-muted">Tuesday</div>
+                            </div>
+                            <div class="col calendar-day-header border-start">
+                                <div class="p-3 text-center fw-medium text-muted">Wednesday</div>
+                            </div>
+                            <div class="col calendar-day-header border-start">
+                                <div class="p-3 text-center fw-medium text-muted">Thursday</div>
+                            </div>
+                            <div class="col calendar-day-header border-start">
+                                <div class="p-3 text-center fw-medium text-muted">Friday</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calendar Body -->
+                    <div class="calendar-body">
+                        {% for week in calendar_weeks %}
+                        <div class="row g-0 border-bottom">
+                            {% for day in week %}
+                            <div class="col calendar-day border-start {% if day.is_other_month %}other-month{% endif %} {% if day.is_today %}today{% endif %} {% if day.is_weekend %}weekend{% endif %} {% if day.is_holiday %}holiday{% endif %}">
+                                <div class="calendar-day-content p-2" style="min-height: 120px;">
+                                    <!-- Day Number -->
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <span class="day-number fw-medium {% if day.is_other_month %}text-muted{% elif day.is_today %}text-primary{% endif %}">
+                                            {% if day.date %}{{ day.date.day }}{% endif %}
+                                        </span>
+                                        {% if day.is_today %}
+                                            <span class="badge bg-primary-transparent fs-11">Today</span>
+                                        {% elif day.is_holiday %}
+                                            <span class="badge bg-warning-transparent fs-11">Holiday</span>
+                                        {% elif day.is_weekend %}
+                                            <span class="badge bg-secondary-transparent fs-11">Weekend</span>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Leave Requests -->
+                                    <div class="leave-requests">
+                                        {% if day.leave_requests %}
+                                            {% for request in day.leave_requests %}
+                                                <div class="leave-item mb-1" 
+                                                     data-bs-toggle="tooltip" 
+                                                     title="{{ request.employee.get_full_name }} - {{ request.leave_type.name }} ({{ request.get_status_display }})">
+                                                    <div class="d-flex align-items-center gap-1">
+                                                        <span class="avatar avatar-xs" style="background-color: {{ request.leave_type.color_code }};">
+                                                            <span class="text-white fw-medium fs-10">{{ request.leave_type.code }}</span>
+                                                        </span>
+                                                        <span class="fs-11 text-truncate flex-fill">{{ request.employee.first_name }}</span>
+                                                        {% if request.status == 'PENDING' %}
+                                                            <i class="ri-time-line fs-10 text-warning"></i>
+                                                        {% elif request.status == 'APPROVED' %}
+                                                            <i class="ri-check-line fs-10 text-success"></i>
+                                                        {% elif request.status == 'REJECTED' %}
+                                                            <i class="ri-close-line fs-10 text-danger"></i>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                            {% if day.leave_requests|length > 3 %}
+                                                <div class="text-center">
+                                                    <span class="badge bg-light text-muted fs-10">+{{ day.leave_requests|length|add:"-3" }} more</span>
+                                                </div>
+                                            {% endif %}
+                                        {% elif day.is_weekend and not day.is_other_month %}
+                                            <div class="text-center text-muted mt-2">
+                                                <i class="ri-calendar-2-line fs-14 mb-1 d-block"></i>
+                                                <small class="fs-10">No leave requests<br>allowed on weekends<br>(Fri-Sat)</small>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Calendar day hover effects
+    const calendarDays = document.querySelectorAll('.calendar-day');
+    calendarDays.forEach(day => {
+        day.addEventListener('mouseenter', function() {
+            if (!this.classList.contains('other-month')) {
+                this.style.transform = 'scale(1.02)';
+                this.style.zIndex = '10';
+                this.style.boxShadow = '0 4px 20px rgba(0,0,0,0.1)';
+            }
+        });
+        
+        day.addEventListener('mouseleave', function() {
+            this.style.transform = '';
+            this.style.zIndex = '';
+            this.style.boxShadow = '';
+        });
+    });
+    
+    // Auto-submit form on filter change
+    const filterForm = document.querySelector('form[method="get"]');
+    const filterSelects = filterForm.querySelectorAll('select');
+    
+    filterSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            // Add a small delay to allow user to make multiple selections
+            clearTimeout(this.submitTimeout);
+            this.submitTimeout = setTimeout(() => {
+                filterForm.submit();
+            }, 500);
+        });
+    });
+});
+</script>
 {% endblock %}

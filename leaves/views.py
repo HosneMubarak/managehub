@@ -2,16 +2,16 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.http import JsonResponse, HttpResponseForbidden
-from django.views.generic import (
-    ListView, DetailView, CreateView, UpdateView, DeleteView
-)
 from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView, UpdateView
+from django.http import JsonResponse
 from django.utils import timezone
-from django.db.models import Q, Sum
 from django.core.paginator import Paginator
+from django.db.models import Q, Count, Sum
 from datetime import date, timedelta
-from decimal import Decimal
+import calendar
+import json
+import decimal
 
 from .models import (
     LeaveRequest, LeaveType, EmployeeEntitlement, Department,
@@ -252,8 +252,38 @@ def leave_calendar_view(request):
     
     if form.is_valid():
         department = form.cleaned_data.get('department')
-        month = form.cleaned_data.get('month') or month
-        year = form.cleaned_data.get('year') or year
+        
+        # Get month and year from cleaned data (already converted to int or None)
+        month_value = form.cleaned_data.get('month')
+        if month_value is not None:
+            month = month_value
+        
+        year_value = form.cleaned_data.get('year')
+        if year_value is not None:
+            year = year_value
+    else:
+        # If form is not valid, try to get parameters directly from request
+        try:
+            month_param = request.GET.get('month')
+            if month_param and month_param.strip():
+                month = int(month_param)
+        except (ValueError, TypeError):
+            month = timezone.now().month
+            
+        try:
+            year_param = request.GET.get('year')
+            if year_param and year_param.strip():
+                year = int(year_param)
+        except (ValueError, TypeError):
+            year = timezone.now().year
+    
+    # Validate month and year ranges
+    if not (1 <= month <= 12):
+        month = timezone.now().month
+    
+    current_year = timezone.now().year
+    if not (current_year - 10 <= year <= current_year + 10):
+        year = current_year
     
     # Get calendar data
     start_date = date(year, month, 1)
@@ -266,12 +296,31 @@ def leave_calendar_view(request):
         department, start_date, end_date
     )
     
+    # Generate calendar weeks for grid display
+    calendar_weeks = generate_calendar_weeks(year, month, calendar_data)
+    
+    # Calculate navigation dates
+    if month == 1:
+        prev_month, prev_year = 12, year - 1
+    else:
+        prev_month, prev_year = month - 1, year
+        
+    if month == 12:
+        next_month, next_year = 1, year + 1
+    else:
+        next_month, next_year = month + 1, year
+    
     context = {
         'calendar_data': calendar_data,
+        'calendar_weeks': calendar_weeks,
         'filter_form': form,
         'current_month': month,
         'current_year': year,
         'month_name': date(year, month, 1).strftime('%B %Y'),
+        'prev_month': prev_month,
+        'prev_year': prev_year,
+        'next_month': next_month,
+        'next_year': next_year,
     }
     
     return render(request, 'leaves/leave_calendar.html', context)
@@ -336,24 +385,23 @@ def add_comment_ajax(request, pk):
 
 @login_required
 def approve_leave_ajax(request, pk):
-    """Approve/reject leave request via AJAX"""
+    """Approve/reject leave request via AJAX - Following projects app pattern"""
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         leave_request = get_object_or_404(LeaveRequest, id=pk)
         
         if leave_request.status != 'PENDING':
-            return JsonResponse({'error': 'Request is not pending'}, status=400)
+            return JsonResponse({'success': False, 'error': 'Request is not pending'})
         
         try:
-            import json
-            data = json.loads(request.body)
-            action = data.get('action')
-            reason = data.get('reason', '')
+            # Get data from FormData like projects app
+            action = request.POST.get('action')
+            reason = request.POST.get('reason', '').strip()
             
             if action not in ['approve', 'reject']:
-                return JsonResponse({'error': 'Invalid action'}, status=400)
+                return JsonResponse({'success': False, 'error': 'Invalid action'})
             
-            if action == 'reject' and not reason.strip():
-                return JsonResponse({'error': 'Rejection reason is required'}, status=400)
+            if action == 'reject' and not reason:
+                return JsonResponse({'success': False, 'error': 'Rejection reason is required'})
             
             if action == 'approve':
                 LeaveCalculationService.approve_leave_request(
@@ -373,26 +421,24 @@ def approve_leave_ajax(request, pk):
                 'status_display': leave_request.get_status_display()
             })
             
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
+            return JsonResponse({'success': False, 'error': str(e)})
     
-    return JsonResponse({'error': 'Invalid request'}, status=400)
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 
 @login_required
 def cancel_leave_ajax(request, pk):
-    """Cancel leave request via AJAX"""
+    """Cancel leave request via AJAX - Following projects app pattern"""
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         leave_request = get_object_or_404(LeaveRequest, id=pk)
         
         # Check permissions - only request owner can cancel
         if request.user != leave_request.employee:
-            return JsonResponse({'error': 'Permission denied'}, status=403)
+            return JsonResponse({'success': False, 'error': 'Permission denied'})
         
         if not leave_request.can_be_cancelled:
-            return JsonResponse({'error': 'Cannot cancel this request'}, status=400)
+            return JsonResponse({'success': False, 'error': 'Cannot cancel this request'})
         
         try:
             LeaveCalculationService.cancel_leave_request(
@@ -407,9 +453,9 @@ def cancel_leave_ajax(request, pk):
             })
         
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
+            return JsonResponse({'success': False, 'error': str(e)})
     
-    return JsonResponse({'error': 'Invalid request'}, status=400)
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 
 @login_required
@@ -510,3 +556,66 @@ def reports_view(request):
         })
     
     return render(request, 'leaves/reports.html', context)
+
+
+def generate_calendar_weeks(year, month, calendar_data):
+    """Generate calendar weeks for grid display"""
+    from collections import namedtuple
+    
+    CalendarDay = namedtuple('CalendarDay', [
+        'date', 'is_today', 'is_weekend', 'is_holiday', 
+        'is_other_month', 'leave_requests'
+    ])
+    
+    # Get the first day of the month and the calendar
+    # Set first day of week to Saturday (5) for regional calendar format
+    calendar.setfirstweekday(5)  # Saturday = 5
+    first_day = date(year, month, 1)
+    cal = calendar.monthcalendar(year, month)
+    today = timezone.now().date()
+    
+    weeks = []
+    
+    for week in cal:
+        week_days = []
+        for day in week:
+            if day == 0:
+                # Previous/next month days - skip for now to keep it simple
+                # We'll show empty cells for previous/next month
+                day_date = None
+                is_other_month = True
+                is_today = False
+                is_weekend = False
+                is_holiday = False
+                day_leave_requests = []
+            else:
+                day_date = date(year, month, day)
+                is_other_month = False
+                
+                # Get leave requests for this day
+                day_leave_requests = calendar_data.get(day_date, {}).get('leave_requests', [])
+                
+                # Check if it's today
+                is_today = day_date == today
+                
+                # Check if it's weekend (Friday=4, Saturday=5 in many regions)
+                # Or use Saturday=5, Sunday=6 for Western weekend
+                is_weekend = day_date.weekday() in [5, 6]
+                
+                # Check if it's holiday
+                is_holiday = calendar_data.get(day_date, {}).get('is_holiday', False)
+            
+            calendar_day = CalendarDay(
+                date=day_date,
+                is_today=is_today,
+                is_weekend=is_weekend,
+                is_holiday=is_holiday,
+                is_other_month=is_other_month,
+                leave_requests=day_leave_requests[:3] if day_leave_requests else []  # Limit to 3 for display
+            )
+            
+            week_days.append(calendar_day)
+        
+        weeks.append(week_days)
+    
+    return weeks

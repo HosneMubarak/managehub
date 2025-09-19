@@ -579,94 +579,104 @@
     </div>
 </div>
 
+{% endblock %}
+
 <!-- Toast Container -->
 <div class="toast-container" id="toastContainer"></div>
 
-{% endblock %}
-
-{% block extra_js %}
+{% block scripts %}
 <script>
-    // Professional Leave Request Management - Matching Projects App Standards
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Professional leave requests page loaded');
-    
-    // Get CSRF token
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    
-    // Modal instances
-    const approveModal = new bootstrap.Modal(document.getElementById('approveModal'));
-    const rejectModal = new bootstrap.Modal(document.getElementById('rejectModal'));
-    const cancelModal = new bootstrap.Modal(document.getElementById('cancelModal'));
-    
-    let currentRequestId = null;
-    
-    // Professional Toast Notification System
-    function showToast(message, type = 'success', duration = 3000) {
-        const toastContainer = document.getElementById('toastContainer');
-        const toastId = 'toast-' + Date.now();
+    // Toast notification system matching projects app exactly
+    function showToast(message, type) {
+        const toastContainer = document.querySelector('.toast-container') || createToastContainer();
         
-        const toastHtml = `
-            <div class="toast ${type}" id="${toastId}" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                    <i class="ri-${type === 'success' ? 'check-circle' : 'error-warning'}-line me-2"></i>
-                    <strong class="me-auto">${type === 'success' ? 'Success' : 'Error'}</strong>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body">
-                    ${message}
-                </div>
+        const toastElement = document.createElement('div');
+        toastElement.className = 'toast';
+        toastElement.setAttribute('role', 'alert');
+        toastElement.setAttribute('aria-live', 'assertive');
+        toastElement.setAttribute('aria-atomic', 'true');
+        toastElement.setAttribute('data-bs-autohide', 'true');
+        toastElement.setAttribute('data-bs-delay', type === 'error' ? '5000' : '3000');
+        
+        const headerClass = type === 'success' ? 'bg-success text-fixed-white' : 'bg-danger text-fixed-white';
+        
+        toastElement.innerHTML = `
+            <div class="toast-header ${headerClass}">
+                <img class="bd-placeholder-img rounded me-1" src="/static/assets/images/brand-logos/toggle-dark.png" alt="ManageHub" width="20" height="20">
+                <strong class="me-auto">ManageHub</strong>
+                <small>now</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                ${message}
             </div>
         `;
         
-        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+        toastContainer.appendChild(toastElement);
         
-        const toastElement = document.getElementById(toastId);
-        const toast = new bootstrap.Toast(toastElement, {
-            autohide: true,
-            delay: duration
-        });
-        
+        const toast = new bootstrap.Toast(toastElement);
         toast.show();
         
-        // Clean up after toast is hidden
         toastElement.addEventListener('hidden.bs.toast', function() {
             toastElement.remove();
         });
     }
     
-    // Enhanced Action Handlers
-    document.querySelectorAll('.approve-request-btn').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            currentRequestId = this.dataset.requestId;
-            document.getElementById('approveNotes').value = '';
-            approveModal.show();
-        });
-    });
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.style.zIndex = '1055';
+        document.body.appendChild(container);
+        return container;
+    }
     
-    document.querySelectorAll('.reject-request-btn').forEach(button => {
-        button.addEventListener('click', function(e) {
+    function showSuccessMessage(message) {
+        showToast(message, 'success');
+    }
+    
+    function showErrorMessage(message) {
+        showToast(message, 'error');
+    }
+    
+    // Modal instances
+    let currentRequestId = null;
+    
+    // Action button handlers - matching projects app pattern
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.approve-request-btn')) {
             e.preventDefault();
-            currentRequestId = this.dataset.requestId;
+            const btn = e.target.closest('.approve-request-btn');
+            currentRequestId = btn.dataset.requestId;
+            document.getElementById('approveNotes').value = '';
+            const modal = new bootstrap.Modal(document.getElementById('approveModal'));
+            modal.show();
+        }
+        
+        if (e.target.closest('.reject-request-btn')) {
+            e.preventDefault();
+            const btn = e.target.closest('.reject-request-btn');
+            currentRequestId = btn.dataset.requestId;
             const rejectReason = document.getElementById('rejectReason');
             rejectReason.value = '';
             rejectReason.classList.remove('is-invalid');
-            rejectModal.show();
-        });
-    });
-    
-    document.querySelectorAll('.cancel-request-btn').forEach(button => {
-        button.addEventListener('click', function(e) {
+            const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+            modal.show();
+        }
+        
+        if (e.target.closest('.cancel-request-btn')) {
             e.preventDefault();
-            currentRequestId = this.dataset.requestId;
-            cancelModal.show();
-        });
+            const btn = e.target.closest('.cancel-request-btn');
+            currentRequestId = btn.dataset.requestId;
+            const modal = new bootstrap.Modal(document.getElementById('cancelModal'));
+            modal.show();
+        }
     });
     
-    // Modal Confirm Handlers
+    // Modal confirm handlers
     document.getElementById('confirmApprove').addEventListener('click', function() {
         const notes = document.getElementById('approveNotes').value.trim();
-        performAction('approve', currentRequestId, notes, this);
+        performLeaveAction('approve', currentRequestId, notes);
     });
     
     document.getElementById('confirmReject').addEventListener('click', function() {
@@ -680,77 +690,63 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         reasonField.classList.remove('is-invalid');
-        performAction('reject', currentRequestId, reason, this);
+        performLeaveAction('reject', currentRequestId, reason);
     });
     
     document.getElementById('confirmCancel').addEventListener('click', function() {
-        performAction('cancel', currentRequestId, '', this);
+        performLeaveAction('cancel', currentRequestId, '');
     });
     
-    // Enhanced performAction function with loading states
-    function performAction(action, requestId, reason, buttonElement) {
-        console.log('Performing action:', action, 'for request:', requestId);
-        
-        // Add loading state
-        const originalText = buttonElement.innerHTML;
-        buttonElement.classList.add('btn-loading');
-        buttonElement.disabled = true;
-        
+    // Main action function - following projects app pattern exactly
+    function performLeaveAction(action, requestId, reason) {
         const url = action === 'cancel' ? 
             `/leaves/ajax/cancel/${requestId}/` : 
             `/leaves/ajax/approve/${requestId}/`;
         
-        const data = {
-            action: action,
-            reason: reason
-        };
+        // Create FormData like projects app
+        const formData = new FormData();
+        formData.append('action', action);
+        if (reason) {
+            formData.append('reason', reason);
+        }
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
         
         fetch(url, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken,
                 'X-Requested-With': 'XMLHttpRequest'
             },
-            body: JSON.stringify(data)
+            body: formData
         })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(err => Promise.reject(err));
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             if (data.success) {
-                showToast(data.message, 'success');
+                showSuccessMessage(data.message);
                 
-                // Close modal
-                if (action === 'approve') approveModal.hide();
-                else if (action === 'reject') rejectModal.hide();
-                else if (action === 'cancel') cancelModal.hide();
+                // Close modals like projects app
+                const approveModal = bootstrap.Modal.getInstance(document.getElementById('approveModal'));
+                const rejectModal = bootstrap.Modal.getInstance(document.getElementById('rejectModal'));
+                const cancelModal = bootstrap.Modal.getInstance(document.getElementById('cancelModal'));
                 
-                // Reload page after short delay
+                if (approveModal) approveModal.hide();
+                if (rejectModal) rejectModal.hide();
+                if (cancelModal) cancelModal.hide();
+                
+                // Reload page like projects app
                 setTimeout(() => {
-                    location.reload();
-                }, 1500);
+                    window.location.reload();
+                }, 1000);
             } else {
-                showToast(data.error || 'An error occurred', 'error', 5000);
+                showErrorMessage(data.error || 'An error occurred');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            const errorMessage = error.error || error.message || 'An unexpected error occurred';
-            showToast(errorMessage, 'error', 5000);
-        })
-        .finally(() => {
-            // Remove loading state
-            buttonElement.classList.remove('btn-loading');
-            buttonElement.disabled = false;
-            buttonElement.innerHTML = originalText;
+            showErrorMessage('Network error occurred');
         });
     }
     
-    // Form validation for reject modal
+    // Form validation
     document.getElementById('rejectReason').addEventListener('input', function() {
         if (this.value.trim()) {
             this.classList.remove('is-invalid');

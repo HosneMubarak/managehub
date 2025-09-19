@@ -1,54 +1,73 @@
 {% extends 'components/base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}
     {% if object %}Edit Leave Request{% else %}New Leave Request{% endif %} - ManageHub
 {% endblock %}
 
+{% block styles %}
+    <!-- dragula css-->
+    <link rel="stylesheet" href="{% static 'assets/libs/dragula/dragula.min.css'%}">
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box">
-                <h4 class="page-title">
-                    {% if object %}Edit Leave Request{% else %}Request Leave{% endif %}
-                </h4>
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Home</a></li>
-                        <li class="breadcrumb-item"><a href="{% url 'leaves:dashboard' %}">Leave</a></li>
-                        <li class="breadcrumb-item active">
-                            {% if object %}Edit Request{% else %}New Request{% endif %}
-                        </li>
-                    </ol>
-                </div>
-            </div>
+    <!-- Page Header -->
+    <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2">
+        <div>
+            <nav>
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'leaves:my_requests' %}">Leave Requests</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        {% if object %}Edit Request{% else %}New Request{% endif %}
+                    </li>
+                </ol>
+            </nav>
+            <h1 class="page-title fw-medium fs-18 mb-0">
+                {% if object %}Edit Leave Request{% else %}Request Leave{% endif %}
+            </h1>
+        </div>
+        <div class="btn-list">
+            <a href="{% url 'leaves:my_requests' %}" class="btn btn-white btn-wave me-0">
+                <i class="ri-arrow-left-line me-1"></i> Back to Requests
+            </a>
         </div>
     </div>
+    <!-- Page Header Close -->
 
+    <!-- Start::row-1 -->
     <div class="row">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="header-title">
+        <div class="col-xxl-8">
+            <div class="card custom-card">
+                <div class="card-header justify-content-between">
+                    <div class="card-title">
                         {% if object %}Edit Leave Request{% else %}Leave Request Form{% endif %}
-                    </h4>
+                    </div>
+                    <div>
+                        <span class="badge bg-info-transparent">
+                            <i class="ri-calendar-line me-1"></i>
+                            {% if object %}Editing Request{% else %}New Request{% endif %}
+                        </span>
+                    </div>
                 </div>
                 <div class="card-body">
                     <form method="post" id="leave-request-form">
                         {% csrf_token %}
                         
                         {% if form.non_field_errors %}
-                            <div class="alert alert-danger">
+                            <div class="alert alert-danger border-0 shadow-sm">
+                                <i class="ri-error-warning-line me-2"></i>
                                 {{ form.non_field_errors }}
                             </div>
                         {% endif %}
 
+                        <!-- Leave Type and Duration Section -->
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-xl-6">
                                 <div class="mb-3">
                                     <label for="{{ form.leave_type.id_for_label }}" class="form-label">
-                                        Leave Type <span class="text-danger">*</span>
+                                        <i class="ri-bookmark-line me-1 text-muted"></i>Leave Type <span class="text-danger">*</span>
                                     </label>
                                     {{ form.leave_type }}
                                     {% if form.leave_type.errors %}
@@ -59,32 +78,30 @@
                                     <small class="form-text text-muted">{{ form.leave_type.help_text }}</small>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-xl-6">
                                 <div class="mb-3">
-                                    <label class="form-label">Leave Balance</label>
-                                    <div id="balance-info" class="p-2 bg-light rounded">
-                                        <div class="d-flex justify-content-between">
-                                            <span>Available:</span>
-                                            <span id="available-days" class="fw-bold">-</span>
+                                    <label class="form-label">
+                                        <i class="ri-hourglass-line me-1 text-muted"></i>Calculated Duration
+                                    </label>
+                                    <div class="p-3 bg-primary-transparent rounded border">
+                                        <div class="d-flex align-items-center justify-content-center">
+                                            <span class="h4 mb-0 text-primary" id="calculated-duration">0</span>
+                                            <span class="text-muted ms-2">days</span>
                                         </div>
-                                        <div class="d-flex justify-content-between">
-                                            <span>Used:</span>
-                                            <span id="used-days">-</span>
-                                        </div>
-                                        <div class="d-flex justify-content-between">
-                                            <span>Pending:</span>
-                                            <span id="pending-days">-</span>
-                                        </div>
+                                        <small class="text-muted d-block text-center mt-1">
+                                            Excludes weekends and holidays
+                                        </small>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Date Selection Section -->
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-xl-6">
                                 <div class="mb-3">
                                     <label for="{{ form.start_date.id_for_label }}" class="form-label">
-                                        Start Date <span class="text-danger">*</span>
+                                        <i class="ri-calendar-check-line me-1 text-muted"></i>Start Date <span class="text-danger">*</span>
                                     </label>
                                     {{ form.start_date }}
                                     {% if form.start_date.errors %}
@@ -95,10 +112,10 @@
                                     <small class="form-text text-muted">{{ form.start_date.help_text }}</small>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-xl-6">
                                 <div class="mb-3">
                                     <label for="{{ form.end_date.id_for_label }}" class="form-label">
-                                        End Date <span class="text-danger">*</span>
+                                        <i class="ri-calendar-close-line me-1 text-muted"></i>End Date <span class="text-danger">*</span>
                                     </label>
                                     {{ form.end_date }}
                                     {% if form.end_date.errors %}
@@ -111,9 +128,10 @@
                             </div>
                         </div>
 
-                        <div class="mb-3">
+                        <!-- Reason Section -->
+                        <div class="mb-4">
                             <label for="{{ form.reason.id_for_label }}" class="form-label">
-                                Reason <span class="text-danger">*</span>
+                                <i class="ri-message-3-line me-1 text-muted"></i>Reason <span class="text-danger">*</span>
                             </label>
                             {{ form.reason }}
                             {% if form.reason.errors %}
@@ -124,22 +142,56 @@
                             <small class="form-text text-muted">{{ form.reason.help_text }}</small>
                         </div>
 
-                        <div class="mb-3">
-                            <div class="alert alert-info">
-                                <h6><i class="mdi mdi-information"></i> Leave Request Guidelines</h6>
-                                <ul class="mb-0">
-                                    <li>Leave requests must be submitted at least 24 hours in advance</li>
-                                    <li>Annual leave requests require manager approval</li>
-                                    <li>Sick leave can be submitted retroactively with proper documentation</li>
-                                    <li>Half-day leave types (.5) will automatically calculate as 0.5 days</li>
-                                    <li>Weekends are automatically excluded from duration calculations</li>
-                                </ul>
+                        <hr class="my-4">
+
+                        <!-- Guidelines Section -->
+                        <div class="mb-4">
+                            <div class="fs-15 fw-medium mb-3">
+                                <i class="ri-information-line me-2 text-primary"></i>Leave Request Guidelines
+                            </div>
+                            <div class="row">
+                                <div class="col-xl-6">
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="mb-2">
+                                            <i class="ri-check-line text-success me-2"></i>
+                                            <span class="text-muted">Submit at least 24 hours in advance</span>
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="ri-check-line text-success me-2"></i>
+                                            <span class="text-muted">Annual leave requires manager approval</span>
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="ri-close-line text-danger me-2"></i>
+                                            <span class="text-muted">Cannot start or end on weekends (Fri-Sat)</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-xl-6">
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="mb-2">
+                                            <i class="ri-check-line text-success me-2"></i>
+                                            <span class="text-muted">Sick leave can be submitted retroactively</span>
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="ri-check-line text-success me-2"></i>
+                                            <span class="text-muted">Weekends excluded from calculations</span>
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="ri-information-line text-info me-2"></i>
+                                            <span class="text-muted">Business days only (Mon-Fri)</span>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="text-end">
-                            <a href="{% url 'leaves:my_requests' %}" class="btn btn-light me-2">Cancel</a>
-                            <button type="submit" class="btn btn-primary">
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'leaves:my_requests' %}" class="btn btn-white btn-wave">
+                                <i class="ri-arrow-left-line me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-wave">
+                                <i class="ri-{% if object %}edit{% else %}add{% endif %}-line me-1"></i>
                                 {% if object %}Update Request{% else %}Submit Request{% endif %}
                             </button>
                         </div>
@@ -148,132 +200,322 @@
             </div>
         </div>
 
-        <div class="col-lg-4">
-            <!-- Leave Balance -->
-            <div class="card">
+        <div class="col-xxl-4">
+            <!-- Leave Balance Summary -->
+            <div class="card custom-card">
                 <div class="card-header">
-                    <h4 class="header-title">Leave Balance</h4>
+                    <div class="card-title">Your Leave Balance</div>
                 </div>
                 <div class="card-body">
-                    <div class="text-center mb-3">
-                        <h5 class="text-muted">Available Days</h5>
-                        <h3 class="text-primary" id="available-days">
+                    <div class="text-center mb-4">
+                        <div class="avatar avatar-xl bg-primary-transparent mx-auto mb-3">
+                            <i class="ri-calendar-check-line fs-24"></i>
+                        </div>
+                        <h4 class="text-primary mb-1" id="available-days-main">
                             {% if leave_summary %}{{ leave_summary.remaining_days|floatformat:1 }}{% else %}-{% endif %}
-                        </h3>
+                        </h4>
+                        <p class="text-muted mb-0">Available Days</p>
                     </div>
                     
                     <div class="row text-center">
                         <div class="col-6">
-                            <p class="text-muted mb-1">Used</p>
-                            <h6 id="used-days">
-                                {% if leave_summary %}{{ leave_summary.approved_days|floatformat:1 }}{% else %}-{% endif %}
-                            </h6>
+                            <div class="d-flex align-items-center justify-content-center mb-2">
+                                <span class="avatar avatar-sm bg-success-transparent me-2">
+                                    <i class="ri-check-line fs-14"></i>
+                                </span>
+                                <div>
+                                    <p class="mb-0 fw-medium text-muted fs-12">Used</p>
+                                    <p class="fs-14 mb-0 fw-medium" id="used-days-main">
+                                        {% if leave_summary %}{{ leave_summary.approved_days|floatformat:1 }}{% else %}-{% endif %}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-6">
-                            <p class="text-muted mb-1">Pending</p>
-                            <h6 id="pending-days">
-                                {% if leave_summary %}{{ leave_summary.pending_days|floatformat:1 }}{% else %}-{% endif %}
-                            </h6>
+                            <div class="d-flex align-items-center justify-content-center mb-2">
+                                <span class="avatar avatar-sm bg-warning-transparent me-2">
+                                    <i class="ri-time-line fs-14"></i>
+                                </span>
+                                <div>
+                                    <p class="mb-0 fw-medium text-muted fs-12">Pending</p>
+                                    <p class="fs-14 mb-0 fw-medium" id="pending-days-main">
+                                        {% if leave_summary %}{{ leave_summary.pending_days|floatformat:1 }}{% else %}-{% endif %}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Leave Type Legend -->
-            <div class="card">
+            <!-- Leave Types Reference -->
+            <div class="card custom-card">
                 <div class="card-header">
-                    <h4 class="header-title">Leave Types</h4>
+                    <div class="card-title">Leave Types</div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-primary-transparent">{{ leave_types|length }} Types</span>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <div id="leave-types-info">
+                    <div class="d-flex flex-column gap-3">
                         {% for leave_type in leave_types %}
-                            <div class="mb-2" data-leave-type="{{ leave_type.id }}">
-                                <span class="badge rounded-pill fs-6 me-2" style="background-color: {{ leave_type.color_code }};">
-                                    {{ leave_type.code }}
-                                </span>
-                                <span>{{ leave_type.name }}</span>
-                                {% if leave_type.is_half_day %}
-                                    <small class="text-muted">(Half Day)</small>
-                                {% endif %}
-                                {% if not leave_type.is_paid %}
-                                    <small class="text-warning">(Unpaid)</small>
-                                {% endif %}
+                        <div class="d-flex align-items-center gap-2" data-leave-type="{{ leave_type.id }}">
+                            <span class="avatar avatar-sm avatar-rounded" style="background-color: {{ leave_type.color_code }};">
+                                <span class="text-white fw-medium fs-12">{{ leave_type.code }}</span>
+                            </span>
+                            <div class="flex-fill">
+                                <div class="fw-medium fs-14">{{ leave_type.name }}</div>
+                                <div class="d-flex gap-2 mt-1">
+                                    {% if leave_type.is_half_day %}
+                                        <span class="badge bg-info-transparent fs-11">Half Day</span>
+                                    {% endif %}
+                                    {% if not leave_type.is_paid %}
+                                        <span class="badge bg-warning-transparent fs-11">Unpaid</span>
+                                    {% endif %}
+                                    {% if leave_type.affects_entitlement %}
+                                        <span class="badge bg-secondary-transparent fs-11">Counts Against Entitlement</span>
+                                    {% endif %}
+                                </div>
                             </div>
+                        </div>
                         {% empty %}
-                            <p class="text-muted">No leave types available</p>
+                        <div class="text-center text-muted">
+                            <i class="ri-calendar-line fs-24 mb-2 d-block"></i>
+                            <p class="mb-0">No leave types available</p>
+                        </div>
                         {% endfor %}
                     </div>
                 </div>
             </div>
 
-            <!-- Duration Calculator -->
-            <div class="card">
+            <!-- Quick Tips -->
+            <div class="card custom-card">
                 <div class="card-header">
-                    <h4 class="header-title">Duration Calculator</h4>
+                    <div class="card-title">Quick Tips</div>
                 </div>
                 <div class="card-body">
-                    <div id="duration-info" class="text-center">
-                        <div class="mb-2">
-                            <span class="h4" id="calculated-duration">0</span>
-                            <span class="text-muted">days</span>
+                    <div class="d-flex flex-column gap-3">
+                        <div class="d-flex align-items-start gap-2">
+                            <span class="avatar avatar-sm bg-success-transparent">
+                                <i class="ri-lightbulb-line fs-14"></i>
+                            </span>
+                            <div>
+                                <div class="fw-medium fs-13 text-success">Plan Ahead</div>
+                                <div class="text-muted fs-12">Submit requests 24+ hours in advance for faster approval</div>
+                            </div>
                         </div>
-                        <small class="text-muted">Duration will be calculated automatically</small>
+                        <div class="d-flex align-items-start gap-2">
+                            <span class="avatar avatar-sm bg-info-transparent">
+                                <i class="ri-calendar-event-line fs-14"></i>
+                            </span>
+                            <div>
+                                <div class="fw-medium fs-13 text-info">Smart Calculation</div>
+                                <div class="text-muted fs-12">Weekends and holidays are automatically excluded</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start gap-2">
+                            <span class="avatar avatar-sm bg-warning-transparent">
+                                <i class="ri-edit-line fs-14"></i>
+                            </span>
+                            <div>
+                                <div class="fw-medium fs-13 text-warning">Edit Anytime</div>
+                                <div class="text-muted fs-12">Modify pending requests until they're approved</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
+{% endblock %}
+
+{% block scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const leaveTypeSelect = document.getElementById('{{ form.leave_type.id_for_label }}');
-        const startDateInput = document.getElementById('{{ form.start_date.id_for_label }}');
-        const endDateInput = document.getElementById('{{ form.end_date.id_for_label }}');
+document.addEventListener('DOMContentLoaded', function() {
+    const leaveTypeSelect = document.getElementById('{{ form.leave_type.id_for_label }}');
+    const startDateInput = document.getElementById('{{ form.start_date.id_for_label }}');
+    const endDateInput = document.getElementById('{{ form.end_date.id_for_label }}');
+    const form = document.getElementById('leave-request-form');
+    
+    // Enhanced duration calculation with weekend exclusion
+    function calculateDuration() {
+        const startDate = new Date(startDateInput.value);
+        const endDate = new Date(endDateInput.value);
         
-        // Load leave balance when leave type changes
-        function loadLeaveBalance() {
-            if (leaveTypeSelect.value) {
-                fetch('{% url "leaves:balance_ajax" %}')
-                    .then(response => response.json())
-                    .then(data => {
-                        document.getElementById('available-days').textContent = data.remaining_days.toFixed(1);
-                        document.getElementById('used-days').textContent = data.approved_days.toFixed(1);
-                        document.getElementById('pending-days').textContent = data.pending_days.toFixed(1);
-                    })
-                    .catch(error => {
-                        console.error('Error loading balance:', error);
-                    });
+        if (startDate && endDate && startDate <= endDate) {
+            let duration = 0;
+            const currentDate = new Date(startDate);
+            
+            // Count business days (exclude weekends: Friday and Saturday)
+            while (currentDate <= endDate) {
+                const dayOfWeek = currentDate.getDay();
+                if (dayOfWeek !== 5 && dayOfWeek !== 6) { // Not Friday (5) or Saturday (6)
+                    duration++;
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
             }
+            
+            // Check if selected leave type is half day
+            const selectedOption = leaveTypeSelect.options[leaveTypeSelect.selectedIndex];
+            if (selectedOption && selectedOption.textContent.includes('Half') || selectedOption.textContent.includes('.5')) {
+                duration = duration * 0.5;
+            }
+            
+            document.getElementById('calculated-duration').textContent = duration.toFixed(1);
+        } else {
+            document.getElementById('calculated-duration').textContent = '0';
+        }
+    }
+    
+    // Weekend validation function
+    function validateWeekends() {
+        const startDate = new Date(startDateInput.value);
+        const endDate = new Date(endDateInput.value);
+        let hasErrors = false;
+        
+        // Check start date (Friday=5, Saturday=6 in JavaScript Date.getDay())
+        if (startDate && (startDate.getDay() === 5 || startDate.getDay() === 6)) {
+            startDateInput.classList.add('is-invalid');
+            let feedback = startDateInput.parentNode.querySelector('.invalid-feedback');
+            if (!feedback) {
+                feedback = document.createElement('div');
+                feedback.className = 'invalid-feedback';
+                startDateInput.parentNode.appendChild(feedback);
+            }
+            feedback.textContent = 'Leave requests cannot start on weekends (Friday or Saturday).';
+            hasErrors = true;
+        } else {
+            startDateInput.classList.remove('is-invalid');
         }
         
-        // Calculate duration when dates change
-        function calculateDuration() {
+        // Check end date (Friday=5, Saturday=6 in JavaScript Date.getDay())
+        if (endDate && (endDate.getDay() === 5 || endDate.getDay() === 6)) {
+            endDateInput.classList.add('is-invalid');
+            let feedback = endDateInput.parentNode.querySelector('.invalid-feedback');
+            if (!feedback) {
+                feedback = document.createElement('div');
+                feedback.className = 'invalid-feedback';
+                endDateInput.parentNode.appendChild(feedback);
+            }
+            feedback.textContent = 'Leave requests cannot end on weekends (Friday or Saturday).';
+            hasErrors = true;
+        } else {
+            endDateInput.classList.remove('is-invalid');
+        }
+        
+        return !hasErrors;
+    }
+    
+    // Load leave balance when leave type changes
+    function loadLeaveBalance() {
+        if (leaveTypeSelect.value) {
+            fetch('{% url "leaves:balance_ajax" %}', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Update main balance display
+                const availableElement = document.getElementById('available-days-main');
+                const usedElement = document.getElementById('used-days-main');
+                const pendingElement = document.getElementById('pending-days-main');
+                
+                if (availableElement) availableElement.textContent = data.remaining_days.toFixed(1);
+                if (usedElement) usedElement.textContent = data.approved_days.toFixed(1);
+                if (pendingElement) pendingElement.textContent = data.pending_days.toFixed(1);
+            })
+            .catch(error => {
+                console.error('Error loading balance:', error);
+            });
+        }
+    }
+    
+    // Form validation enhancement
+    function validateForm() {
+        let isValid = true;
+        const requiredFields = [leaveTypeSelect, startDateInput, endDateInput];
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+        
+        // Validate date range
+        if (startDateInput.value && endDateInput.value) {
             const startDate = new Date(startDateInput.value);
             const endDate = new Date(endDateInput.value);
             
-            if (startDate && endDate && startDate <= endDate) {
-                // Simple calculation - in real implementation, this would exclude weekends
-                const timeDiff = endDate.getTime() - startDate.getTime();
-                const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
-                
-                document.getElementById('calculated-duration').textContent = daysDiff;
-            } else {
-                document.getElementById('calculated-duration').textContent = '0';
+            if (startDate > endDate) {
+                endDateInput.classList.add('is-invalid');
+                let feedback = endDateInput.parentNode.querySelector('.invalid-feedback');
+                if (!feedback) {
+                    feedback = document.createElement('div');
+                    feedback.className = 'invalid-feedback';
+                    endDateInput.parentNode.appendChild(feedback);
+                }
+                feedback.textContent = 'End date must be after or equal to start date.';
+                isValid = false;
             }
         }
         
-        // Event listeners
-        leaveTypeSelect.addEventListener('change', loadLeaveBalance);
-        startDateInput.addEventListener('change', calculateDuration);
-        endDateInput.addEventListener('change', calculateDuration);
+        // Validate weekends
+        if (!validateWeekends()) {
+            isValid = false;
+        }
         
-        // Initial load
+        return isValid;
+    }
+    
+    // Event listeners
+    leaveTypeSelect.addEventListener('change', function() {
         loadLeaveBalance();
         calculateDuration();
     });
-    </script>
-{% endblock %}
-
-{% block extra_js %}
-
+    
+    startDateInput.addEventListener('change', function() {
+        calculateDuration();
+        validateWeekends();
+    });
+    
+    endDateInput.addEventListener('change', function() {
+        calculateDuration();
+        validateWeekends();
+    });
+    
+    // Form submission with validation
+    form.addEventListener('submit', function(e) {
+        if (!validateForm()) {
+            e.preventDefault();
+            
+            // Show validation message
+            const firstInvalidField = form.querySelector('.is-invalid');
+            if (firstInvalidField) {
+                firstInvalidField.focus();
+                firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+    
+    // Real-time validation
+    [leaveTypeSelect, startDateInput, endDateInput].forEach(field => {
+        field.addEventListener('blur', validateForm);
+        field.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid')) {
+                validateForm();
+            }
+        });
+    });
+    
+    // Initial load
+    loadLeaveBalance();
+    calculateDuration();
+});
+</script>
 {% endblock %}
