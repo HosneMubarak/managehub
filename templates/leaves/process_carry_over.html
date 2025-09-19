@@ -93,25 +93,10 @@
         overflow: hidden;
     }
 
-    .help-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 4px;
-        height: 100%;
-        background: linear-gradient(180deg, #0d6efd 0%, #6610f2 100%);
-        transition: width 0.3s ease;
-    }
-
     .help-card:hover {
         background: linear-gradient(135deg, rgba(13, 110, 253, 0.05) 0%, rgba(13, 110, 253, 0.02) 100%);
         box-shadow: 0 8px 25px rgba(13, 110, 253, 0.15);
         transform: translateY(-3px);
-    }
-
-    .help-card:hover::before {
-        width: 6px;
     }
 
     /* Professional Step Indicators */
@@ -183,27 +168,6 @@
     }
 
     /* Professional Stats Cards */
-    .stats-card {
-        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
-        border: 1px solid rgba(0,0,0,0.05);
-        border-left: 4px solid #0d6efd;
-        border-radius: 0 12px 12px 0;
-        padding: 1.5rem;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .stats-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 0;
-        height: 100%;
-        background: linear-gradient(135deg, rgba(13, 110, 253, 0.05) 0%, rgba(102, 16, 242, 0.05) 100%);
-        transition: width 0.3s ease;
-    }
 
     .stats-card:hover {
         transform: translateY(-3px);
