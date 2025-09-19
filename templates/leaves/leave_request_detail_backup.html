@@ -493,8 +493,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Main action function - following projects app pattern exactly
     function performLeaveAction(action, requestId, reason) {
         const url = action === 'cancel' ? 
-            `/leaves/ajax/cancel/${requestId}/` : 
-            `/leaves/ajax/approve/${requestId}/`;
+            `/leaves/requests/${requestId}/cancel/` : 
+            `/leaves/requests/${requestId}/approve/`;
         
         // Create FormData like projects app
         const formData = new FormData();

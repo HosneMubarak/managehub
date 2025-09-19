@@ -25,9 +25,9 @@ urlpatterns = [
     # Reports
     path('reports/', views.reports_view, name='reports'),
     
-    # AJAX endpoints
-    path('ajax/comment/<uuid:pk>/', views.add_comment_ajax, name='add_comment_ajax'),
-    path('ajax/approve/<uuid:pk>/', views.approve_leave_ajax, name='approve_ajax'),
-    path('ajax/cancel/<uuid:pk>/', views.cancel_leave_ajax, name='cancel_ajax'),
-    path('ajax/balance/', views.get_leave_balance_ajax, name='balance_ajax'),
+    # Leave request management endpoints
+    path('requests/<uuid:pk>/comment/', views.add_comment_ajax, name='add_comment'),
+    path('requests/<uuid:pk>/approve/', views.approve_leave_ajax, name='approve'),
+    path('requests/<uuid:pk>/cancel/', views.cancel_leave_ajax, name='cancel'),
+    path('balance/', views.get_leave_balance_ajax, name='balance'),
 ]

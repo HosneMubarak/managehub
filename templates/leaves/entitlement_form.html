@@ -147,7 +147,7 @@
 
     <!-- Start::row-1 -->
     <div class="row">
-        <div class="col-xl-12">
+        <div class="col-xxl-8">
             <form method="post" id="entitlement-form">
                 {% csrf_token %}
                 <div class="card custom-card">
@@ -291,81 +291,6 @@
                             </div>
                         </div>
 
-                        <!-- Summary & Review Section -->
-                        <div class="form-section">
-                            <h5 class="form-section-title">
-                                <i class="ri-calculator-line"></i>
-                                Entitlement Summary
-                            </h5>
-                            <div class="row">
-                                <div class="col-xl-3">
-                                    <div class="text-center p-3 bg-primary-transparent rounded">
-                                        <h4 class="text-primary mb-1" id="total-days">
-                                            {% if object %}{{ object.total_available_days|floatformat:1 }}{% else %}0.0{% endif %}
-                                        </h4>
-                                        <small class="text-muted">Total Available Days</small>
-                                    </div>
-                                </div>
-                                <div class="col-xl-3">
-                                    <div class="text-center p-3 bg-info-transparent rounded">
-                                        <h5 class="text-info mb-1" id="annual-days">
-                                            {% if object %}{{ object.annual_holiday_entitlement|floatformat:1 }}{% else %}0.0{% endif %}
-                                        </h5>
-                                        <small class="text-muted">Annual Days</small>
-                                    </div>
-                                </div>
-                                <div class="col-xl-3">
-                                    <div class="text-center p-3 bg-success-transparent rounded">
-                                        <h5 class="text-success mb-1" id="carried-days">
-                                            {% if object %}{{ object.days_carried_over|floatformat:1 }}{% else %}0.0{% endif %}
-                                        </h5>
-                                        <small class="text-muted">Carried Over</small>
-                                    </div>
-                                </div>
-                                <div class="col-xl-3">
-                                    <div class="text-center p-3 bg-warning-transparent rounded">
-                                        <h5 class="text-warning mb-1" id="til-days">
-                                            {% if object %}{{ object.time_in_lieu|floatformat:1 }}{% else %}0.0{% endif %}
-                                        </h5>
-                                        <small class="text-muted">TIL Days</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Guidelines & Information Section -->
-                        <div class="form-section">
-                            <h5 class="form-section-title">
-                                <i class="ri-information-line"></i>
-                                Guidelines & Information
-                            </h5>
-                            <div class="row">
-                                <div class="col-xl-6">
-                                    <div class="alert alert-info border-0">
-                                        <h6 class="alert-heading">
-                                            <i class="ri-lightbulb-line me-2"></i>Entitlement Guidelines
-                                        </h6>
-                                        <ul class="mb-0">
-                                            <li class="mb-1">Annual Holiday Entitlement: Standard annual leave days for the employee</li>
-                                            <li class="mb-1">Days Carried Over: Unused leave days from the previous year</li>
-                                            <li class="mb-0">Time in Lieu: Additional days earned through overtime work</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="col-xl-6">
-                                    <div class="alert alert-success border-0">
-                                        <h6 class="alert-heading">
-                                            <i class="ri-check-line me-2"></i>Calculation Notes
-                                        </h6>
-                                        <ul class="mb-0">
-                                            <li class="mb-1">Total available days are calculated automatically</li>
-                                            <li class="mb-1">Standard entitlement is typically 20-30 days per year</li>
-                                            <li class="mb-0">Changes will be reflected immediately in the system</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                     
                     <!-- Form Footer -->
@@ -382,6 +307,124 @@
                     </div>
                 </div>
             </form>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-xxl-4">
+            <!-- Entitlement Summary -->
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">Entitlement Summary</div>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="avatar avatar-xl bg-primary-transparent mx-auto mb-3">
+                            <i class="ri-calendar-check-line fs-24"></i>
+                        </div>
+                        <h4 class="text-primary mb-1" id="total-days">
+                            {% if object %}{{ object.total_available_days|floatformat:1 }}{% else %}0.0{% endif %}
+                        </h4>
+                        <p class="text-muted mb-0">Total Available Days</p>
+                    </div>
+                    
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="p-2">
+                                <h6 class="mb-1 text-primary" id="annual-days">
+                                    {% if object %}{{ object.annual_holiday_entitlement|floatformat:1 }}{% else %}0.0{% endif %}
+                                </h6>
+                                <small class="text-muted">Annual</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2">
+                                <h6 class="mb-1 text-info" id="carried-days">
+                                    {% if object %}{{ object.days_carried_over|floatformat:1 }}{% else %}0.0{% endif %}
+                                </h6>
+                                <small class="text-muted">Carried</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2">
+                                <h6 class="mb-1 text-warning" id="til-days">
+                                    {% if object %}{{ object.time_in_lieu|floatformat:1 }}{% else %}0.0{% endif %}
+                                </h6>
+                                <small class="text-muted">TIL</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Guidelines & Information -->
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="ri-information-line me-2"></i>Guidelines & Information
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info border-0 mb-3">
+                        <h6 class="alert-heading">
+                            <i class="ri-lightbulb-line me-2"></i>Entitlement Guidelines
+                        </h6>
+                        <ul class="mb-0">
+                            <li class="mb-1">Annual Holiday Entitlement: Standard annual leave days for the employee</li>
+                            <li class="mb-1">Days Carried Over: Unused leave days from the previous year</li>
+                            <li class="mb-0">Time in Lieu: Additional days earned through overtime work</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert alert-success border-0 mb-0">
+                        <h6 class="alert-heading">
+                            <i class="ri-check-line me-2"></i>Calculation Notes
+                        </h6>
+                        <ul class="mb-0">
+                            <li class="mb-1">Total available days are calculated automatically</li>
+                            <li class="mb-1">Standard entitlement is typically 20-30 days per year</li>
+                            <li class="mb-0">Changes will be reflected immediately in the system</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Tips -->
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="ri-lightbulb-line me-2"></i>Quick Tips
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-start mb-3">
+                        <span class="avatar avatar-sm bg-success-transparent me-3 mt-1">
+                            <i class="ri-user-line fs-12"></i>
+                        </span>
+                        <div>
+                            <h6 class="mb-1 fs-13">Employee Selection</h6>
+                            <p class="text-muted mb-0 fs-12">Choose the employee and their department carefully</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start mb-3">
+                        <span class="avatar avatar-sm bg-info-transparent me-3 mt-1">
+                            <i class="ri-calendar-line fs-12"></i>
+                        </span>
+                        <div>
+                            <h6 class="mb-1 fs-13">Annual Entitlement</h6>
+                            <p class="text-muted mb-0 fs-12">Standard annual leave days (usually 20-30 days)</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start">
+                        <span class="avatar avatar-sm bg-warning-transparent me-3 mt-1">
+                            <i class="ri-time-line fs-12"></i>
+                        </span>
+                        <div>
+                            <h6 class="mb-1 fs-13">TIL Days</h6>
+                            <p class="text-muted mb-0 fs-12">Time in Lieu earned through overtime work</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <!-- End::row-1 -->

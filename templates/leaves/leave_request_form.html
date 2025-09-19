@@ -498,7 +498,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load leave balance when leave type changes
     function loadLeaveBalance() {
         if (leaveTypeSelect.value) {
-            fetch('{% url "leaves:balance_ajax" %}', {
+            fetch('{% url "leaves:balance" %}', {
                 method: 'GET',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
