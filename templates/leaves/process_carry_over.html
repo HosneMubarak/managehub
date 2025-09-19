@@ -361,49 +361,22 @@
 {% endblock %}
 
 {% block content %}
-<div class="main-content app-content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-        
-        <!-- Enhanced Page Header -->
-        <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2 mb-4">
-            <div>
-                <nav>
-                    <ol class="breadcrumb mb-1">
-                        <li class="breadcrumb-item">
-                            <a href="{% url 'dashboard:index' %}" class="text-decoration-none">
-                                <i class="ri-home-line me-1"></i>Dashboard
-                            </a>
-                        </li>
-                        <li class="breadcrumb-item">
-                            <a href="{% url 'leaves:dashboard' %}" class="text-decoration-none">
-                                <i class="ri-calendar-line me-1"></i>Leave Management
-                            </a>
-                        </li>
-                        <li class="breadcrumb-item active" aria-current="page">Process Carry Over</li>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <h4 class="page-title">Year-End Carry Over Processing</h4>
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'leaves:dashboard' %}">Leave Management</a></li>
+                        <li class="breadcrumb-item active">Process Carry Over</li>
                     </ol>
-                </nav>
-                <div class="d-flex align-items-center gap-3">
-                    <h1 class="page-title fw-medium fs-18 mb-0">Year-End Carry Over Processing</h1>
-                    <span class="badge bg-primary-transparent animate-pulse">
-                        <i class="ri-time-line me-1"></i>Year-End Processing
-                    </span>
                 </div>
-                <p class="text-muted mb-0 mt-1">Automatically process unused leave days from previous year</p>
-            </div>
-            <div class="btn-list">
-                <a href="{% url 'leaves:entitlements' %}" class="btn btn-light btn-wave">
-                    <i class="ri-arrow-left-line me-1"></i>Back to Entitlements
-                </a>
-                <a href="{% url 'leaves:dashboard' %}" class="btn btn-outline-primary btn-wave">
-                    <i class="ri-dashboard-line me-1"></i>Dashboard
-                </a>
             </div>
         </div>
-        <!-- Page Header Close -->
-
-        <!-- Start::row-1 -->
+    </div>
+    <!-- Start::row-1 -->
         <div class="row row-sm mt-lg-4">
             <!-- Main Form -->
             <div class="col-xl-8">
@@ -825,8 +798,5 @@
         </div>
         {% endif %}
 
-            </div>
-        </div>
-    </div>
 </div>
 {% endblock %}
