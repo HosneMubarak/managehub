@@ -750,6 +750,63 @@ document.addEventListener('DOMContentLoaded', function() {
         return !hasErrors;
     }
     
+    // Leave types data for JavaScript validation
+    const leaveTypesData = {
+        {% for leave_type in leave_types %}
+        '{{ leave_type.id }}': {
+            'name': '{{ leave_type.name|escapejs }}',
+            'is_half_day': {{ leave_type.is_half_day|yesno:"true,false" }},
+            'code': '{{ leave_type.code|escapejs }}'
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+    
+    // Validate half-day leave types
+    function validateHalfDayLeave() {
+        if (!leaveTypeSelect.value || !startDateInput.value || !endDateInput.value) {
+            return true; // Skip validation if fields are empty
+        }
+        
+        const selectedLeaveType = leaveTypesData[leaveTypeSelect.value];
+        if (selectedLeaveType && selectedLeaveType.is_half_day) {
+            const startDate = new Date(startDateInput.value);
+            const endDate = new Date(endDateInput.value);
+            
+            if (startDate.getTime() !== endDate.getTime()) {
+                // Show error on end date field
+                endDateInput.classList.add('is-invalid');
+                let feedback = endDateInput.parentNode.querySelector('.invalid-feedback');
+                if (!feedback) {
+                    feedback = document.createElement('div');
+                    feedback.className = 'invalid-feedback';
+                    endDateInput.parentNode.appendChild(feedback);
+                }
+                feedback.textContent = `Half-day leave types (${selectedLeaveType.name}) can only be requested for a single day. Please set the end date to match the start date.`;
+                return false;
+            } else {
+                // Clear any existing error
+                endDateInput.classList.remove('is-invalid');
+                const feedback = endDateInput.parentNode.querySelector('.invalid-feedback');
+                if (feedback) {
+                    feedback.remove();
+                }
+            }
+        }
+        
+        return true;
+    }
+    
+    // Auto-set end date for half-day leaves
+    function autoSetEndDateForHalfDay() {
+        if (leaveTypeSelect.value && startDateInput.value) {
+            const selectedLeaveType = leaveTypesData[leaveTypeSelect.value];
+            if (selectedLeaveType && selectedLeaveType.is_half_day) {
+                endDateInput.value = startDateInput.value;
+                calculateDuration();
+            }
+        }
+    }
+    
     // Form validation enhancement
     function validateForm() {
         let isValid = true;
@@ -782,6 +839,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
+        // Validate half-day leave types
+        if (!validateHalfDayLeave()) {
+            isValid = false;
+        }
+        
         // Validate weekends
         if (!validateWeekends()) {
             isValid = false;
@@ -805,16 +867,21 @@ document.addEventListener('DOMContentLoaded', function() {
     
     leaveTypeSelect.addEventListener('change', function() {
         calculateDuration();
+        autoSetEndDateForHalfDay();
+        validateHalfDayLeave();
     });
     
     startDateInput.addEventListener('change', function() {
         calculateDuration();
         validateWeekends();
+        autoSetEndDateForHalfDay();
+        validateHalfDayLeave();
     });
     
     endDateInput.addEventListener('change', function() {
         calculateDuration();
         validateWeekends();
+        validateHalfDayLeave();
     });
     
     // Form submission with validation

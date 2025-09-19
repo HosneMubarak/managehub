@@ -201,11 +201,14 @@
             <h1 class="page-title fw-medium fs-18 mb-0">Employee Entitlements - {{ selected_year }}</h1>
         </div>
         <div class="btn-list">
-            {% if user.is_staff %}
+            {# TODO: Re-implement proper permission checks later #}
+            {# Currently showing entitlement creation to all users for development #}
+             {# TODO: Re-implement proper permission checks later #}
+            {# {% if user.is_staff %} #}
                 <a href="{% url 'leaves:entitlement_create' %}" class="btn btn-primary btn-wave">
-                    <i class="ri-add-line me-1 fw-medium align-middle"></i>New Entitlement
+                    <i class="ri-add-line me-1"></i>Create New Entitlement
                 </a>
-            {% endif %}
+            {# {% endif %} #}
         </div>
     </div>
     <!-- Page Header Close -->
@@ -292,7 +295,8 @@
                                         <th scope="col">Days Taken</th>
                                         <th scope="col">Remaining</th>
                                         <th scope="col">Utilization</th>
-                                        {% if user.is_staff %}<th scope="col">Actions</th>{% endif %}
+                                        {# TODO: Re-implement proper permission checks later #}
+                                        {# {% if user.is_staff %} #}<th scope="col">Actions</th>{# {% endif %} #}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -384,7 +388,9 @@
                                                 </div>
                                             {% endwith %}
                                         </td>
-                                        {% if user.is_staff %}
+                                        {# TODO: Re-implement proper permission checks later #}
+                                        {# Currently showing actions to all users for development #}
+                                        {# {% if user.is_staff %} #}
                                         <td>
                                             <div class="dropdown action-dropdown">
                                                 <button class="btn btn-icon btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -396,16 +402,10 @@
                                                             <i class="ri-edit-line me-2"></i>Edit Entitlement
                                                         </a>
                                                     </li>
-                                                    <li><hr class="dropdown-divider"></li>
-                                                    <li>
-                                                        <a class="dropdown-item text-danger" href="#" onclick="confirmDelete('{{ entitlement.id }}', '{{ entitlement.employee.get_full_name }}')">
-                                                            <i class="ri-delete-bin-line me-2"></i>Delete Entitlement
-                                                        </a>
-                                                    </li>
                                                 </ul>
                                             </div>
                                         </td>
-                                        {% endif %}
+                                        {# {% endif %} #}
                                     </tr>
                                     {% endfor %}
                                 </tbody>

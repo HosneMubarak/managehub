@@ -138,9 +138,13 @@ class EmployeeLeaveRequestsView(LoginRequiredMixin, ListView):
     paginate_by = 10
     
     def dispatch(self, request, *args, **kwargs):
+        # TODO: Re-implement proper permission checks later
+        # Currently allowing all users to view other employees' requests for development
+        # 
+        # Original permission check (commented out):
         # Only staff can view other employees' requests
-        if not (request.user.is_staff or request.user.is_superuser):
-            return HttpResponseForbidden("You don't have permission to view this page.")
+        # if not (request.user.is_staff or request.user.is_superuser):
+        #     return HttpResponseForbidden("You don't have permission to view this page.")
         return super().dispatch(request, *args, **kwargs)
     
     def get_queryset(self):
@@ -212,8 +216,11 @@ class LeaveRequestDetailView(LoginRequiredMixin, DetailView):
         context['comment_form'] = LeaveCommentForm()
         
         # Add approval form for managers
-        if self.request.user.is_staff or self.request.user.is_superuser:
-            context['approval_form'] = LeaveApprovalForm()
+        # TODO: Re-implement proper permission checks later
+        # Currently showing approval form to all users for development
+        # Original permission check (commented out):
+        # if self.request.user.is_staff or self.request.user.is_superuser:
+        context['approval_form'] = LeaveApprovalForm()
         
         # Get employee leave summary
         summary = LeaveCalculationService.get_employee_leave_summary(
@@ -264,10 +271,14 @@ class AdminLeaveRequestCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('leaves:list')
     
     def dispatch(self, request, *args, **kwargs):
+        # TODO: Re-implement proper permission checks later
+        # Currently allowing all users to create leave requests for other users for development
+        #
+        # Original permission check (commented out):
         # Only allow staff users to access this view
-        if not request.user.is_staff:
-            messages.error(request, 'You do not have permission to create leave requests for other users.')
-            return redirect('leaves:create')
+        # if not request.user.is_staff:
+        #     messages.error(request, 'You do not have permission to create leave requests for other users.')
+        #     return redirect('leaves:create')
         return super().dispatch(request, *args, **kwargs)
     
     def get_form_kwargs(self):
@@ -350,11 +361,14 @@ def dashboard_view(request):
     ).select_related('leave_type').order_by('start_date')[:3]
     
     # Manager view - pending approvals
+    # TODO: Re-implement proper permission checks later
+    # Currently showing pending approvals to all users for development
     pending_approvals = []
-    if request.user.is_staff or request.user.is_superuser:
-        pending_approvals = LeaveRequest.objects.filter(
-            status='PENDING'
-        ).select_related('employee', 'leave_type')[:10]
+    # Original permission check (commented out):
+    # if request.user.is_staff or request.user.is_superuser:
+    pending_approvals = LeaveRequest.objects.filter(
+        status='PENDING'
+    ).select_related('employee', 'leave_type')[:10]
     
     context = {
         'leave_summary': summary,
@@ -462,7 +476,7 @@ def entitlement_list_view(request):
     ).select_related('employee', 'department')
     
     if department:
-        entitlements = entitlements.filter(department_id=department)
+        entitlements = entitlements.filter(department__id=department)
     
     # Paginate results
     paginator = Paginator(entitlements, 10)
@@ -594,7 +608,8 @@ def get_leave_balance_ajax(request):
     
     # If employee_id is provided (for admin create form), use that employee
     # Otherwise, use the current user (for regular forms)
-    if employee_id and request.user.is_staff:
+    # TODO: Re-implement proper permission checks later - currently allowing all users
+    if employee_id:  # Removed staff check temporarily
         try:
             # Use pkid (primary key) instead of id (UUID field)
             employee = User.objects.get(pkid=employee_id, is_active=True)
@@ -636,8 +651,12 @@ class EntitlementCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('leaves:entitlements')
     
     def dispatch(self, request, *args, **kwargs):
-        if not (request.user.is_staff or request.user.is_superuser):
-            return HttpResponseForbidden()
+        # TODO: Re-implement proper permission checks later
+        # Currently allowing all users to create entitlements for development
+        #
+        # Original permission check (commented out):
+        # if not (request.user.is_staff or request.user.is_superuser):
+        #     return HttpResponseForbidden()
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -651,16 +670,24 @@ class EntitlementUpdateView(LoginRequiredMixin, UpdateView):
     slug_url_kwarg = 'id'
     
     def dispatch(self, request, *args, **kwargs):
-        if not (request.user.is_staff or request.user.is_superuser):
-            return HttpResponseForbidden()
+        # TODO: Re-implement proper permission checks later
+        # Currently allowing all users to update entitlements for development
+        #
+        # Original permission check (commented out):
+        # if not (request.user.is_staff or request.user.is_superuser):
+        #     return HttpResponseForbidden()
         return super().dispatch(request, *args, **kwargs)
 
 
 @login_required
 def reports_view(request):
     """Leave reports view"""
-    if not (request.user.is_staff or request.user.is_superuser):
-        return HttpResponseForbidden()
+    # TODO: Re-implement proper permission checks later
+    # Currently allowing all users to view reports for development
+    #
+    # Original permission check (commented out):
+    # if not (request.user.is_staff or request.user.is_superuser):
+    #     return HttpResponseForbidden()
     
     # Get parameters
     year = int(request.GET.get('year', timezone.now().year))

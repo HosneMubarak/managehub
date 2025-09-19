@@ -83,6 +83,13 @@ class LeaveRequestForm(forms.ModelForm):
                     'end_date': 'End date must be after or equal to start date.'
                 })
         
+        # Validate half-day leave types
+        if leave_type and leave_type.is_half_day and start_date and end_date:
+            if start_date != end_date:
+                raise ValidationError({
+                    'end_date': f'Half-day leave types ({leave_type.name}) can only be requested for a single day. Please set the end date to match the start date.'
+                })
+        
         if start_date and end_date and leave_type and self.employee:
             # Check eligibility
             eligibility = LeaveCalculationService.check_leave_eligibility(
@@ -194,6 +201,13 @@ class AdminLeaveRequestForm(forms.ModelForm):
             if start_date > end_date:
                 raise ValidationError({
                     'end_date': 'End date must be after or equal to start date.'
+                })
+        
+        # Validate half-day leave types
+        if leave_type and leave_type.is_half_day and start_date and end_date:
+            if start_date != end_date:
+                raise ValidationError({
+                    'end_date': f'Half-day leave types ({leave_type.name}) can only be requested for a single day. Please set the end date to match the start date.'
                 })
         
         if start_date and end_date and leave_type and employee:
