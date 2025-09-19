@@ -1,162 +1,426 @@
 {% extends 'components/base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}
     {% if object %}Edit Entitlement{% else %}New Entitlement{% endif %} - ManageHub
 {% endblock %}
 
+{% block styles %}
+    <!-- dragula css-->
+    <link rel="stylesheet" href="{% static 'assets/libs/dragula/dragula.min.css'%}">
+    <style>
+        /* Form Section Styling */
+        .form-section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .form-section-title {
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-section-title i {
+            margin-right: 0.5rem;
+            color: #0d6efd;
+            font-size: 1.2rem;
+        }
+
+        /* Dark mode support for form sections */
+        [data-theme-mode=dark] .form-section {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme-mode=dark] .form-section-title {
+            color: rgba(255, 255, 255, 0.9);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Required field indicator */
+        .required-field::after {
+            content: " *";
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        /* Form help text */
+        .form-help {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+
+        [data-theme-mode=dark] .form-help {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Progress indicator */
+        .progress-indicator {
+            background: linear-gradient(90deg, #0d6efd 0%, #6610f2 100%);
+            height: 4px;
+            border-radius: 2px;
+            margin-bottom: 2rem;
+        }
+
+        /* Enhanced form controls for dark mode */
+        [data-theme-mode=dark] .form-control {
+            background: rgba(var(--body-bg-rgb));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        [data-theme-mode=dark] .form-control:focus {
+            background: rgba(var(--body-bg-rgb));
+            border-color: #0d6efd;
+            color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+
+        [data-theme-mode=dark] .form-select {
+            background: rgba(var(--body-bg-rgb));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        [data-theme-mode=dark] .form-select:focus {
+            background: rgba(var(--body-bg-rgb));
+            border-color: #0d6efd;
+            color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box">
-                <h4 class="page-title">
-                    {% if object %}Edit Employee Entitlement{% else %}New Employee Entitlement{% endif %}
-                </h4>
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Home</a></li>
-                        <li class="breadcrumb-item"><a href="{% url 'leaves:dashboard' %}">Leave</a></li>
-                        <li class="breadcrumb-item"><a href="{% url 'leaves:entitlements' %}">Entitlements</a></li>
-                        <li class="breadcrumb-item active">
-                            {% if object %}Edit{% else %}New{% endif %}
-                        </li>
-                    </ol>
-                </div>
-            </div>
+    <!-- Page Header -->
+    <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2">
+        <div>
+            <nav>
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'leaves:my_requests' %}">Leave Management</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'leaves:entitlements' %}">Entitlements</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        {% if object %}Edit Entitlement{% else %}New Entitlement{% endif %}
+                    </li>
+                </ol>
+            </nav>
+            <h1 class="page-title fw-medium fs-18 mb-0">
+                {% if object %}Edit Employee Entitlement{% else %}Create Employee Entitlement{% endif %}
+            </h1>
+        </div>
+        <div class="btn-list">
+            <a href="{% url 'leaves:entitlements' %}" class="btn btn-white btn-wave me-0">
+                <i class="ri-arrow-left-line me-1"></i> Back to Entitlements
+            </a>
         </div>
     </div>
+    <!-- Page Header Close -->
 
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="header-title">
-                        {% if object %}Edit Entitlement{% else %}Employee Entitlement Form{% endif %}
-                    </h4>
-                </div>
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        
-                        {% if form.non_field_errors %}
-                            <div class="alert alert-danger">
-                                {{ form.non_field_errors }}
+    <!-- Start::row-1 -->
+    <div class="row">
+        <div class="col-xl-12">
+            <form method="post" id="entitlement-form">
+                {% csrf_token %}
+                <div class="card custom-card">
+                    <div class="card-header">
+                        <div class="card-title d-flex align-items-center">
+                            <i class="ri-user-settings-line me-2"></i>
+                            {% if object %}Edit Employee Entitlement{% else %}Create Employee Entitlement{% endif %}
+                        </div>
+                        <div class="progress-indicator"></div>
+                    </div>
+                    <div class="card-body">
+                        {% if form.errors %}
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="ri-error-warning-line me-2"></i>
+                                <strong>Please correct the following errors:</strong>
+                                <ul class="mb-0 mt-2">
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
                         {% endif %}
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.employee.id_for_label }}" class="form-label">
-                                        Employee <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.employee }}
-                                    {% if form.employee.errors %}
-                                        <div class="invalid-feedback d-block">
-                                            {{ form.employee.errors }}
-                                        </div>
-                                    {% endif %}
+                        <!-- Employee Information Section -->
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="ri-user-line"></i>
+                                Employee Information
+                            </h5>
+                            <div class="row">
+                                <div class="col-xl-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.employee.id_for_label }}" class="form-label required-field">Employee</label>
+                                        {{ form.employee }}
+                                        {% if form.employee.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.employee.errors }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-help">Select the employee for this entitlement record</div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.department.id_for_label }}" class="form-label">
-                                        Department <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.department }}
-                                    {% if form.department.errors %}
-                                        <div class="invalid-feedback d-block">
-                                            {{ form.department.errors }}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.year.id_for_label }}" class="form-label">
-                                        Year <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.year }}
-                                    {% if form.year.errors %}
-                                        <div class="invalid-feedback d-block">
-                                            {{ form.year.errors }}
-                                        </div>
-                                    {% endif %}
+                                <div class="col-xl-6">
+                                    <div class="mb-0">
+                                        <label for="{{ form.department.id_for_label }}" class="form-label required-field">Department</label>
+                                        {{ form.department }}
+                                        {% if form.department.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.department.errors }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-help">Employee's current department</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="{{ form.annual_holiday_entitlement.id_for_label }}" class="form-label">
-                                        Annual Holiday Entitlement <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.annual_holiday_entitlement }}
-                                    {% if form.annual_holiday_entitlement.errors %}
-                                        <div class="invalid-feedback d-block">
-                                            {{ form.annual_holiday_entitlement.errors }}
-                                        </div>
-                                    {% endif %}
-                                    <small class="form-text text-muted">Days per year</small>
+                        <!-- Entitlement Period Section -->
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="ri-calendar-line"></i>
+                                Entitlement Period
+                            </h5>
+                            <div class="row">
+                                <div class="col-xl-6">
+                                    <div class="mb-0">
+                                        <label for="{{ form.year.id_for_label }}" class="form-label required-field">Entitlement Year</label>
+                                        {{ form.year }}
+                                        {% if form.year.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.year.errors }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-help">Calendar year for this entitlement period</div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="{{ form.days_carried_over.id_for_label }}" class="form-label">
-                                        Days Carried Over
-                                    </label>
-                                    {{ form.days_carried_over }}
-                                    {% if form.days_carried_over.errors %}
-                                        <div class="invalid-feedback d-block">
-                                            {{ form.days_carried_over.errors }}
+                                <div class="col-xl-6">
+                                    <div class="mb-0">
+                                        <div class="p-3 bg-info-transparent rounded border">
+                                            <div class="d-flex align-items-center justify-content-center">
+                                                <i class="ri-information-line me-2 text-info"></i>
+                                                <span class="text-info fw-medium">
+                                                    {% if object %}Existing Record{% else %}New Record{% endif %}
+                                                </span>
+                                            </div>
+                                            <small class="text-muted d-block text-center mt-1">
+                                                {% if object %}Updating existing entitlement{% else %}Creating new entitlement{% endif %}
+                                            </small>
                                         </div>
-                                    {% endif %}
-                                    <small class="form-text text-muted">From previous year</small>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="{{ form.time_in_lieu.id_for_label }}" class="form-label">
-                                        Time in Lieu (TIL)
-                                    </label>
-                                    {{ form.time_in_lieu }}
-                                    {% if form.time_in_lieu.errors %}
-                                        <div class="invalid-feedback d-block">
-                                            {{ form.time_in_lieu.errors }}
-                                        </div>
-                                    {% endif %}
-                                    <small class="form-text text-muted">TIL days available</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <div class="alert alert-info">
-                                <h6><i class="mdi mdi-information"></i> Entitlement Information</h6>
-                                <ul class="mb-0">
-                                    <li>Annual Holiday Entitlement: Standard annual leave days for the employee</li>
-                                    <li>Days Carried Over: Unused leave days from the previous year</li>
-                                    <li>Time in Lieu: Additional days earned through overtime or special circumstances</li>
-                                    <li>Total available days will be calculated automatically</li>
-                                </ul>
+                        <!-- Leave Entitlement Details Section -->
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="ri-calendar-check-line"></i>
+                                Leave Entitlement Details
+                            </h5>
+                            <div class="row">
+                                <div class="col-xl-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.annual_holiday_entitlement.id_for_label }}" class="form-label required-field">Annual Holiday Entitlement</label>
+                                        {{ form.annual_holiday_entitlement }}
+                                        {% if form.annual_holiday_entitlement.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.annual_holiday_entitlement.errors }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-help">Standard annual leave days per year (typically 20-30 days)</div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-4">
+                                    <div class="mb-3">
+                                        <label for="{{ form.days_carried_over.id_for_label }}" class="form-label">Days Carried Over</label>
+                                        {{ form.days_carried_over }}
+                                        {% if form.days_carried_over.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.days_carried_over.errors }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-help">Unused leave days from the previous year</div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-4">
+                                    <div class="mb-0">
+                                        <label for="{{ form.time_in_lieu.id_for_label }}" class="form-label">Time in Lieu (TIL)</label>
+                                        {{ form.time_in_lieu }}
+                                        {% if form.time_in_lieu.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.time_in_lieu.errors }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-help">Additional days earned through overtime work</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="text-end">
-                            <a href="{% url 'leaves:entitlements' %}" class="btn btn-light me-2">Cancel</a>
-                            <button type="submit" class="btn btn-primary">
+                        <!-- Summary & Review Section -->
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="ri-calculator-line"></i>
+                                Entitlement Summary
+                            </h5>
+                            <div class="row">
+                                <div class="col-xl-3">
+                                    <div class="text-center p-3 bg-primary-transparent rounded">
+                                        <h4 class="text-primary mb-1" id="total-days">
+                                            {% if object %}{{ object.total_available_days|floatformat:1 }}{% else %}0.0{% endif %}
+                                        </h4>
+                                        <small class="text-muted">Total Available Days</small>
+                                    </div>
+                                </div>
+                                <div class="col-xl-3">
+                                    <div class="text-center p-3 bg-info-transparent rounded">
+                                        <h5 class="text-info mb-1" id="annual-days">
+                                            {% if object %}{{ object.annual_holiday_entitlement|floatformat:1 }}{% else %}0.0{% endif %}
+                                        </h5>
+                                        <small class="text-muted">Annual Days</small>
+                                    </div>
+                                </div>
+                                <div class="col-xl-3">
+                                    <div class="text-center p-3 bg-success-transparent rounded">
+                                        <h5 class="text-success mb-1" id="carried-days">
+                                            {% if object %}{{ object.days_carried_over|floatformat:1 }}{% else %}0.0{% endif %}
+                                        </h5>
+                                        <small class="text-muted">Carried Over</small>
+                                    </div>
+                                </div>
+                                <div class="col-xl-3">
+                                    <div class="text-center p-3 bg-warning-transparent rounded">
+                                        <h5 class="text-warning mb-1" id="til-days">
+                                            {% if object %}{{ object.time_in_lieu|floatformat:1 }}{% else %}0.0{% endif %}
+                                        </h5>
+                                        <small class="text-muted">TIL Days</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Guidelines & Information Section -->
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="ri-information-line"></i>
+                                Guidelines & Information
+                            </h5>
+                            <div class="row">
+                                <div class="col-xl-6">
+                                    <div class="alert alert-info border-0">
+                                        <h6 class="alert-heading">
+                                            <i class="ri-lightbulb-line me-2"></i>Entitlement Guidelines
+                                        </h6>
+                                        <ul class="mb-0">
+                                            <li class="mb-1">Annual Holiday Entitlement: Standard annual leave days for the employee</li>
+                                            <li class="mb-1">Days Carried Over: Unused leave days from the previous year</li>
+                                            <li class="mb-0">Time in Lieu: Additional days earned through overtime work</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-xl-6">
+                                    <div class="alert alert-success border-0">
+                                        <h6 class="alert-heading">
+                                            <i class="ri-check-line me-2"></i>Calculation Notes
+                                        </h6>
+                                        <ul class="mb-0">
+                                            <li class="mb-1">Total available days are calculated automatically</li>
+                                            <li class="mb-1">Standard entitlement is typically 20-30 days per year</li>
+                                            <li class="mb-0">Changes will be reflected immediately in the system</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Form Footer -->
+                    <div class="card-footer bg-light">
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'leaves:entitlements' %}" class="btn btn-light btn-wave">
+                                <i class="ri-arrow-left-line me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-wave">
+                                <i class="ri-{% if object %}edit{% else %}add{% endif %}-line me-1"></i>
                                 {% if object %}Update Entitlement{% else %}Create Entitlement{% endif %}
                             </button>
                         </div>
-                    </form>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
-</div>
+    <!-- End::row-1 -->
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Real-time calculation of total days
+    const annualField = document.getElementById('{{ form.annual_holiday_entitlement.id_for_label }}');
+    const carriedField = document.getElementById('{{ form.days_carried_over.id_for_label }}');
+    const tilField = document.getElementById('{{ form.time_in_lieu.id_for_label }}');
+    
+    function updateTotalDays() {
+        const annual = parseFloat(annualField.value) || 0;
+        const carried = parseFloat(carriedField.value) || 0;
+        const til = parseFloat(tilField.value) || 0;
+        const total = annual + carried + til;
+        
+        document.getElementById('total-days').textContent = total.toFixed(1);
+        document.getElementById('annual-days').textContent = annual.toFixed(1);
+        document.getElementById('carried-days').textContent = carried.toFixed(1);
+        document.getElementById('til-days').textContent = til.toFixed(1);
+    }
+    
+    // Add event listeners
+    if (annualField) annualField.addEventListener('input', updateTotalDays);
+    if (carriedField) carriedField.addEventListener('input', updateTotalDays);
+    if (tilField) tilField.addEventListener('input', updateTotalDays);
+    
+    // Form validation
+    const form = document.getElementById('entitlement-form');
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        const requiredFields = [annualField];
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            const firstInvalidField = form.querySelector('.is-invalid');
+            if (firstInvalidField) {
+                firstInvalidField.focus();
+                firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+});
+</script>
 {% endblock %}
