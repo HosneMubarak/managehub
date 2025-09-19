@@ -1,3 +1,365 @@
+{% extends 'components/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Process Year-End Carry Over - ManageHub{% endblock %}
+
+{% block styles %}
+    <!-- dragula css-->
+    <link rel="stylesheet" href="{% static 'assets/libs/dragula/dragula.min.css'%}">
+<style>
+    /* Enhanced Page Layout */
+    .main-content {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        min-height: 100vh;
+    }
+
+    /* Professional Form Styling */
+    .carry-over-form {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .carry-over-form:hover {
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+
+    .form-section {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(13, 110, 253, 0.1);
+        border-left: 4px solid #0d6efd;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #0d6efd 0%, #6610f2 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-section:hover {
+        border-left-color: #6610f2;
+        background: linear-gradient(135deg, rgba(13, 110, 253, 0.02) 0%, rgba(13, 110, 253, 0.01) 100%);
+        box-shadow: 0 4px 20px rgba(13, 110, 253, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .form-section:hover::before {
+        opacity: 1;
+    }
+
+    .form-section-title {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid rgba(13, 110, 253, 0.1);
+        display: flex;
+        align-items: center;
+        font-size: 1.1rem;
+    }
+
+    .form-section-title i {
+        margin-right: 0.75rem;
+        color: #0d6efd;
+        font-size: 1.3rem;
+        padding: 0.5rem;
+        background: rgba(13, 110, 253, 0.1);
+        border-radius: 8px;
+    }
+
+    /* Enhanced Help Cards */
+    .help-card {
+        background: linear-gradient(135deg, rgba(13, 110, 253, 0.02) 0%, rgba(13, 110, 253, 0.01) 100%);
+        border: 1px solid rgba(13, 110, 253, 0.1);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .help-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, #0d6efd 0%, #6610f2 100%);
+        transition: width 0.3s ease;
+    }
+
+    .help-card:hover {
+        background: linear-gradient(135deg, rgba(13, 110, 253, 0.05) 0%, rgba(13, 110, 253, 0.02) 100%);
+        box-shadow: 0 8px 25px rgba(13, 110, 253, 0.15);
+        transform: translateY(-3px);
+    }
+
+    .help-card:hover::before {
+        width: 6px;
+    }
+
+    /* Professional Step Indicators */
+    .step-indicator {
+        position: relative;
+        padding-left: 1rem;
+    }
+
+    .step-indicator::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(180deg, #0d6efd 0%, #6610f2 100%);
+        border-radius: 1px;
+    }
+
+    .step-number {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+    }
+
+    /* Enhanced Results Table */
+    .results-table {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .results-table thead th {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: none;
+        font-weight: 600;
+        color: #495057;
+        padding: 1.25rem 1rem;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .results-table tbody tr {
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        transition: all 0.2s ease;
+    }
+
+    .results-table tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.02);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .results-table tbody td {
+        padding: 1.25rem 1rem;
+        vertical-align: middle;
+        border-bottom: none;
+    }
+
+    /* Professional Stats Cards */
+    .stats-card {
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+        border: 1px solid rgba(0,0,0,0.05);
+        border-left: 4px solid #0d6efd;
+        border-radius: 0 12px 12px 0;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 0;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(13, 110, 253, 0.05) 0%, rgba(102, 16, 242, 0.05) 100%);
+        transition: width 0.3s ease;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+        border-left-color: #6610f2;
+    }
+
+    .stats-card:hover::before {
+        width: 100%;
+    }
+
+    .stats-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .stats-card:hover .stats-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    /* Enhanced Alerts */
+    .alert-enhanced {
+        border: none;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .alert-enhanced::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: currentColor;
+    }
+
+    /* Dark Mode Support */
+    [data-theme-mode=dark] .main-content {
+        background: linear-gradient(135deg, rgb(var(--body-bg-rgb)) 0%, rgba(255,255,255,0.02) 100%);
+    }
+
+    [data-theme-mode=dark] .form-section {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.01) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-left: 4px solid #0d6efd;
+    }
+
+    [data-theme-mode=dark] .form-section:hover {
+        background: linear-gradient(135deg, rgba(13, 110, 253, 0.08) 0%, rgba(13, 110, 253, 0.04) 100%);
+        box-shadow: 0 4px 20px rgba(13, 110, 253, 0.2);
+    }
+
+    [data-theme-mode=dark] .form-section-title {
+        color: rgba(255, 255, 255, 0.9);
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    [data-theme-mode=dark] .help-card {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.01) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    [data-theme-mode=dark] .help-card:hover {
+        background: linear-gradient(135deg, rgba(13, 110, 253, 0.08) 0%, rgba(13, 110, 253, 0.04) 100%);
+        box-shadow: 0 8px 25px rgba(13, 110, 253, 0.3);
+    }
+
+    [data-theme-mode=dark] .results-table {
+        background: rgb(var(--body-bg-rgb));
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    [data-theme-mode=dark] .results-table thead th {
+        background: linear-gradient(135deg, rgba(45, 45, 48, 0.9) 0%, rgba(35, 35, 38, 0.9) 100%);
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    [data-theme-mode=dark] .results-table tbody tr {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    [data-theme-mode=dark] .results-table tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    [data-theme-mode=dark] .stats-card {
+        background: linear-gradient(135deg, rgb(var(--body-bg-rgb)) 0%, rgba(255,255,255,0.02) 100%);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-left: 4px solid #0d6efd;
+    }
+
+    [data-theme-mode=dark] .stats-card:hover {
+        border-left-color: #6610f2;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    .animate-fade-in {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    .animate-pulse {
+        animation: pulse 2s infinite;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .form-section {
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stats-card {
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .results-table thead th,
+        .results-table tbody td {
+            padding: 0.75rem 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="main-content app-content">
     <div class="container-fluid">
@@ -273,60 +635,103 @@
             </div>
         </div>
 
-        <!-- Results Section -->
+        <!-- Enhanced Results Section -->
         {% if results %}
         <div class="row mt-4">
             <div class="col-12">
-                <div class="card custom-card">
-                    <div class="card-header">
-                        <div class="card-title">
-                            <i class="ri-file-list-3-line me-2"></i>Processing Results
+                <div class="card custom-card animate-fade-in" style="animation-delay: 0.6s;">
+                    <div class="card-header d-flex align-items-center justify-content-between p-4 border-bottom">
+                        <div class="card-title mb-0 d-flex align-items-center">
+                            <div class="avatar avatar-sm bg-success-transparent me-3">
+                                <i class="ri-file-list-3-line fs-16"></i>
+                            </div>
+                            <div>
+                                <span class="fw-semibold fs-16">Processing Results</span>
+                                <p class="text-muted mb-0 fs-12">
+                                    {% if dry_run %}Preview Results (No Changes Made){% else %}Processing Complete{% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            {% if dry_run %}
+                                <span class="badge bg-info-transparent">
+                                    <i class="ri-eye-line me-1"></i>Dry Run
+                                </span>
+                            {% else %}
+                                <span class="badge bg-success-transparent">
+                                    <i class="ri-check-line me-1"></i>Completed
+                                </span>
+                            {% endif %}
                         </div>
                     </div>
-                    <div class="card-body">
-                        <!-- Summary Stats -->
+                    <div class="card-body p-4">
+                        <!-- Enhanced Summary Stats -->
                         <div class="row mb-4">
-                            <div class="col-md-3">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="avatar avatar-sm bg-primary-transparent">
-                                        <i class="ri-user-line fs-16"></i>
-                                    </span>
-                                    <div>
-                                        <div class="fw-medium">{{ results.processed_employees }}</div>
-                                        <div class="text-muted fs-12">Employees Processed</div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="stats-card">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <div class="stats-icon bg-primary-transparent text-primary">
+                                                <i class="ri-user-line"></i>
+                                            </div>
+                                            <h4 class="fw-bold mb-1">{{ results.processed_employees }}</h4>
+                                            <p class="text-muted mb-0 fs-13">Employees Processed</p>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-primary-transparent fs-11">Total</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="avatar avatar-sm bg-success-transparent">
-                                        <i class="ri-calendar-check-line fs-16"></i>
-                                    </span>
-                                    <div>
-                                        <div class="fw-medium">{{ results.employees_with_carry_over|length }}</div>
-                                        <div class="text-muted fs-12">With Carry Over</div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="stats-card">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <div class="stats-icon bg-success-transparent text-success">
+                                                <i class="ri-calendar-check-line"></i>
+                                            </div>
+                                            <h4 class="fw-bold mb-1">{{ results.employees_with_carry_over|length }}</h4>
+                                            <p class="text-muted mb-0 fs-13">With Carry Over</p>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-success-transparent fs-11">Success</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="avatar avatar-sm bg-info-transparent">
-                                        <i class="ri-time-line fs-16"></i>
-                                    </span>
-                                    <div>
-                                        <div class="fw-medium">{{ results.total_days_carried_over }}</div>
-                                        <div class="text-muted fs-12">Total Days Carried</div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="stats-card">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <div class="stats-icon bg-info-transparent text-info">
+                                                <i class="ri-time-line"></i>
+                                            </div>
+                                            <h4 class="fw-bold mb-1">{{ results.total_days_carried_over }}</h4>
+                                            <p class="text-muted mb-0 fs-13">Total Days Carried</p>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-info-transparent fs-11">Days</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="avatar avatar-sm bg-warning-transparent">
-                                        <i class="ri-error-warning-line fs-16"></i>
-                                    </span>
-                                    <div>
-                                        <div class="fw-medium">{{ results.errors|length }}</div>
-                                        <div class="text-muted fs-12">Errors</div>
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <div class="stats-card">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <div class="stats-icon bg-warning-transparent text-warning">
+                                                <i class="ri-error-warning-line"></i>
+                                            </div>
+                                            <h4 class="fw-bold mb-1">{{ results.errors|length }}</h4>
+                                            <p class="text-muted mb-0 fs-13">Errors</p>
+                                        </div>
+                                        <div class="text-end">
+                                            {% if results.errors|length > 0 %}
+                                                <span class="badge bg-danger-transparent fs-11">Issues</span>
+                                            {% else %}
+                                                <span class="badge bg-success-transparent fs-11">Clean</span>
+                                            {% endif %}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
