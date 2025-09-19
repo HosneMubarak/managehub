@@ -3,7 +3,7 @@
 {% load humanize %}
 
 {% block title %}
-    {% if object %}Edit Leave Request{% else %}New Leave Request{% endif %} - ManageHub
+    Create Leave Request for Employee - ManageHub
 {% endblock %}
 
 {% block styles %}
@@ -105,19 +105,15 @@
             <nav>
                 <ol class="breadcrumb mb-1">
                     <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'leaves:my_requests' %}">Leave Requests</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">
-                        {% if object %}Edit Request{% else %}New Request{% endif %}
-                    </li>
+                    <li class="breadcrumb-item"><a href="{% url 'leaves:list' %}">Leave Requests</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Create for Employee</li>
                 </ol>
             </nav>
-            <h1 class="page-title fw-medium fs-18 mb-0">
-                {% if object %}Edit Leave Request{% else %}Request Leave{% endif %}
-            </h1>
+            <h1 class="page-title fw-medium fs-18 mb-0">Create Leave Request for Employee</h1>
         </div>
         <div class="btn-list">
-            <a href="{% url 'leaves:my_requests' %}" class="btn btn-white btn-wave me-0">
-                <i class="ri-arrow-left-line me-1"></i> Back to Requests
+            <a href="{% url 'leaves:list' %}" class="btn btn-white btn-wave me-0">
+                <i class="ri-arrow-left-line me-1"></i> Back to All Requests
             </a>
         </div>
     </div>
@@ -126,13 +122,13 @@
     <!-- Start::row-1 -->
     <div class="row">
         <div class="col-xxl-8">
-            <form method="post" id="leave-request-form">
+            <form method="post" id="admin-leave-request-form">
                 {% csrf_token %}
                 <div class="card custom-card">
                     <div class="card-header">
                         <div class="card-title d-flex align-items-center">
-                            <i class="ri-calendar-add-line me-2"></i>
-                            {% if object %}Edit Leave Request{% else %}Create Leave Request{% endif %}
+                            <i class="ri-admin-line me-2"></i>
+                            Create Leave Request for Employee
                         </div>
                         <div class="progress-indicator"></div>
                     </div>
@@ -151,6 +147,28 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
                         {% endif %}
+
+                        <!-- Employee Selection Section -->
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="ri-user-line"></i>
+                                Employee Selection
+                            </h5>
+                            <div class="row">
+                                <div class="col-xl-12">
+                                    <div class="mb-0">
+                                        <label for="{{ form.employee.id_for_label }}" class="form-label required-field">Employee</label>
+                                        {{ form.employee }}
+                                        {% if form.employee.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.employee.errors }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-help">{{ form.employee.help_text }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- Leave Type & Duration Section -->
                         <div class="form-section">
@@ -192,7 +210,7 @@
                                                     <div>
                                                         <strong>Insufficient Balance!</strong>
                                                         <div class="mt-1">
-                                                            <span id="balance-message">You don't have enough leave balance for this request.</span>
+                                                            <span id="balance-message">The selected employee doesn't have enough leave balance for this request.</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -203,7 +221,7 @@
                                                     <div>
                                                         <strong>Balance Available</strong>
                                                         <div class="mt-1">
-                                                            <span id="balance-available-message">You have sufficient balance for this request.</span>
+                                                            <span id="balance-available-message">The selected employee has sufficient balance for this request.</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -278,26 +296,26 @@
                             </h5>
                             <div class="row">
                                 <div class="col-xl-6">
-                                    <div class="alert alert-success border-0">
+                                    <div class="alert alert-info border-0">
                                         <h6 class="alert-heading">
-                                            <i class="ri-check-line me-2"></i>Requirements
+                                            <i class="ri-admin-line me-2"></i>Admin Guidelines
                                         </h6>
                                         <ul class="mb-0">
-                                            <li class="mb-1">Submit at least 24 hours in advance</li>
-                                            <li class="mb-1">Annual leave requires manager approval</li>
-                                            <li class="mb-0">Sick leave can be submitted retroactively</li>
+                                            <li class="mb-1">You are creating this request on behalf of the selected employee</li>
+                                            <li class="mb-1">The employee will be notified via email</li>
+                                            <li class="mb-0">Request will be automatically approved if you have approval rights</li>
                                         </ul>
                                     </div>
                                 </div>
                                 <div class="col-xl-6">
-                                    <div class="alert alert-info border-0">
+                                    <div class="alert alert-success border-0">
                                         <h6 class="alert-heading">
-                                            <i class="ri-calendar-line me-2"></i>Calculation Notes
+                                            <i class="ri-check-line me-2"></i>Validation Notes
                                         </h6>
                                         <ul class="mb-0">
-                                            <li class="mb-1">Weekends excluded from calculations</li>
-                                            <li class="mb-1">Business days only (Sun-Thu)</li>
-                                            <li class="mb-0">Cannot start or end on weekends (Sat-Sun)</li>
+                                            <li class="mb-1">Employee's leave balance will be checked automatically</li>
+                                            <li class="mb-1">Weekend dates are excluded from calculations</li>
+                                            <li class="mb-0">Overlapping requests will be validated</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -308,12 +326,11 @@
                     <!-- Form Footer -->
                     <div class="card-footer bg-light">
                         <div class="d-flex justify-content-end gap-2">
-                            <a href="{% url 'leaves:my_requests' %}" class="btn btn-light btn-wave">
+                            <a href="{% url 'leaves:list' %}" class="btn btn-light btn-wave">
                                 <i class="ri-arrow-left-line me-1"></i>Cancel
                             </a>
                             <button type="submit" class="btn btn-primary btn-wave">
-                                <i class="ri-{% if object %}edit{% else %}add{% endif %}-line me-1"></i>
-                                {% if object %}Update Request{% else %}Submit Request{% endif %}
+                                <i class="ri-add-line me-1"></i>Create Leave Request
                             </button>
                         </div>
                     </div>
@@ -321,24 +338,30 @@
             </form>
         </div>
 
+        <!-- Sidebar -->
         <div class="col-xxl-4">
-            <!-- Leave Balance Summary -->
+            <!-- Employee Balance Display -->
             <div class="card custom-card">
                 <div class="card-header">
-                    <div class="card-title">Your Leave Balance</div>
+                    <div class="card-title">Employee Leave Balance</div>
                 </div>
                 <div class="card-body">
-                    <div class="text-center mb-4">
+                    <div class="text-center mb-4" id="balance-display" style="display: none;">
                         <div class="avatar avatar-xl bg-primary-transparent mx-auto mb-3">
                             <i class="ri-calendar-check-line fs-24"></i>
                         </div>
-                        <h4 class="text-primary mb-1" id="available-days-main">
-                            {% if leave_summary %}{{ leave_summary.remaining_days|floatformat:1 }}{% else %}-{% endif %}
-                        </h4>
+                        <h4 class="text-primary mb-1" id="available-days-main">-</h4>
                         <p class="text-muted mb-0">Available Days</p>
                     </div>
                     
-                    <div class="row text-center">
+                    <div class="text-center text-muted" id="no-employee-selected">
+                        <div class="avatar avatar-xl bg-light mx-auto mb-3">
+                            <i class="ri-user-line fs-24 text-muted"></i>
+                        </div>
+                        <p class="mb-0">Select an employee to view their leave balance</p>
+                    </div>
+                    
+                    <div class="row text-center" id="balance-breakdown" style="display: none;">
                         <div class="col-6">
                             <div class="d-flex align-items-center justify-content-center mb-2">
                                 <span class="avatar avatar-sm bg-success-transparent me-2">
@@ -346,9 +369,7 @@
                                 </span>
                                 <div>
                                     <p class="mb-0 fw-medium text-muted fs-12">Used</p>
-                                    <p class="fs-14 mb-0 fw-medium" id="used-days-main">
-                                        {% if leave_summary %}{{ leave_summary.approved_days|floatformat:1 }}{% else %}-{% endif %}
-                                    </p>
+                                    <p class="fs-14 mb-0 fw-medium" id="used-days-main">-</p>
                                 </div>
                             </div>
                         </div>
@@ -359,9 +380,7 @@
                                 </span>
                                 <div>
                                     <p class="mb-0 fw-medium text-muted fs-12">Pending</p>
-                                    <p class="fs-14 mb-0 fw-medium" id="pending-days-main">
-                                        {% if leave_summary %}{{ leave_summary.pending_days|floatformat:1 }}{% else %}-{% endif %}
-                                    </p>
+                                    <p class="fs-14 mb-0 fw-medium" id="pending-days-main">-</p>
                                 </div>
                             </div>
                         </div>
@@ -412,35 +431,35 @@
             <!-- Quick Tips -->
             <div class="card custom-card">
                 <div class="card-header">
-                    <div class="card-title">Quick Tips</div>
+                    <div class="card-title">Admin Tips</div>
                 </div>
                 <div class="card-body">
                     <div class="d-flex flex-column gap-3">
                         <div class="d-flex align-items-start gap-2">
-                            <span class="avatar avatar-sm bg-success-transparent">
-                                <i class="ri-lightbulb-line fs-14"></i>
+                            <span class="avatar avatar-sm bg-primary-transparent">
+                                <i class="ri-admin-line fs-14"></i>
                             </span>
                             <div>
-                                <div class="fw-medium fs-13 text-success">Plan Ahead</div>
-                                <div class="text-muted fs-12">Submit requests 24+ hours in advance for faster approval</div>
+                                <div class="fw-medium fs-13 text-primary">Admin Privilege</div>
+                                <div class="text-muted fs-12">You can create requests for any employee</div>
                             </div>
                         </div>
                         <div class="d-flex align-items-start gap-2">
                             <span class="avatar avatar-sm bg-info-transparent">
-                                <i class="ri-calendar-event-line fs-14"></i>
+                                <i class="ri-notification-line fs-14"></i>
                             </span>
                             <div>
-                                <div class="fw-medium fs-13 text-info">Smart Calculation</div>
-                                <div class="text-muted fs-12">Weekends and holidays are automatically excluded</div>
+                                <div class="fw-medium fs-13 text-info">Auto Notification</div>
+                                <div class="text-muted fs-12">Employee will be notified via email automatically</div>
                             </div>
                         </div>
                         <div class="d-flex align-items-start gap-2">
-                            <span class="avatar avatar-sm bg-warning-transparent">
-                                <i class="ri-edit-line fs-14"></i>
+                            <span class="avatar avatar-sm bg-success-transparent">
+                                <i class="ri-check-line fs-14"></i>
                             </span>
                             <div>
-                                <div class="fw-medium fs-13 text-warning">Edit Anytime</div>
-                                <div class="text-muted fs-12">Modify pending requests until they're approved</div>
+                                <div class="fw-medium fs-13 text-success">Balance Check</div>
+                                <div class="text-muted fs-12">System validates employee's available balance</div>
                             </div>
                         </div>
                     </div>
@@ -454,10 +473,11 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const employeeSelect = document.getElementById('{{ form.employee.id_for_label }}');
     const leaveTypeSelect = document.getElementById('{{ form.leave_type.id_for_label }}');
     const startDateInput = document.getElementById('{{ form.start_date.id_for_label }}');
     const endDateInput = document.getElementById('{{ form.end_date.id_for_label }}');
-    const form = document.getElementById('leave-request-form');
+    const form = document.getElementById('admin-leave-request-form');
     
     // Enhanced duration calculation with weekend exclusion
     function calculateDuration() {
@@ -479,7 +499,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Check if selected leave type is half day
             const selectedOption = leaveTypeSelect.options[leaveTypeSelect.selectedIndex];
-            if (selectedOption && selectedOption.textContent.includes('Half') || selectedOption.textContent.includes('.5')) {
+            if (selectedOption && (selectedOption.textContent.includes('Half') || selectedOption.textContent.includes('.5'))) {
                 duration = duration * 0.5;
             }
             
@@ -495,15 +515,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Check leave balance against requested duration
     function checkLeaveBalance(requestedDays) {
+        const employeeSelect = document.getElementById('{{ form.employee.id_for_label }}');
         const leaveTypeSelect = document.getElementById('{{ form.leave_type.id_for_label }}');
+        const employeeId = employeeSelect.value;
         const leaveTypeId = leaveTypeSelect.value;
         
-        if (!leaveTypeId || !requestedDays || requestedDays <= 0) {
+        if (!employeeId || !leaveTypeId || !requestedDays || requestedDays <= 0) {
             hideBalanceAlerts();
             return;
         }
         
-        // Get current user's balance from the sidebar
+        // Get selected employee's balance from the sidebar
         const availableDaysElement = document.getElementById('available-days-main');
         if (!availableDaysElement) {
             hideBalanceAlerts();
@@ -520,7 +542,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('insufficient-balance-warning').style.display = 'block';
             document.getElementById('sufficient-balance-info').style.display = 'none';
             document.getElementById('balance-message').textContent = 
-                `You need ${requestedDays.toFixed(1)} days but only have ${availableDays.toFixed(1)} days available.`;
+                `Employee needs ${requestedDays.toFixed(1)} days but only has ${availableDays.toFixed(1)} days available.`;
             
             // Disable submit button
             const submitBtn = document.querySelector('button[type="submit"]');
@@ -535,13 +557,13 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('insufficient-balance-warning').style.display = 'none';
             document.getElementById('sufficient-balance-info').style.display = 'block';
             document.getElementById('balance-available-message').textContent = 
-                `Requesting ${requestedDays.toFixed(1)} days from ${availableDays.toFixed(1)} available days.`;
+                `Requesting ${requestedDays.toFixed(1)} days from employee's ${availableDays.toFixed(1)} available days.`;
             
             // Enable submit button
             const submitBtn = document.querySelector('button[type="submit"]');
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="ri-add-line me-1"></i>Submit Leave Request';
+                submitBtn.innerHTML = '<i class="ri-add-line me-1"></i>Create Leave Request';
                 submitBtn.classList.remove('btn-danger');
                 submitBtn.classList.add('btn-primary');
             }
@@ -558,10 +580,135 @@ document.addEventListener('DOMContentLoaded', function() {
         const submitBtn = document.querySelector('button[type="submit"]');
         if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="ri-add-line me-1"></i>Submit Leave Request';
+            submitBtn.innerHTML = '<i class="ri-add-line me-1"></i>Create Leave Request';
             submitBtn.classList.remove('btn-danger');
             submitBtn.classList.add('btn-primary');
         }
+    }
+    
+    // Load leave balance for selected employee
+    function loadEmployeeBalance() {
+        const employeeId = employeeSelect.value;
+        const balanceDisplay = document.getElementById('balance-display');
+        const noEmployeeSelected = document.getElementById('no-employee-selected');
+        const balanceBreakdown = document.getElementById('balance-breakdown');
+        
+        if (employeeId) {
+            // Show loading state
+            const availableElement = document.getElementById('available-days-main');
+            const usedElement = document.getElementById('used-days-main');
+            const pendingElement = document.getElementById('pending-days-main');
+            
+            // Show loading indicators
+            if (availableElement) availableElement.textContent = '...';
+            if (usedElement) usedElement.textContent = '...';
+            if (pendingElement) pendingElement.textContent = '...';
+            
+            balanceDisplay.style.display = 'block';
+            noEmployeeSelected.style.display = 'none';
+            balanceBreakdown.style.display = 'flex';
+            
+            const params = {
+                employee_id: employeeId,
+                year: new Date().getFullYear()
+            };
+            console.log('Fetching balance with params:', params);
+            
+            fetch('{% url "leaves:balance" %}?' + new URLSearchParams(params), {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Update balance display with animation
+                if (availableElement) {
+                    availableElement.style.opacity = '0.5';
+                    setTimeout(() => {
+                        availableElement.textContent = data.remaining_days.toFixed(1);
+                        availableElement.style.opacity = '1';
+                    }, 200);
+                }
+                if (usedElement) {
+                    usedElement.style.opacity = '0.5';
+                    setTimeout(() => {
+                        usedElement.textContent = data.approved_days.toFixed(1);
+                        usedElement.style.opacity = '1';
+                    }, 300);
+                }
+                if (pendingElement) {
+                    pendingElement.style.opacity = '0.5';
+                    setTimeout(() => {
+                        pendingElement.textContent = data.pending_days.toFixed(1);
+                        pendingElement.style.opacity = '1';
+                    }, 400);
+                }
+                
+                console.log('Balance loaded successfully for employee:', data.employee_name);
+            })
+            .catch(error => {
+                console.error('Error loading balance:', error);
+                
+                // Show error state
+                if (availableElement) availableElement.textContent = 'Error';
+                if (usedElement) usedElement.textContent = 'Error';
+                if (pendingElement) pendingElement.textContent = 'Error';
+                
+                // Show error message to user
+                showBalanceError('Failed to load employee balance. Please try again.');
+            });
+        } else {
+            // No employee selected - reset to initial state
+            balanceDisplay.style.display = 'none';
+            noEmployeeSelected.style.display = 'block';
+            balanceBreakdown.style.display = 'none';
+        }
+    }
+    
+    // Show balance error message
+    function showBalanceError(message) {
+        const balanceDisplay = document.getElementById('balance-display');
+        const noEmployeeSelected = document.getElementById('no-employee-selected');
+        
+        // Create or update error message
+        let errorDiv = document.getElementById('balance-error');
+        if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.id = 'balance-error';
+            errorDiv.className = 'text-center text-danger';
+            errorDiv.innerHTML = `
+                <div class="avatar avatar-xl bg-danger-transparent mx-auto mb-3">
+                    <i class="ri-error-warning-line fs-24"></i>
+                </div>
+                <p class="mb-0">${message}</p>
+            `;
+            balanceDisplay.parentNode.appendChild(errorDiv);
+        } else {
+            errorDiv.querySelector('p').textContent = message;
+        }
+        
+        balanceDisplay.style.display = 'none';
+        noEmployeeSelected.style.display = 'none';
+        errorDiv.style.display = 'block';
+        
+        // Hide error after 5 seconds
+        setTimeout(() => {
+            if (errorDiv) {
+                errorDiv.style.display = 'none';
+                noEmployeeSelected.style.display = 'block';
+            }
+        }, 5000);
     }
     
     // Weekend validation function
@@ -603,36 +750,10 @@ document.addEventListener('DOMContentLoaded', function() {
         return !hasErrors;
     }
     
-    // Load leave balance when leave type changes
-    function loadLeaveBalance() {
-        if (leaveTypeSelect.value) {
-            fetch('{% url "leaves:balance" %}', {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Update main balance display
-                const availableElement = document.getElementById('available-days-main');
-                const usedElement = document.getElementById('used-days-main');
-                const pendingElement = document.getElementById('pending-days-main');
-                
-                if (availableElement) availableElement.textContent = data.remaining_days.toFixed(1);
-                if (usedElement) usedElement.textContent = data.approved_days.toFixed(1);
-                if (pendingElement) pendingElement.textContent = data.pending_days.toFixed(1);
-            })
-            .catch(error => {
-                console.error('Error loading balance:', error);
-            });
-        }
-    }
-    
     // Form validation enhancement
     function validateForm() {
         let isValid = true;
-        const requiredFields = [leaveTypeSelect, startDateInput, endDateInput];
+        const requiredFields = [employeeSelect, leaveTypeSelect, startDateInput, endDateInput];
         
         requiredFields.forEach(field => {
             if (!field.value.trim()) {
@@ -670,9 +791,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Event listeners
+    employeeSelect.addEventListener('change', function() {
+        console.log('Employee changed to:', this.value);
+        // Clear any existing error messages
+        const errorDiv = document.getElementById('balance-error');
+        if (errorDiv) {
+            errorDiv.style.display = 'none';
+        }
+        loadEmployeeBalance();
+        // Recalculate duration and check balance after employee change
+        calculateDuration();
+    });
+    
     leaveTypeSelect.addEventListener('change', function() {
         calculateDuration();
-        loadLeaveBalance();
     });
     
     startDateInput.addEventListener('change', function() {
@@ -719,7 +851,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Real-time validation
-    [leaveTypeSelect, startDateInput, endDateInput].forEach(field => {
+    [employeeSelect, leaveTypeSelect, startDateInput, endDateInput].forEach(field => {
         field.addEventListener('blur', validateForm);
         field.addEventListener('input', function() {
             if (this.classList.contains('is-invalid')) {
@@ -729,7 +861,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Initial load
-    loadLeaveBalance();
     calculateDuration();
 });
 </script>

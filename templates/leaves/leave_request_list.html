@@ -1,57 +1,210 @@
 {% extends 'components/base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}All Leave Requests - ManageHub{% endblock %}
 
+{% block styles %}
+<style>
+    /* Stats Cards */
+    .stats-card {
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+        border: 1px solid rgba(0,0,0,0.05);
+        border-left: 4px solid #0d6efd;
+        border-radius: 0 12px 12px 0;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        border-left-color: #6610f2;
+    }
+
+    [data-theme-mode=dark] .stats-card {
+        background: linear-gradient(135deg, rgb(var(--body-bg-rgb)) 0%, rgba(255,255,255,0.02) 100%);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-left: 4px solid #0d6efd;
+    }
+
+    [data-theme-mode=dark] .stats-card:hover {
+        border-left-color: #6610f2;
+    }
+
+    /* Enhanced Table Styling */
+    .table-enhanced {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .table-enhanced thead th {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: none;
+        font-weight: 600;
+        color: #495057;
+        padding: 1rem 0.75rem;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .table-enhanced tbody tr {
+        transition: all 0.2s ease;
+        border: none;
+    }
+
+    .table-enhanced tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.02);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .table-enhanced tbody td {
+        padding: 1rem 0.75rem;
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        vertical-align: middle;
+    }
+
+    [data-theme-mode=dark] .table-enhanced thead th {
+        background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+        color: rgba(255,255,255,0.9);
+    }
+
+    [data-theme-mode=dark] .table-enhanced tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.1);
+    }
+
+    [data-theme-mode=dark] .table-enhanced tbody td {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Action Dropdown Styling */
+    .action-dropdown .dropdown-toggle {
+        border: none;
+        background: transparent;
+        color: #6c757d;
+        padding: 0.375rem 0.75rem;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .action-dropdown .dropdown-toggle:hover {
+        background-color: var(--bs-light);
+        color: var(--bs-primary);
+    }
+
+    /* Filter Card Styling */
+    .filter-card {
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+        border: 1px solid rgba(0,0,0,0.05);
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    [data-theme-mode=dark] .filter-card {
+        background: linear-gradient(135deg, rgb(var(--body-bg-rgb)) 0%, rgba(255,255,255,0.02) 100%);
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box">
-                <h4 class="page-title">All Leave Requests</h4>
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Home</a></li>
-                        <li class="breadcrumb-item"><a href="{% url 'leaves:dashboard' %}">Leave</a></li>
-                        <li class="breadcrumb-item active">All Requests</li>
-                    </ol>
-                </div>
-            </div>
+    <!-- Page Header -->
+    <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2">
+        <div>
+            <nav>
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'leaves:dashboard' %}">Leave Management</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">All Leave Requests</li>
+                </ol>
+            </nav>
+            <h1 class="page-title fw-medium fs-18 mb-0">All Leave Requests</h1>
+        </div>
+        <div class="btn-list">
+            <a href="{% url 'leaves:create' %}" class="btn btn-primary btn-wave me-2">
+                <i class="ri-add-line me-1"></i> New Request
+            </a>
+            {% if user.is_staff %}
+                <a href="{% url 'leaves:admin_create' %}" class="btn btn-success btn-wave me-0">
+                    <i class="ri-admin-line me-1"></i> Create for Employee
+                </a>
+            {% endif %}
         </div>
     </div>
+    <!-- Page Header Close -->
 
-    <!-- Stats Cards -->
+    <!-- Start::row-1 -->
     <div class="row">
-        <div class="col-md-4">
-            <div class="card widget-flat">
+        <!-- Stats Cards -->
+        <div class="col-xl-3">
+            <div class="card custom-card stats-card">
                 <div class="card-body">
-                    <div class="float-end">
-                        <i class="mdi mdi-calendar-multiple widget-icon"></i>
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <span class="avatar avatar-md bg-primary">
+                                <i class="ri-file-list-3-line fs-16"></i>
+                            </span>
+                        </div>
+                        <div class="flex-fill">
+                            <h4 class="fw-semibold mb-0">{{ stats.total|default:0 }}</h4>
+                            <p class="text-muted mb-0">Total Requests</p>
+                        </div>
                     </div>
-                    <h5 class="text-muted fw-normal mt-0">Total Requests</h5>
-                    <h3 class="mt-3 mb-3">{{ stats.total }}</h3>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card widget-flat">
+        <div class="col-xl-3">
+            <div class="card custom-card stats-card">
                 <div class="card-body">
-                    <div class="float-end">
-                        <i class="mdi mdi-clock-outline widget-icon bg-warning-lighten text-warning"></i>
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <span class="avatar avatar-md bg-warning">
+                                <i class="ri-time-line fs-16"></i>
+                            </span>
+                        </div>
+                        <div class="flex-fill">
+                            <h4 class="fw-semibold mb-0">{{ stats.pending|default:0 }}</h4>
+                            <p class="text-muted mb-0">Pending Review</p>
+                        </div>
                     </div>
-                    <h5 class="text-muted fw-normal mt-0">Pending</h5>
-                    <h3 class="mt-3 mb-3">{{ stats.pending }}</h3>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card widget-flat">
+        <div class="col-xl-3">
+            <div class="card custom-card stats-card">
                 <div class="card-body">
-                    <div class="float-end">
-                        <i class="mdi mdi-check-circle widget-icon bg-success-lighten text-success"></i>
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <span class="avatar avatar-md bg-success">
+                                <i class="ri-check-line fs-16"></i>
+                            </span>
+                        </div>
+                        <div class="flex-fill">
+                            <h4 class="fw-semibold mb-0">{{ stats.approved|default:0 }}</h4>
+                            <p class="text-muted mb-0">Approved</p>
+                        </div>
                     </div>
-                    <h5 class="text-muted fw-normal mt-0">Approved</h5>
-                    <h3 class="mt-3 mb-3">{{ stats.approved }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3">
+            <div class="card custom-card stats-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <span class="avatar avatar-md bg-danger">
+                                <i class="ri-close-line fs-16"></i>
+                            </span>
+                        </div>
+                        <div class="flex-fill">
+                            <h4 class="fw-semibold mb-0">{{ stats.rejected|default:0 }}</h4>
+                            <p class="text-muted mb-0">Rejected</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -59,28 +212,45 @@
 
     <!-- Filters -->
     <div class="row">
-        <div class="col-12">
-            <div class="card">
+        <div class="col-xl-12">
+            <div class="card custom-card filter-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="ri-filter-line me-2"></i>Filter Leave Requests
+                    </div>
+                </div>
                 <div class="card-body">
-                    <form method="get" class="row g-3">
-                        <div class="col-md-2">
+                    <form method="get" class="row g-3" id="filterForm">
+                        <div class="col-xl-2">
+                            <label class="form-label">Status</label>
                             {{ filter_form.status }}
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-xl-2">
+                            <label class="form-label">Leave Type</label>
                             {{ filter_form.leave_type }}
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-xl-2">
+                            <label class="form-label">Year</label>
                             {{ filter_form.year }}
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-xl-2">
+                            <label class="form-label">Employee</label>
                             {{ filter_form.employee }}
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-xl-2">
+                            <label class="form-label">Date From</label>
                             {{ filter_form.start_date_from }}
                         </div>
-                        <div class="col-md-2">
-                            <button type="submit" class="btn btn-primary">Filter</button>
-                            <a href="{% url 'leaves:list' %}" class="btn btn-light">Clear</a>
+                        <div class="col-xl-2">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-wave">
+                                    <i class="ri-search-line me-1"></i>Filter
+                                </button>
+                                <a href="{% url 'leaves:list' %}" class="btn btn-light btn-wave">
+                                    <i class="ri-refresh-line me-1"></i>Clear
+                                </a>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -90,16 +260,24 @@
 
     <!-- Leave Requests Table -->
     <div class="row">
-        <div class="col-12">
-            <div class="card">
+        <div class="col-xl-12">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="ri-list-check-2 me-2"></i>Leave Requests
+                        {% if leave_requests %}
+                            <span class="badge bg-primary-transparent ms-2">{{ leave_requests|length }} Results</span>
+                        {% endif %}
+                    </div>
+                </div>
                 <div class="card-body">
                     {% if leave_requests %}
                         <div class="table-responsive">
-                            <table class="table table-centered table-nowrap mb-0">
-                                <thead class="table-light">
+                            <table class="table table-enhanced mb-0">
+                                <thead>
                                     <tr>
                                         <th>Employee</th>
-                                        <th>Type</th>
+                                        <th>Leave Type</th>
                                         <th>Dates</th>
                                         <th>Duration</th>
                                         <th>Status</th>
@@ -112,51 +290,94 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <div class="flex-shrink-0">
+                                                <div class="me-3">
                                                     {% if request.employee.avatar %}
-                                                        <img src="{{ request.employee.avatar.url }}" alt="" class="rounded-circle" width="32">
+                                                        <span class="avatar avatar-sm avatar-rounded">
+                                                            <img src="{{ request.employee.avatar.url }}" alt="{{ request.employee.get_full_name }}">
+                                                        </span>
                                                     {% else %}
-                                                        <div class="avatar-sm">
-                                                            <span class="avatar-title rounded-circle bg-primary text-white">
-                                                                {{ request.employee.first_name|first }}{{ request.employee.last_name|first }}
-                                                            </span>
-                                                        </div>
+                                                        <span class="avatar avatar-sm avatar-rounded bg-primary">
+                                                            {{ request.employee.first_name|first }}{{ request.employee.last_name|first }}
+                                                        </span>
                                                     {% endif %}
                                                 </div>
-                                                <div class="flex-grow-1 ms-2">
-                                                    <h6 class="mb-0">{{ request.employee.get_full_name }}</h6>
-                                                    <small class="text-muted">{{ request.employee.email }}</small>
+                                                <div>
+                                                    <div class="fw-medium">{{ request.employee.get_full_name }}</div>
+                                                    <div class="text-muted fs-12">{{ request.employee.email }}</div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td>
-                                            <span class="badge rounded-pill" style="background-color: {{ request.leave_type.color_code }};">
+                                            <span class="badge" style="background-color: {{ request.leave_type.color_code }}; color: white;">
                                                 {{ request.leave_type.code }}
                                             </span>
+                                            <div class="text-muted fs-12 mt-1">{{ request.leave_type.name }}</div>
                                         </td>
                                         <td>
-                                            <strong>{{ request.start_date|date:"M d, Y" }}</strong>
+                                            <div class="fw-medium">{{ request.start_date|date:"M d, Y" }}</div>
                                             {% if request.start_date != request.end_date %}
-                                                <br><small class="text-muted">to {{ request.end_date|date:"M d, Y" }}</small>
+                                                <div class="text-muted fs-12">to {{ request.end_date|date:"M d, Y" }}</div>
+                                            {% else %}
+                                                <div class="text-muted fs-12">Single day</div>
                                             {% endif %}
                                         </td>
-                                        <td>{{ request.duration_days|floatformat:1 }} days</td>
+                                        <td>
+                                            <span class="fw-medium">{{ request.duration_days|floatformat:1 }}</span>
+                                            <span class="text-muted">days</span>
+                                        </td>
                                         <td>
                                             {% if request.status == 'PENDING' %}
-                                                <span class="badge bg-warning">{{ request.get_status_display }}</span>
+                                                <span class="badge bg-warning-transparent text-warning">
+                                                    <i class="ri-time-line me-1"></i>{{ request.get_status_display }}
+                                                </span>
                                             {% elif request.status == 'APPROVED' %}
-                                                <span class="badge bg-success">{{ request.get_status_display }}</span>
+                                                <span class="badge bg-success-transparent text-success">
+                                                    <i class="ri-check-line me-1"></i>{{ request.get_status_display }}
+                                                </span>
                                             {% elif request.status == 'REJECTED' %}
-                                                <span class="badge bg-danger">{{ request.get_status_display }}</span>
+                                                <span class="badge bg-danger-transparent text-danger">
+                                                    <i class="ri-close-line me-1"></i>{{ request.get_status_display }}
+                                                </span>
                                             {% else %}
-                                                <span class="badge bg-secondary">{{ request.get_status_display }}</span>
+                                                <span class="badge bg-secondary-transparent text-secondary">
+                                                    <i class="ri-question-line me-1"></i>{{ request.get_status_display }}
+                                                </span>
                                             {% endif %}
                                         </td>
-                                        <td>{{ request.created_at|date:"M d, Y" }}</td>
                                         <td>
-                                            <a href="{% url 'leaves:detail' request.id %}" class="btn btn-sm btn-outline-primary">
-                                                View
-                                            </a>
+                                            <div class="fw-medium">{{ request.created_at|date:"M d, Y" }}</div>
+                                            <div class="text-muted fs-12">{{ request.created_at|date:"g:i A" }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="dropdown action-dropdown">
+                                                <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="ri-more-2-line"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <a class="dropdown-item" href="{% url 'leaves:detail' request.id %}">
+                                                            <i class="ri-eye-line"></i>View Details
+                                                        </a>
+                                                    </li>
+                                                    {% if user.is_staff and request.status == 'PENDING' %}
+                                                        <li><hr class="dropdown-divider"></li>
+                                                        <li>
+                                                            <a class="dropdown-item text-success approve-request-btn" 
+                                                               href="javascript:void(0);" 
+                                                               data-request-id="{{ request.id }}">
+                                                                <i class="ri-check-line"></i>Approve Request
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item text-danger reject-request-btn" 
+                                                               href="javascript:void(0);" 
+                                                               data-request-id="{{ request.id }}">
+                                                                <i class="ri-close-line"></i>Reject Request
+                                                            </a>
+                                                        </li>
+                                                    {% endif %}
+                                                </ul>
+                                            </div>
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -166,54 +387,250 @@
 
                         <!-- Pagination -->
                         {% if is_paginated %}
-                        <div class="row mt-3">
-                            <div class="col-sm-12 col-md-5">
-                                <div class="dataTables_info">
-                                    Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} entries
-                                </div>
-                            </div>
-                            <div class="col-sm-12 col-md-7">
-                                <div class="dataTables_paginate paging_simple_numbers float-end">
-                                    <ul class="pagination pagination-rounded">
-                                        {% if page_obj.has_previous %}
-                                            <li class="paginate_button page-item previous">
-                                                <a href="?page={{ page_obj.previous_page_number }}" class="page-link">Previous</a>
-                                            </li>
-                                        {% endif %}
-                                        
-                                        {% for num in page_obj.paginator.page_range %}
-                                            {% if page_obj.number == num %}
-                                                <li class="paginate_button page-item active">
-                                                    <a href="#" class="page-link">{{ num }}</a>
-                                                </li>
-                                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                                <li class="paginate_button page-item">
-                                                    <a href="?page={{ num }}" class="page-link">{{ num }}</a>
-                                                </li>
-                                            {% endif %}
-                                        {% endfor %}
-                                        
-                                        {% if page_obj.has_next %}
-                                            <li class="paginate_button page-item next">
-                                                <a href="?page={{ page_obj.next_page_number }}" class="page-link">Next</a>
-                                            </li>
-                                        {% endif %}
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
+                        <nav aria-label="Page navigation" class="mt-4">
+                            <ul class="pagination justify-content-end">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                            <i class="ri-arrow-left-line"></i> Previous
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                            Next <i class="ri-arrow-right-line"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
                         {% endif %}
 
                     {% else %}
                         <div class="text-center py-5">
-                            <i class="mdi mdi-calendar-remove h1 text-muted"></i>
-                            <h4 class="text-muted">No leave requests found</h4>
-                            <p class="text-muted">No leave requests match your current filters.</p>
+                            <div class="avatar avatar-xl bg-light mx-auto mb-4">
+                                <i class="ri-calendar-close-line fs-24 text-muted"></i>
+                            </div>
+                            <h4 class="text-muted mb-2">No Leave Requests Found</h4>
+                            <p class="text-muted mb-4">No leave requests match your current filters or criteria.</p>
+                            <a href="{% url 'leaves:create' %}" class="btn btn-primary btn-wave">
+                                <i class="ri-add-line me-1"></i>Create New Request
+                            </a>
                         </div>
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
+    <!-- End::row-1 -->
+
+<!-- Approve Modal -->
+<div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="approveModalLabel">
+                    <i class="ri-check-line text-success me-2"></i>Approve Leave Request
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to approve this leave request?</p>
+                <div class="alert alert-success">
+                    <i class="ri-information-line me-2"></i>
+                    The employee will be notified of the approval via email.
+                </div>
+                <div class="mb-3">
+                    <label for="approveReason" class="form-label">Approval Notes (Optional)</label>
+                    <textarea class="form-control" id="approveReason" rows="3" placeholder="Add any notes about this approval..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="confirmApprove">
+                    <i class="ri-check-line me-1"></i>Approve Request
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rejectModalLabel">
+                    <i class="ri-close-line text-danger me-2"></i>Reject Leave Request
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to reject this leave request?</p>
+                <div class="alert alert-warning">
+                    <i class="ri-alert-line me-2"></i>
+                    Please provide a reason for rejection. The employee will be notified via email.
+                </div>
+                <div class="mb-3">
+                    <label for="rejectReason" class="form-label">Rejection Reason <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="rejectReason" rows="3" placeholder="Please explain why this request is being rejected..." required></textarea>
+                    <div class="invalid-feedback">
+                        Please provide a reason for rejection.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmReject">
+                    <i class="ri-close-line me-1"></i>Reject Request
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let currentRequestId = null;
+    
+    // Handle approve and reject button clicks
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.approve-request-btn')) {
+            e.preventDefault();
+            const btn = e.target.closest('.approve-request-btn');
+            currentRequestId = btn.dataset.requestId;
+            const modal = new bootstrap.Modal(document.getElementById('approveModal'));
+            modal.show();
+        }
+        
+        if (e.target.closest('.reject-request-btn')) {
+            e.preventDefault();
+            const btn = e.target.closest('.reject-request-btn');
+            currentRequestId = btn.dataset.requestId;
+            const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+            modal.show();
+        }
+    });
+    
+    // Handle approve confirmation
+    document.getElementById('confirmApprove').addEventListener('click', function() {
+        const reason = document.getElementById('approveReason').value;
+        performLeaveAction('approve', currentRequestId, reason);
+    });
+    
+    // Handle reject confirmation
+    document.getElementById('confirmReject').addEventListener('click', function() {
+        const reason = document.getElementById('rejectReason').value.trim();
+        const rejectReasonField = document.getElementById('rejectReason');
+        
+        if (!reason) {
+            rejectReasonField.classList.add('is-invalid');
+            return;
+        }
+        
+        rejectReasonField.classList.remove('is-invalid');
+        performLeaveAction('reject', currentRequestId, reason);
+    });
+    
+    // Main action function - following projects app pattern exactly
+    function performLeaveAction(action, requestId, reason) {
+        const url = `/leaves/requests/${requestId}/${action}/`;
+        
+        // Create FormData like projects app
+        const formData = new FormData();
+        formData.append('action', action);
+        if (reason) {
+            formData.append('reason', reason);
+        }
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success toast like projects app
+                showToast('success', data.message);
+                
+                // Close modals like projects app
+                const approveModal = bootstrap.Modal.getInstance(document.getElementById('approveModal'));
+                const rejectModal = bootstrap.Modal.getInstance(document.getElementById('rejectModal'));
+                
+                if (approveModal) approveModal.hide();
+                if (rejectModal) rejectModal.hide();
+                
+                // Reload page like projects app
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                showToast('error', data.message || 'An error occurred');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('error', 'An error occurred while processing the request');
+        });
+    }
+    
+    // Toast notification function matching projects app
+    function showToast(type, message) {
+        const toastContainer = document.getElementById('toast-container') || createToastContainer();
+        const toastId = 'toast-' + Date.now();
+        
+        const toastHtml = `
+            <div class="toast align-items-center text-bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert" aria-live="assertive" aria-atomic="true" id="${toastId}">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="ri-${type === 'success' ? 'check' : 'error-warning'}-line me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        `;
+        
+        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+        const toastElement = document.getElementById(toastId);
+        const toast = new bootstrap.Toast(toastElement);
+        toast.show();
+        
+        // Remove toast element after it's hidden
+        toastElement.addEventListener('hidden.bs.toast', function() {
+            toastElement.remove();
+        });
+    }
+    
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.style.zIndex = '1055';
+        document.body.appendChild(container);
+        return container;
+    }
+});
+</script>
 {% endblock %}

@@ -65,15 +65,15 @@ class LeaveRequestForm(forms.ModelForm):
         
         # Validate that start and end dates are not weekends
         if start_date:
-            if start_date.weekday() in [4, 5]:  # Friday=4, Saturday=5 (common in many regions)
+            if start_date.weekday() in [5, 6]:  # Saturday=5, Sunday=6
                 raise ValidationError({
-                    'start_date': 'Leave requests cannot start on weekends (Friday or Saturday).'
+                    'start_date': 'Leave requests cannot start on weekends (Saturday or Sunday).'
                 })
         
         if end_date:
-            if end_date.weekday() in [4, 5]:  # Friday=4, Saturday=5 (common in many regions)
+            if end_date.weekday() in [5, 6]:  # Saturday=5, Sunday=6
                 raise ValidationError({
-                    'end_date': 'Leave requests cannot end on weekends (Friday or Saturday).'
+                    'end_date': 'Leave requests cannot end on weekends (Saturday or Sunday).'
                 })
         
         # Validate date range
@@ -104,6 +104,118 @@ class LeaveRequestForm(forms.ModelForm):
         if self.employee:
             instance.employee = self.employee
             instance.created_by = self.employee
+        
+        # Set duration from cleaned data
+        if hasattr(self, 'cleaned_data') and 'duration_days' in self.cleaned_data:
+            instance.duration_days = self.cleaned_data['duration_days']
+        
+        if commit:
+            instance.save()
+        
+        return instance
+
+
+class AdminLeaveRequestForm(forms.ModelForm):
+    """Form for creating leave requests on behalf of any user (for managers/HR)"""
+    
+    employee = forms.ModelChoiceField(
+        queryset=User.objects.filter(is_active=True),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        help_text="Select the employee for whom you're creating this leave request"
+    )
+    
+    class Meta:
+        model = LeaveRequest
+        fields = [
+            'employee', 'leave_type', 'start_date', 'end_date', 'reason'
+        ]
+        widgets = {
+            'start_date': forms.DateInput(
+                attrs={
+                    'type': 'date',
+                    'class': 'form-control',
+                    'min': date.today().strftime('%Y-%m-%d')
+                }
+            ),
+            'end_date': forms.DateInput(
+                attrs={
+                    'type': 'date',
+                    'class': 'form-control',
+                    'min': date.today().strftime('%Y-%m-%d')
+                }
+            ),
+            'leave_type': forms.Select(attrs={'class': 'form-control'}),
+            'reason': forms.Textarea(
+                attrs={
+                    'class': 'form-control',
+                    'rows': 4,
+                    'placeholder': 'Please provide a reason for this leave request...'
+                }
+            ),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        self.created_by = kwargs.pop('created_by', None)
+        super().__init__(*args, **kwargs)
+        
+        # Filter active leave types
+        self.fields['leave_type'].queryset = LeaveType.objects.filter(is_active=True)
+        
+        # Add help text
+        self.fields['start_date'].help_text = "Leave start date"
+        self.fields['end_date'].help_text = "Leave end date"
+        self.fields['reason'].help_text = "Provide a detailed reason for the leave request"
+        
+        # Order employees by name for better UX
+        self.fields['employee'].queryset = User.objects.filter(is_active=True).order_by('first_name', 'last_name')
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get('start_date')
+        end_date = cleaned_data.get('end_date')
+        leave_type = cleaned_data.get('leave_type')
+        employee = cleaned_data.get('employee')
+        
+        # Validate that start and end dates are not weekends
+        if start_date:
+            if start_date.weekday() in [5, 6]:  # Saturday=5, Sunday=6
+                raise ValidationError({
+                    'start_date': 'Leave requests cannot start on weekends (Saturday or Sunday).'
+                })
+        
+        if end_date:
+            if end_date.weekday() in [5, 6]:  # Saturday=5, Sunday=6
+                raise ValidationError({
+                    'end_date': 'Leave requests cannot end on weekends (Saturday or Sunday).'
+                })
+        
+        # Validate date range
+        if start_date and end_date:
+            if start_date > end_date:
+                raise ValidationError({
+                    'end_date': 'End date must be after or equal to start date.'
+                })
+        
+        if start_date and end_date and leave_type and employee:
+            # Check eligibility for the selected employee
+            eligibility = LeaveCalculationService.check_leave_eligibility(
+                employee, leave_type, start_date, end_date
+            )
+            
+            if not eligibility['eligible']:
+                for error in eligibility['errors']:
+                    raise ValidationError(error)
+            
+            # Set calculated duration
+            cleaned_data['duration_days'] = eligibility['calculated_duration']
+        
+        return cleaned_data
+    
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        
+        if self.created_by:
+            instance.created_by = self.created_by
         
         # Set duration from cleaned data
         if hasattr(self, 'cleaned_data') and 'duration_days' in self.cleaned_data:

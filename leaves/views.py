@@ -18,7 +18,7 @@ from .models import (
     LeaveComment, HolidayCalendar, LeaveBalance
 )
 from .forms import (
-    LeaveRequestForm, LeaveRequestFilterForm, LeaveApprovalForm,
+    LeaveRequestForm, AdminLeaveRequestForm, LeaveRequestFilterForm, LeaveApprovalForm,
     LeaveCommentForm, EmployeeEntitlementForm, HolidayCalendarForm,
     LeaveCalendarFilterForm, BulkLeaveImportForm
 )
@@ -166,6 +166,45 @@ class LeaveRequestCreateView(LoginRequiredMixin, CreateView):
         messages.success(
             self.request,
             'Your leave request has been submitted successfully.'
+        )
+        return super().form_valid(form)
+
+
+class AdminLeaveRequestCreateView(LoginRequiredMixin, CreateView):
+    """Create a leave request on behalf of any user (for managers/HR)"""
+    model = LeaveRequest
+    form_class = AdminLeaveRequestForm
+    template_name = 'leaves/admin_leave_request_form.html'
+    success_url = reverse_lazy('leaves:list')
+    
+    def dispatch(self, request, *args, **kwargs):
+        # Only allow staff users to access this view
+        if not request.user.is_staff:
+            messages.error(request, 'You do not have permission to create leave requests for other users.')
+            return redirect('leaves:create')
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['created_by'] = self.request.user
+        return kwargs
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Add leave types for the sidebar
+        context['leave_types'] = LeaveType.objects.filter(is_active=True).order_by('code')
+        
+        # Add departments for filtering
+        context['departments'] = Department.objects.filter(is_active=True).order_by('name')
+        
+        return context
+    
+    def form_valid(self, form):
+        employee = form.cleaned_data['employee']
+        messages.success(
+            self.request,
+            f'Leave request for {employee.get_full_name()} has been created successfully.'
         )
         return super().form_valid(form)
 
@@ -461,10 +500,27 @@ def cancel_leave_ajax(request, pk):
 @login_required
 def get_leave_balance_ajax(request):
     """Get employee leave balance via AJAX"""
+    from django.contrib.auth import get_user_model
+    
+    User = get_user_model()
     year = request.GET.get('year', timezone.now().year)
+    employee_id = request.GET.get('employee_id')
+    
+    # If employee_id is provided (for admin create form), use that employee
+    # Otherwise, use the current user (for regular forms)
+    if employee_id and request.user.is_staff:
+        try:
+            # Use pkid (primary key) instead of id (UUID field)
+            employee = User.objects.get(pkid=employee_id, is_active=True)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'Employee not found'}, status=404)
+        except ValueError:
+            return JsonResponse({'error': 'Invalid employee ID'}, status=400)
+    else:
+        employee = request.user
     
     summary = LeaveCalculationService.get_employee_leave_summary(
-        request.user, int(year)
+        employee, int(year)
     )
     
     return JsonResponse({
@@ -473,6 +529,7 @@ def get_leave_balance_ajax(request):
         'pending_days': float(summary['pending_days']),
         'remaining_days': float(summary['remaining_days']),
         'utilization_rate': float(summary['utilization_rate']),
+        'employee_name': employee.get_full_name(),
         'leave_by_type': {
             code: {
                 'approved': float(data['approved']),
@@ -598,8 +655,7 @@ def generate_calendar_weeks(year, month, calendar_data):
                 # Check if it's today
                 is_today = day_date == today
                 
-                # Check if it's weekend (Friday=4, Saturday=5 in many regions)
-                # Or use Saturday=5, Sunday=6 for Western weekend
+                # Check if it's weekend (Saturday=5, Sunday=6)
                 is_weekend = day_date.weekday() in [5, 6]
                 
                 # Check if it's holiday

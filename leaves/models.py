@@ -185,8 +185,8 @@ class LeaveRequest(TimeStampedModel):
         current_date = self.start_date
         
         while current_date <= self.end_date:
-            # Skip weekends (Saturday=5, Sunday=6)
-            if current_date.weekday() < 5:
+            # Skip weekends (Saturday=5, Sunday=6) - only count business days
+            if current_date.weekday() not in [5, 6]:
                 if self.leave_type.is_half_day:
                     duration += 0.5
                 else:

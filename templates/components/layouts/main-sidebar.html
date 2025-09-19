@@ -84,11 +84,11 @@
 												<a href="{% url 'leaves:my_requests' %}" class="side-menu__item">My Requests</a>
 											</li>
 											<li class="slide">
-												<a href="{% url 'leaves:calendar' %}" class="side-menu__item">Leave Calendar</a>
+												<a href="{% url 'leaves:list' %}" class="side-menu__item">All Requests</a>
 											</li>
 											{% if user.is_staff %}
 											<li class="slide">
-												<a href="{% url 'leaves:list' %}" class="side-menu__item">All Requests</a>
+												<a href="{% url 'leaves:admin_create' %}" class="side-menu__item">Create for Employee</a>
 											</li>
 											<li class="slide">
 												<a href="{% url 'leaves:entitlements' %}" class="side-menu__item">Entitlements</a>

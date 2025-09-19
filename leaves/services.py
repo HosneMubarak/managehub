@@ -36,8 +36,8 @@ class LeaveCalculationService:
             )
         
         while current_date <= end_date:
-            # Skip weekends if required
-            if exclude_weekends and current_date.weekday() >= 5:  # Saturday=5, Sunday=6
+            # Skip weekends if required (Saturday=5, Sunday=6)
+            if exclude_weekends and current_date.weekday() in [5, 6]:  # Saturday=5, Sunday=6
                 current_date += timedelta(days=1)
                 continue
             
@@ -326,7 +326,7 @@ class LeaveCalculationService:
         while current_date <= end_date:
             calendar_data[current_date] = {
                 'date': current_date,
-                'is_weekend': current_date.weekday() >= 5,
+                'is_weekend': current_date.weekday() in [5, 6],  # Saturday=5, Sunday=6
                 'is_holiday': HolidayCalendar.objects.filter(
                     date=current_date, is_active=True
                 ).exists(),
